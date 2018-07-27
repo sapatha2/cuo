@@ -45,18 +45,16 @@ for basis in ['vdz','vtz']:
     e-=e[homo]
     e*=27.2
     
-    '''
     plt.subplot(231+i) 
     plt.title(method+" "+basis)
     plt.ylabel("SCF eigenvalue-HOMO, eV")
     plt.xlabel("orbital number")
-    plt.plot(np.arange(homo-7,homo+10),e[homo-7:homo+10],'bo')
-    plt.plot(np.arange(homo-7,homo+1),e[m.mo_occ>0][homo-7:],'go')
+    plt.plot(np.arange(homo-10,homo+10),e[homo-10:homo+10],'bo')
+    plt.plot(np.arange(homo-10,homo+1),e[m.mo_occ>0][homo-10:],'go')
     plt.plot(homo,e[homo],'rs')
     i+=1
-    '''
 
     #print_qwalk_mol(mol,m,basename="../qwalk/"+el+basis+str(charge)+"_"+method)
   
-#plt.show()
+plt.show()
 

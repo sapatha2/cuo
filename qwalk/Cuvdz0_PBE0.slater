@@ -3,8 +3,8 @@ SLATER
 	CUTOFF_MO
   MAGNIFY 1.0 
   NMO 13 
-  ORBFILE ../qwalk/Cuvdz0_PBE0.orb
-  INCLUDE ../qwalk/Cuvdz0_PBE0.basis
+  ORBFILE Cuvdz0_PBE0.orb
+  INCLUDE Cuvdz0_PBE0.basis
   CENTERS { USEGLOBAL }
   }
 

@@ -3,8 +3,8 @@ SLATER
 	CUTOFF_MO
   MAGNIFY 1.0 
   NMO 13 
-  ORBFILE ../qwalk/Cuvdz0_ROHF.orb
-  INCLUDE ../qwalk/Cuvdz0_ROHF.basis
+  ORBFILE Cuvdz0_ROHF.orb
+  INCLUDE Cuvdz0_ROHF.basis
   CENTERS { USEGLOBAL }
   }
 
