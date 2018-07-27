@@ -10,7 +10,7 @@ Please cite J. Comp. Phys. v 228 pp 3390-3404 (2009)
  when publishing results from this program.
 ------------------------------------------------
 Running on MacBook-Air.local
-Thu Jul 26 21:36:11 2018
+Thu Jul 26 21:51:27 2018
 
 #############Plot_method#################
 orbs=1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
@@ -19,5 +19,5 @@ xmin=-8 xmax=8
 ymin=-8 ymax=8
 zmin=-8 zmax=11.2598
 done
-Wall time for this method: 84 seconds.
-Total wall time so far: 84 seconds.
+Wall time for this method: 48 seconds.
+Total wall time so far: 48 seconds.

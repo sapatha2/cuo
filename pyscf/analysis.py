@@ -56,7 +56,7 @@ for basis in ['vdz','vtz']:
     i+=1
     '''
 
-    print_qwalk_mol(mol,m,basename="../qwalk/"+el+basis+str(charge)+"_"+method)
+    #print_qwalk_mol(mol,m,basename="../qwalk/"+el+basis+str(charge)+"_"+method)
   
 #plt.show()
 
