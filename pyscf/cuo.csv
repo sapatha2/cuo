@@ -1,3 +1,7 @@
 basis,charge,method,molecule,pseudopotential,pyscf-version,totalenergy,totalenergy-stocherr,totalenergy-syserr
-vdz,0,HF,CuO,trail,new,-212.23882967321765,0.0,0.0
-vtz,0,HF,CuO,trail,new,-212.24349945680058,0.0,0.0
+vdz,0,ROHF,CuO,trail,new,-212.23882967321765,0.0,0.0
+vtz,0,ROHF,CuO,trail,new,-212.24349945680052,0.0,0.0
+vdz,0,B3LYP,CuO,trail,new,-213.57807445323064,0.0,0.0
+vtz,0,B3LYP,CuO,trail,new,-213.5922866211195,0.0,0.0
+vdz,0,PBE0,CuO,trail,new,-213.5646010733625,0.0,0.0
+vtz,0,PBE0,CuO,trail,new,-213.57647031273862,0.0,0.0
