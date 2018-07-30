@@ -60,6 +60,7 @@ for method in ['B3LYP']:
       "#PBS -o "+basename+".pout \n"+\
       "mkdir -p /scratch/sciteam/$USER/"+basename+"\n"+\
       "cd /scratch/sciteam/$USER/"+basename+"\n"+\
+      "cp "+cpypath+".vmc"+str(i)+" .\n"+\
       "cp "+cpypath+".slater"+str(i)+" .\n"+\
       "cp "+cpypath+".optjast3 .\n"+\
       "cp "+cpypath+".sys .\n"+\

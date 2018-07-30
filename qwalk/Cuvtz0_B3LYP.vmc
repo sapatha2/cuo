@@ -8,7 +8,7 @@ method {
         nmo 14
         orbfile Cuvtz0_B3LYPiao.orb
         include Cuvtz0_B3LYPiao.basis
-        centers { use global }
+        centers { useglobal }
       }
       states { 2 6 7 8 9 10 12 13 14 }
     }

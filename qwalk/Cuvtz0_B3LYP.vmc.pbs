@@ -7,6 +7,7 @@
 #PBS -o Cuvtz0_B3LYP.vmc.pout 
 mkdir -p /scratch/sciteam/$USER/Cuvtz0_B3LYP.vmc
 cd /scratch/sciteam/$USER/Cuvtz0_B3LYP.vmc
+cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.vmc .
 cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.slater .
 cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.optjast3 .
 cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.sys .
