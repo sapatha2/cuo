@@ -4,8 +4,11 @@ method {
   total_fit 64000 
 }
 include Cuvtz0_B3LYP.sys
-trialfunc {
-  slater-jastrow
-  wf1 { include Cuvtz0_B3LYP.slater }
-  wf2 { include Cuvtz0_B3LYP.jast3 }
+#trialfunc {
+#  slater-jastrow
+#  wf1 { include Cuvtz0_B3LYP.slater }
+#  wf2 { include Cuvtz0_B3LYP.jast3 }
+#}
+trialfunc { 
+  include Cuvtz0_B3LYP.linear.wfout 
 }

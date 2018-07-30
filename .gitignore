@@ -1,1 +1,3 @@
 *.cube
+*.out
+*.config*
