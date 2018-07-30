@@ -1,11 +1,11 @@
 SLATER
   ORBITALS  { 
-	CUTOFF_MO
-  MAGNIFY 1.0 
-  NMO 13 
-  ORBFILE Cuvdz0_B3LYP.orb
-  INCLUDE Cuvdz0_B3LYP.basis
-  CENTERS { USEGLOBAL }
+    CUTOFF_MO
+    MAGNIFY 1.0 
+    NMO 13 
+    ORBFILE Cuvdz0_B3LYP.orb
+    INCLUDE Cuvdz0_B3LYP.basis
+    CENTERS { USEGLOBAL }
   }
 
   DETWT { 1.0 }

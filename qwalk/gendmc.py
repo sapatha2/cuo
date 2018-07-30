@@ -1,10 +1,12 @@
 #Generates multi slater expansions for our calculations
 import numpy as np
 
-Ndet=23 #number of determinants in expansion
 N=2 #number of expansions we want, minimum 1
-wmax=0.2 #maximum magnitude of weights
+nblock=640 #number of vmc blocks we want, minimum 1
+timestep=0.01 #timestpe, minimum 0
 assert(N>=1)
+assert(nblock>=1)
+assert(timestep>0)
 
 el='Cu'
 charge=0
@@ -14,7 +16,7 @@ minao={}
 i=0
 edit_ind=[] #Indices of lines to edit
 template=[]
-with open("slat_template","r") as f:
+with open("dmc_template","r") as f:
   for line in f:
     template.append(line)
     if("##" in line):
@@ -30,18 +32,12 @@ for method in ['B3LYP']:
     for i in range(1,N+1):
       basename=el+basis+str(charge)+"_"+method
       
-      w=2*wmax*np.random.rand(Ndet-1)-wmax
-      weights=[1.0]+w.tolist()
-      weights=[str(x) for x in weights]
+      template[edit_ind[0]]="  nblock "+str(nblock)+"\n"
+      template[edit_ind[1]]="  timestep "+str(timestep)+"\n"
+      template[edit_ind[2]]="include "+basename+".sys"
+      template[edit_ind[3]]="  wf1 { include "+basename+".slater"+str(i)+" }"+"\n"
       
-      for p in np.arange(0,Ndet+5,5):
-        weights.insert(p,"\n")
-      
-      template[edit_ind[0]]="  ORBFILE "+basename+".orb"+"\n"
-      template[edit_ind[1]]="  INCLUDE "+basename+".basis"+"\n"
-      template[edit_ind[2]]="DETWT { "+" ".join(weights)+" }"+"\n"
-      
-      fname=basename+".slater"+str(i)
+      fname=basename+".dmc"+str(i)
       fout=open(fname,"w")
       fout.write("".join(template))
       fout.close()
