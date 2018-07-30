@@ -23,3 +23,8 @@ for method in ['B3LYP']:
       
       if(os.path.isfile(fname)):
         remove(fname)
+
+      fname=basename+".vmc"+str(i)+".pbs"
+      
+      if(os.path.isfile(fname)):
+        remove(fname)
