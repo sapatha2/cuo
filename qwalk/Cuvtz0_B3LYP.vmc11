@@ -1,6 +1,6 @@
 method { 
   vmc 
-  nblock 512 
+  nblock 512
   average { average_derivative_dm 
     average { tbdm_basis 
       orbitals {
@@ -19,6 +19,6 @@ include Cuvtz0_B3LYP.sys
 
 trialfunc {
   slater-jastrow
-  wf1 { include Cuvtz0_B3LYP.slater }
+  wf1 { include Cuvtz0_B3LYP.slater11 }
   wf2 { include Cuvtz0_B3LYP.optjast3 }
 }

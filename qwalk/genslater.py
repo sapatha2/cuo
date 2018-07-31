@@ -2,7 +2,7 @@
 import numpy as np
 
 Ndet=23 #number of determinants in expansion
-N=2 #number of expansions we want, minimum 1
+N=20 #number of expansions we want, minimum 1
 wmax=0.2 #maximum magnitude of weights
 assert(N>=1)
 

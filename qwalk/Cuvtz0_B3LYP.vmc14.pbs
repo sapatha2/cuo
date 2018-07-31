@@ -1,0 +1,18 @@
+#!/bin/bash 
+#PBS -q normal
+#PBS -l nodes=15:ppn=32:xe 
+#PBS -l walltime=01:00:00
+#PBS -N Cuvtz0_B3LYP.vmc14
+#PBS -e Cuvtz0_B3LYP.vmc14.perr 
+#PBS -o Cuvtz0_B3LYP.vmc14.pout 
+mkdir -p /scratch/sciteam/$USER/Cuvtz0_B3LYP.vmc14
+cd /scratch/sciteam/$USER/Cuvtz0_B3LYP.vmc14
+cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.vmc14 .
+cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.slater14 .
+cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.optjast3 .
+cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.sys .
+cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.orb .
+cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.basis .
+cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYPiao.orb .
+cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYPiao.basis .
+aprun -n 480 /u/sciteam/$USER/mainline/bin/qwalk Cuvtz0_B3LYP.vmc14 &> Cuvtz0_B3LYP.vmc14.out

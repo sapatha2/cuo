@@ -4,9 +4,9 @@ import numpy as np
 ######################################################################
 #USER OPTIONS, ONLY THING TO EDIT
 
-N=2 #number of expansions we want, minimum 1
-nblock=640 #number of vmc blocks we want, minimum 1
-nodes=1 #number of nodes (32 ppn)
+N=20 #number of expansions we want, minimum 1
+nblock=512 #number of vmc blocks we want, minimum 1
+nodes=15 #number of nodes (32 ppn)
 walltime="01:00:00"
 ######################################################################
 
