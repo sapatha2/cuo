@@ -38,7 +38,7 @@ for method in ['B3LYP']:
       template[edit_ind[0]]="  nblock "+str(nblock)+"\n"
       template[edit_ind[1]]="  timestep "+str(timestep)+"\n"
       template[edit_ind[2]]="include "+basename+".sys"
-      template[edit_ind[3]]="  wf1 { include "+basename+".slater"+str(i)+" }"+"\n"
+      template[edit_ind[3]]="  wf1 { include "+basename+".slater"+str(i)+cutoff+" }"+"\n"
       
       fname=basename+".dmc_E"+str(i)+cutoff
       fout=open(fname,"w")
@@ -62,7 +62,7 @@ for method in ['B3LYP']:
       "mkdir -p /scratch/sciteam/$USER/"+basename+"\n"+\
       "cd /scratch/sciteam/$USER/"+basename+"\n"+\
       "cp "+cpypath+".dmc_E"+str(i)+cutoff+" .\n"+\
-      "cp "+cpypath+".slater"+str(i)+" .\n"+\
+      "cp "+cpypath+".slater"+str(i)+cutoff+" .\n"+\
       "cp "+cpypath+".optjast3 .\n"+\
       "cp "+cpypath+".sys .\n"+\
       "cp "+cpypath+".orb .\n"+\

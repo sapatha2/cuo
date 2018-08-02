@@ -8,7 +8,7 @@
 mkdir -p /scratch/sciteam/$USER/Cuvtz0_B3LYP.dmc_E100p2
 cd /scratch/sciteam/$USER/Cuvtz0_B3LYP.dmc_E100p2
 cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.dmc_E100p2 .
-cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.slater10 .
+cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.slater100p2 .
 cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.optjast3 .
 cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.sys .
 cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.orb .

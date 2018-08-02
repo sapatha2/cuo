@@ -8,6 +8,6 @@ method {
 include Cuvtz0_B3LYP.sys
 trialfunc {
   slater-jastrow
-  wf1 { include Cuvtz0_B3LYP.slater5 }
+  wf1 { include Cuvtz0_B3LYP.slater50p4 }
   wf2 { include Cuvtz0_B3LYP.optjast3 }
 }
