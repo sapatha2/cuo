@@ -3,3 +3,5 @@
 *.config*
 *.perr
 *.pout
+*.log
+*.o

@@ -4,11 +4,11 @@ import numpy as np
 ######################################################################
 #USER OPTIONS, ONLY THING TO EDIT
 
-N=2 #number of expansions we want, minimum 1
-nblock=640 #number of vmc blocks we want, minimum 1
-timestep=0.01 #timestpe, minimum 0
-nodes=1 #number of nodes (32 ppn)
-walltime="01:00:00"
+N=20 #number of expansions we want, minimum 1
+nblock=512 #number of vmc blocks we want, minimum 1
+timestep=0.01 #timestep, minimum 0
+nodes=480 #number of nodes (32 ppn)
+walltime="02:00:00"
 ######################################################################
 
 el='Cu'
@@ -61,7 +61,7 @@ for method in ['B3LYP']:
       "#PBS -o "+basename+".pout \n"+\
       "mkdir -p /scratch/sciteam/$USER/"+basename+"\n"+\
       "cd /scratch/sciteam/$USER/"+basename+"\n"+\
-      "cp "+cpypath+".vmc"+str(i)+" .\n"+\      
+      "cp "+cpypath+".dmc"+str(i)+" .\n"+\
       "cp "+cpypath+".slater"+str(i)+" .\n"+\
       "cp "+cpypath+".optjast3 .\n"+\
       "cp "+cpypath+".sys .\n"+\
