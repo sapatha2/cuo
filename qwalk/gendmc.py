@@ -5,10 +5,10 @@ import numpy as np
 #USER OPTIONS, ONLY THING TO EDIT
 
 N=20 #number of expansions we want, minimum 1
-nblock=512 #number of vmc blocks we want, minimum 1
+nblock=400 #number of vmc blocks we want, minimum 1
 timestep=0.01 #timestep, minimum 0
-nodes=480 #number of nodes (32 ppn)
-walltime="02:00:00"
+nodes=20 #number of nodes (32 ppn)
+walltime="01:00:00"
 ######################################################################
 
 el='Cu'
