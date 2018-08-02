@@ -40,7 +40,7 @@ for method in ['B3LYP']:
       
       template[edit_ind[0]]="  ORBFILE "+basename+".orb"+"\n"
       template[edit_ind[1]]="  INCLUDE "+basename+".basis"+"\n"
-      template[edit_ind[2]]="DETWT { "+" ".join(weights)+" }"+"\n"
+      template[edit_ind[2]]="  OPTIMIZE_DET \n DETWT { "+" ".join(weights)+" }"+"\n"
       
       fname=basename+".slater"+str(i)+cutoff
       fout=open(fname,"w")

@@ -1,0 +1,25 @@
+method { 
+  dmc 
+  nblock 400
+  timestep 0.01
+  tmoves
+  average { average_derivative_dm 
+    average { tbdm_basis 
+      orbitals {
+        magnify 1 
+        nmo 14
+        orbfile Cuvtz0_B3LYPiao.orb
+        include Cuvtz0_B3LYPiao.basis
+        centers { useglobal }
+      }
+      states { 2 6 12 }
+    }
+  }
+}
+
+include Cuvtz0_B3LYP.sys
+trialfunc {
+  slater-jastrow
+  wf1 { include Cuvtz0_B3LYP.slater160p3 }
+  wf2 { include Cuvtz0_B3LYP.optjast3 }
+}

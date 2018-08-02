@@ -1,4 +1,4 @@
-#Generates multi slater expansions for our calculations
+#DMC files only for energy
 import numpy as np
 
 ######################################################################

@@ -1,4 +1,4 @@
-#Generates multi slater expansions for our calculations
+#DMC files for full density matrix
 import numpy as np
 
 ######################################################################
