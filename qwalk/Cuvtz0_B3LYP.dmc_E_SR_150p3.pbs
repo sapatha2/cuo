@@ -1,7 +1,7 @@
 #!/bin/bash 
 #PBS -q normal
-#PBS -l nodes=40:ppn=32:xe 
-#PBS -l walltime=02:00:00
+#PBS -l nodes=20:ppn=32:xe 
+#PBS -l walltime=01:00:00
 #PBS -N Cuvtz0_B3LYP.dmc_E_SR_150p3
 #PBS -e Cuvtz0_B3LYP.dmc_E_SR_150p3.perr 
 #PBS -o Cuvtz0_B3LYP.dmc_E_SR_150p3.pout 
@@ -13,4 +13,6 @@ cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.optjast3 .
 cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.sys .
 cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.orb .
 cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.basis .
-aprun -n 1280 /u/sciteam/$USER/mainline/bin/qwalk Cuvtz0_B3LYP.dmc_E_SR_150p3 &> Cuvtz0_B3LYP.dmc_E_SR_150p3.out
+cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYPiao.orb .
+cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYPiao.basis .
+aprun -n 640 /u/sciteam/$USER/mainline/bin/qwalk Cuvtz0_B3LYP.dmc_E_SR_150p3 &> Cuvtz0_B3LYP.dmc_E_SR_150p3.out

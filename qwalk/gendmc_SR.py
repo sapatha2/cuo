@@ -3,12 +3,12 @@ import numpy as np
 
 ######################################################################
 #USER OPTIONS, ONLY THING TO EDIT
-cutoff="0p4" #cutoff for slater
+cutoff="0p2" #cutoff for slater
 N=20 #number of expansions we want, minimum 1
-nblock=400 #number of vmc blocks we want, minimum 1
+nblock=100 #number of vmc blocks we want, minimum 1
 timestep=0.01 #timestep, minimum 0
-nodes=40 #number of nodes (32 ppn)
-walltime="02:00:00"
+nodes=20 #number of nodes (32 ppn)
+walltime="01:00:00"
 ######################################################################
 
 el='Cu'
@@ -67,6 +67,8 @@ for method in ['B3LYP']:
       "cp "+cpypath+".sys .\n"+\
       "cp "+cpypath+".orb .\n"+\
       "cp "+cpypath+".basis .\n"+\
+      "cp "+cpypath+"iao.orb .\n"+\
+      "cp "+cpypath+"iao.basis .\n"+\
       "aprun -n "+str(nodes*32)+" /u/sciteam/$USER/mainline/bin/qwalk "+basename+" &> "+basename+".out\n"
 
       fname=basename+".pbs"

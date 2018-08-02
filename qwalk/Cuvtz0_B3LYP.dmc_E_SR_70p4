@@ -1,6 +1,6 @@
 method { 
   dmc 
-  nblock 400
+  nblock 100
   timestep 0.01
   tmoves
   average { average_derivative_dm 
