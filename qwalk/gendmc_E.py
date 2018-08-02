@@ -3,7 +3,7 @@ import numpy as np
 
 ######################################################################
 #USER OPTIONS, ONLY THING TO EDIT
-
+cutoff="0p4" #cutoff for slater
 N=20 #number of expansions we want, minimum 1
 nblock=400 #number of vmc blocks we want, minimum 1
 timestep=0.01 #timestep, minimum 0
@@ -40,7 +40,7 @@ for method in ['B3LYP']:
       template[edit_ind[2]]="include "+basename+".sys"
       template[edit_ind[3]]="  wf1 { include "+basename+".slater"+str(i)+" }"+"\n"
       
-      fname=basename+".dmc_E"+str(i)
+      fname=basename+".dmc_E"+str(i)+cutoff
       fout=open(fname,"w")
       fout.write("".join(template))
       fout.close()
@@ -49,7 +49,7 @@ for method in ['B3LYP']:
 for method in ['B3LYP']:
   for basis in ['vtz']:
     for i in range(1,N+1):
-      basename=el+basis+str(charge)+"_"+method+".dmc_E"+str(i)
+      basename=el+basis+str(charge)+"_"+method+".dmc_E"+str(i)+cutoff
       cpypath="/u/sciteam/$USER/cuo/qwalk/"+el+basis+str(charge)+"_"+method
 
       contents="#!/bin/bash \n"+\
@@ -61,7 +61,7 @@ for method in ['B3LYP']:
       "#PBS -o "+basename+".pout \n"+\
       "mkdir -p /scratch/sciteam/$USER/"+basename+"\n"+\
       "cd /scratch/sciteam/$USER/"+basename+"\n"+\
-      "cp "+cpypath+".dmc_E"+str(i)+" .\n"+\
+      "cp "+cpypath+".dmc_E"+str(i)+cutoff+" .\n"+\
       "cp "+cpypath+".slater"+str(i)+" .\n"+\
       "cp "+cpypath+".optjast3 .\n"+\
       "cp "+cpypath+".sys .\n"+\

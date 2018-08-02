@@ -10,6 +10,7 @@ minao={}
 basis='vtz'
 method='B3LYP'
 
+'''
 #Energies
 E=[]
 err=[]
@@ -46,4 +47,3 @@ d['E']*=27.2
 d['err']*=27.2
 plt.errorbar(np.arange(len(d['E'])),d['E'],yerr=d['err'],c='g',marker='o')
 plt.show()
-'''

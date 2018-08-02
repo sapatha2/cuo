@@ -9,6 +9,7 @@ minao={}
 basis='vtz'
 method='B3LYP'
 
+'''
 #Energies
 E=[]
 err=[]
@@ -41,3 +42,11 @@ for i in range(1,N+1):
 
 d={'E':E,'err':err,'nblock':nblock}
 json.dump(d,open("analyzevmc.json","w"))
+'''
+
+#Plot energies
+import matplotlib.pyplot as plt
+d=json.load(open("analyzevmc.json","r"))
+print(d['err'])
+plt.errorbar(np.arange(len(d['E'])),d['E'],yerr=d['err'],c='g',marker='o')
+plt.show()

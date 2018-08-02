@@ -1,9 +1,10 @@
 #Generates multi slater expansions for our calculations
 import numpy as np
 
+cutoff="0p4"
+wmax=0.4 #maximum magnitude of weights
 Ndet=23 #number of determinants in expansion
 N=20 #number of expansions we want, minimum 1
-wmax=0.3 #maximum magnitude of weights
 assert(N>=1)
 
 el='Cu'
@@ -41,7 +42,7 @@ for method in ['B3LYP']:
       template[edit_ind[1]]="  INCLUDE "+basename+".basis"+"\n"
       template[edit_ind[2]]="DETWT { "+" ".join(weights)+" }"+"\n"
       
-      fname=basename+".slater"+str(i)
+      fname=basename+".slater"+str(i)+cutoff
       fout=open(fname,"w")
       fout.write("".join(template))
       fout.close()
