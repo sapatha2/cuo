@@ -3,7 +3,7 @@ import numpy as np
 import json
 
 N=20 #Number of expansions 
-
+'''
 el='Cu'
 charge=0
 minao={}
@@ -65,4 +65,3 @@ plt.ylabel("E-E[GS], eV")
 plt.xlabel("State")
 plt.legend(loc=2)
 plt.show()
-'''
