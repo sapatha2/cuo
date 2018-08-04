@@ -3,7 +3,7 @@ import numpy as np
 
 ######################################################################
 #USER OPTIONS, ONLY THING TO EDIT
-cutoff="0p2" #cutoff for slater
+cutoff="0p4" #cutoff for slater
 N=20 #number of expansions we want, minimum 1
 nblock=100 #number of vmc blocks we want, minimum 1
 timestep=0.01 #timestep, minimum 0
