@@ -57,7 +57,7 @@ for cut in ["0p2","0p3","0p4"]:
             tmp_wfnderiv.append(float(s[0]))
 	    tmp_wfnderiv_err.append(float(s[2][:-1]))
         if "Derivative of the energy" in line:
-          for j in range(N):
+          for j in range(Ndet-1):
 	    s=f.next().split(" ")
             tmp_ederiv.append(float(s[0]))
 	    tmp_ederiv_err.append(float(s[2][:-1]))
