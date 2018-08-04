@@ -67,6 +67,12 @@ for cut in ["0p2","0p3","0p4"]:
     ederiv.append(tmp_ederiv)
     ederiv_err.append(tmp_ederiv_err)      
 
+#Ground state
+wfnderiv.append([0]*len(wfnderiv[0]))
+wfnderiv_err.append([0]*len(wfnderiv[0]))
+ederiv.append([0]*len(wfnderiv[0]))
+ederiv_err.append([0]*len(wfnderiv[0]))
+
 d={'E':E,'err':err,'wfnderiv':wfnderiv,'wfnderiv_err':wfnderiv_err,
 'ederiv':ederiv,'ederiv_err':ederiv_err,'cutoff':cutoff}
 json.dump(d,open("analyzedmc_E_SR_not.json","w"))
