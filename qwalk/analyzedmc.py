@@ -10,6 +10,7 @@ minao={}
 basis='vtz'
 method='B3LYP'
 
+'''
 #Energies
 E=[]
 err=[]
@@ -38,18 +39,31 @@ assert(min(E)==-213.4851715)
 
 d={'E':E,'err':err,'cutoff':cutoff}
 json.dump(d,open("analyzedmc.json","w"))
+'''
 
-'''
 import matplotlib.pyplot as plt 
+import pandas as pd
 d=json.load(open("analyzedmc.json","r"))
-d['E']=np.array(d['E'])
-d['err']=np.array(d['err'])
-ind=np.argsort(d['E'])
-d['E']=np.sort(d['E'])
-d['E']-=d['E'][0]
-d['err']=d['err'][ind]
-d['E']*=27.2
-d['err']*=27.2
-plt.errorbar(np.arange(len(d['E'])),d['E'],yerr=d['err'],c='g',marker='o')
+df=pd.DataFrame(d)
+for cutoff in [0.4,0.3,0.2]:
+  #Select values for cutoff
+  sel=(np.abs(cutoff-(np.array(d['cutoff'])))<1e-5)
+  E=np.array(d['E'])[sel]
+  err=np.array(d['err'])[sel]
+  #Add ground state energy
+  E=np.insert(E,0,d['E'][-1])
+  err=np.insert(err,0,d['err'][-1])
+  #Sort energies
+  ind=np.argsort(E)
+  E=E[ind]
+  err=err[ind]
+  E-=E[0]  #Subtract GS energy
+  E*=27.2
+  err*=27.2
+  plt.errorbar(np.arange(len(E)),E,yerr=err,marker='o',label='cutoff='+str(cutoff))
+
+plt.title("Total DMC energies CuO")
+plt.ylabel("E-E[GS], eV")
+plt.xlabel("State")
+plt.legend(loc=2)
 plt.show()
-'''
