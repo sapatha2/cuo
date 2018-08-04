@@ -3,7 +3,7 @@ import numpy as np
 
 ######################################################################
 #USER OPTIONS, ONLY THING TO EDIT
-cutoff="0p3" #cutoff for slater
+cutoff="0p2" #cutoff for slater
 N=20 #number of expansions we want, minimum 1
 nblock=100 #number of vmc blocks we want, minimum 1
 timestep=0.01 #timestep, minimum 0
@@ -53,7 +53,7 @@ for method in ['B3LYP']:
       cpypath="/u/sciteam/$USER/cuo/qwalk/"+el+basis+str(charge)+"_"+method
 
       contents="#!/bin/bash \n"+\
-      "#PBS -q debug\n"+\
+      "#PBS -q normal\n"+\
       "#PBS -l nodes="+str(nodes)+":ppn=32:xe \n"+\
       "#PBS -l walltime="+walltime+"\n"+\
       "#PBS -N "+basename+"\n"+\

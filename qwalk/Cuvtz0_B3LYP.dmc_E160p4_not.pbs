@@ -1,5 +1,5 @@
 #!/bin/bash 
-#PBS -q debug
+#PBS -q normal
 #PBS -l nodes=20:ppn=32:xe 
 #PBS -l walltime=00:30:00
 #PBS -N Cuvtz0_B3LYP.dmc_E160p4_not
