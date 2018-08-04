@@ -41,7 +41,6 @@ wfnderiv=[]
 wfnderiv_err=[]
 ederiv=[]
 ederiv_err=[]
-cutoff=[]
 for cut in ["0p2","0p3","0p4"]:
   for i in range(1,N+1):
     tmp_wfnderiv=[]
@@ -67,10 +66,6 @@ for cut in ["0p2","0p3","0p4"]:
     wfnderiv_err.append(tmp_wfnderiv_err)
     ederiv.append(tmp_ederiv)
     ederiv_err.append(tmp_ederiv_err)      
-
-    if(cut=="0p2"): cutoff.append(0.2)
-    elif(cut=="0p3"): cutoff.append(0.3)
-    else: cutoff.append(0.4)
 
 d={'E':E,'err':err,'wfnderiv':wfnderiv,'wfnderiv_err':wfnderiv_err,
 'ederiv':ederiv,'ederiv_err':ederiv_err,'cutoff':cutoff}
