@@ -1,4 +1,4 @@
-#Analyze DMC 
+#Analyze DMC runs with 400 blocks, energy only with tmoves
 import numpy as np 
 import json
 
