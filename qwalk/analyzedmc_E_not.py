@@ -9,7 +9,6 @@ charge=0
 minao={}
 basis='vtz'
 method='B3LYP'
-'''
 #Energies
 E=[]
 err=[]
@@ -19,7 +18,7 @@ for cut in ["0p2","0p3","0p4"]:
     e=[]
     esig=[]
     nb=0
-    basename=el+basis+str(charge)+"_"+method+".dmc_E_SR_"+str(i)+cut+"_not"
+    basename=el+basis+str(charge)+"_"+method+".dmc_E"+str(i)+cut+"_not"
     with open("/scratch/sciteam/sapatha2/"+basename+"/"+basename+".o","r") as f:
       for line in f:
         if "total_energy0" in line:
@@ -37,12 +36,12 @@ cutoff.append(0)
 assert(min(E)==-213.4851715)
 
 d={'E':E,'err':err,'cutoff':cutoff}
-json.dump(d,open("analyzedmc_E_SR_not.json","w"))
-'''
+json.dump(d,open("analyzedmc_E_not.json","w"))
 
+'''
 import matplotlib.pyplot as plt
 import pandas as pd
-d=json.load(open("analyzedmc_E_SR_not.json","r"))
+d=json.load(open("analyzedmc_E_not.json","r"))
 df=pd.DataFrame(d)
 for cutoff in [0.4,0.3,0.2]:
   #Select values for cutoff
@@ -66,3 +65,4 @@ plt.ylabel("E-E[GS], eV")
 plt.xlabel("State")
 plt.legend(loc=2)
 plt.show()
+'''
