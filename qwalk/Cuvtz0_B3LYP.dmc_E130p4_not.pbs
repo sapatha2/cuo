@@ -1,0 +1,16 @@
+#!/bin/bash 
+#PBS -q debug
+#PBS -l nodes=20:ppn=32:xe 
+#PBS -l walltime=00:30:00
+#PBS -N Cuvtz0_B3LYP.dmc_E130p4_not
+#PBS -e Cuvtz0_B3LYP.dmc_E130p4_not.perr 
+#PBS -o Cuvtz0_B3LYP.dmc_E130p4_not.pout 
+mkdir -p /scratch/sciteam/$USER/Cuvtz0_B3LYP.dmc_E130p4_not
+cd /scratch/sciteam/$USER/Cuvtz0_B3LYP.dmc_E130p4_not
+cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.dmc_E130p4_not .
+cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.slater130p4 .
+cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.optjast3 .
+cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.sys .
+cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.orb .
+cp /u/sciteam/$USER/cuo/qwalk/Cuvtz0_B3LYP.basis .
+aprun -n 640 /u/sciteam/$USER/mainline/bin/qwalk Cuvtz0_B3LYP.dmc_E130p4_not &> Cuvtz0_B3LYP.dmc_E130p4_not.out
