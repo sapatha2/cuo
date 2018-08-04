@@ -2,7 +2,8 @@
 import numpy as np 
 import json
 
-N=20 #Number of expansions 
+N=20 #Number of expansions
+Ndet=23 #Number of determinants per expansion 
 
 el='Cu'
 charge=0
@@ -51,7 +52,7 @@ for cut in ["0p2","0p3","0p4"]:
     with open("/scratch/sciteam/sapatha2/"+basename+"/"+basename+".o","r") as f:
       for line in f:
         if "Wave function derivatives" in line:
-          for j in range(N):
+          for j in range(Ndet-1):
 	    s=f.next().split(" ")
             tmp_wfnderiv.append(float(s[0]))
 	    tmp_wfnderiv_err.append(float(s[2][:-1]))
