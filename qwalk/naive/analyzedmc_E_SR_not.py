@@ -11,6 +11,7 @@ minao={}
 basis='vtz'
 method='B3LYP'
 
+'''
 #Energies
 E=[]
 err=[]
@@ -77,13 +78,15 @@ ederiv_err.append([0]*len(wfnderiv[0]))
 d={'E':E,'err':err,'wfnderiv':wfnderiv,'wfnderiv_err':wfnderiv_err,
 'ederiv':ederiv,'ederiv_err':ederiv_err,'cutoff':cutoff}
 json.dump(d,open("analyzedmc_E_SR_not.json","w"))
-
-#Plot energy
 '''
+
 import matplotlib.pyplot as plt
 import pandas as pd
 d=json.load(open("analyzedmc_E_SR_not.json","r"))
 df=pd.DataFrame(d)
+
+#Plot energy
+'''
 for cutoff in [0.4,0.3,0.2]:
   #Select values for cutoff
   sel=(np.abs(cutoff-(np.array(d['cutoff'])))<1e-5)
@@ -107,3 +110,49 @@ plt.xlabel("State")
 plt.legend(loc=2)
 plt.show()
 '''
+
+#Preliminary wavefunction derivatives analysis 
+for cutoff in [0.4,0.3,0.2]:
+  sel=(np.abs(cutoff-(np.array(d['cutoff'])))<1e-5)
+  wfnderiv=df['wfnderiv'][sel]
+  wfnderiv_err=df['wfnderiv_err'][sel]
+  ederiv=df['ederiv'][sel]
+  ederiv_err=df['ederiv_err'][sel]
+  wfnderiv=np.array([item for sublist in wfnderiv for item in sublist])
+  wfnderiv_err=np.array([item for sublist in wfnderiv_err for item in sublist])
+  ederiv=np.array([item for sublist in ederiv for item in sublist])
+  ederiv_err=np.array([item for sublist in ederiv_err for item in sublist])
+ 
+  print(np.mean(wfnderiv_err),np.mean(ederiv_err))
+  print(np.mean(wfnderiv_err),np.mean(ederiv_err))
+
+plt.show()
+
+'''
+#Plot wavefunction derivatives
+for cutoff in [0.4,0.3,0.2]:
+  sel=(np.abs(cutoff-(np.array(d['cutoff'])))<1e-5)
+  wfnderiv=df['wfnderiv'][sel]
+  wfnderiv_err=df['wfnderiv_err'][sel]
+  ederiv=df['ederiv'][sel]
+  ederiv_err=df['ederiv_err'][sel]
+  wfnderiv=[item for sublist in wfnderiv for item in sublist]
+  wfnderiv_err=[item for sublist in wfnderiv_err for item in sublist]
+  ederiv=[item for sublist in ederiv for item in sublist]
+  ederiv_err=[item for sublist in ederiv_err for item in sublist]
+  plt.subplot(221)
+  plt.title("wfnderiv")
+  plt.hist(wfnderiv,bins=20,label='cutoff='+str(cutoff))
+  plt.subplot(222)
+  plt.title("wfnderiv_err")
+  plt.hist(wfnderiv_err,bins=20,label='cutoff='+str(cutoff))
+  plt.subplot(223)
+  plt.title("ederiv")
+  plt.hist(ederiv,bins=20,label='cutoff='+str(cutoff))
+  plt.subplot(224)
+  plt.title("ederiv_err")
+  plt.hist(ederiv_err,bins=20,label='cutoff='+str(cutoff))
+plt.legend(loc=1)
+plt.show()
+'''
+
