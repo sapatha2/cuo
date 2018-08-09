@@ -7,4 +7,4 @@
 *.o
 *.ER
 *.OU
-debug/
+outputs/

@@ -3,6 +3,7 @@ method {
   ##nblock 
   average { average_derivative_dm 
     average { tbdm_basis 
+      mode obdm
       orbitals {
         magnify 1 
         nmo 14

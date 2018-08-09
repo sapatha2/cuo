@@ -17,8 +17,8 @@ nup=8 #number of up electrons
 ndn=7 #number of down electrons
 actmin=6 #active space minimum
 actmax=14 #active space maximum
-nblock_vmc=1  #number of vmc blocks
-nodes=1 #nodes to use 
+nblock_vmc=800  #number of vmc blocks
+nodes=2 #nodes to use 
 walltime='01:00:00' #walltime
 
 #VMC input file template
@@ -69,10 +69,10 @@ for nchoose in nchooses:
         up=[[str(y) for y in x] for x in up]
         dn=[[str(y) for y in x] for x in dn]
         
-        states=""
+        states="1 2 3 4 5 6 7 8 9 10 11 12 13 \n"+\
+        "1 2 3 4 5 6 7 8 9 10 11 12\n\n"
         for p in range(nchoose):
           states+=" ".join(up[p])+"\n"+" ".join(dn[p])+"\n\n"
-        print(states)
 
         content=\
         "SLATER\n"+\
@@ -123,4 +123,16 @@ for nchoose in nchooses:
         fout=open(fname,"w")
         fout.write(contents)
         fout.close()
- 
+
+        #Submitter file
+        f=open(directory+"/submit.sh","w")
+        f.write(
+        '#!/bin/bash\n'+\
+        'for S in {0.."+str(nchoose-1)+"}; do\n'+\
+        '  for G in {1..9}; do\n'+\
+        '    echo "Cuvtz0_B3LYP_s"$S"_g0."$G".vmc.pbs"\n'+\
+        '  done\n'+\
+        'done\n')
+        f.close() 
+
+        os.system("chmod 777 "+directory+"/submit.sh")
