@@ -111,12 +111,12 @@ for nchoose in nchooses:
         "cd /scratch/sciteam/$USER/"+directory+"\n"+\
         "cp "+cpypath+"/"+vmcf+" .\n"+\
         "cp "+cpypath+"/"+slatf+" .\n"+\
-        "cp "+cpypath+"/Cuvtz0_B3LYP.optjast3 .\n"+\
-        "cp "+cpypath+"/Cuvtz0_B3LYP.sys .\n"+\
-        "cp "+cpypath+"/Cuvtz0_B3LYP.orb .\n"+\
-        "cp "+cpypath+"/Cuvtz0_B3LYP.basis .\n"+\
-        "cp "+cpypath+"/Cuvtz0_B3LYPiao.orb .\n"+\
-        "cp "+cpypath+"/Cuvtz0_B3LYPiao.basis .\n"+\
+        "cp -u "+cpypath+"/Cuvtz0_B3LYP.optjast3 .\n"+\
+        "cp -u "+cpypath+"/Cuvtz0_B3LYP.sys .\n"+\
+        "cp -u "+cpypath+"/Cuvtz0_B3LYP.orb .\n"+\
+        "cp -u "+cpypath+"/Cuvtz0_B3LYP.basis .\n"+\
+        "cp -u "+cpypath+"/Cuvtz0_B3LYPiao.orb .\n"+\
+        "cp -u "+cpypath+"/Cuvtz0_B3LYPiao.basis .\n"+\
         "aprun -n "+str(nodes*32)+" /u/sciteam/$USER/mainline/bin/qwalk "+vmcf+" &> "+vmcf+".out\n"
  
         fname=directory+"/"+vmcf+".pbs"
