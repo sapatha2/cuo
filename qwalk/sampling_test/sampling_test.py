@@ -124,7 +124,7 @@ for nchoose in nchooses:
         fout.write(contents)
         fout.close()
 
-        #Submitter file
+        #Generate submitter file
         f=open(directory+"/submit.sh","w")
         f.write(
         '#!/bin/bash\n'+\
