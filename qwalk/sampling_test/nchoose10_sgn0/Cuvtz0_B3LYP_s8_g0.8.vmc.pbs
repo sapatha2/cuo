@@ -1,0 +1,18 @@
+#!/bin/bash 
+#PBS -q normal
+#PBS -l nodes=2:ppn=32:xe 
+#PBS -l walltime=01:00:00
+#PBS -N Cuvtz0_B3LYP_s8_g0.8.vmc
+#PBS -e Cuvtz0_B3LYP_s8_g0.8.vmc.perr 
+#PBS -o Cuvtz0_B3LYP_s8_g0.8.vmc.pout 
+mkdir -p /scratch/sciteam/$USER/./nchoose10_sgn0
+cd /scratch/sciteam/$USER/./nchoose10_sgn0
+cp /u/sciteam/$USER/cuo/qwalk/sampling_test/./nchoose10_sgn0/Cuvtz0_B3LYP_s8_g0.8.vmc .
+cp /u/sciteam/$USER/cuo/qwalk/sampling_test/./nchoose10_sgn0/Cuvtz0_B3LYP_s8_g0.8.slater .
+cp /u/sciteam/$USER/cuo/qwalk/sampling_test/./nchoose10_sgn0/Cuvtz0_B3LYP.optjast3 .
+cp /u/sciteam/$USER/cuo/qwalk/sampling_test/./nchoose10_sgn0/Cuvtz0_B3LYP.sys .
+cp /u/sciteam/$USER/cuo/qwalk/sampling_test/./nchoose10_sgn0/Cuvtz0_B3LYP.orb .
+cp /u/sciteam/$USER/cuo/qwalk/sampling_test/./nchoose10_sgn0/Cuvtz0_B3LYP.basis .
+cp /u/sciteam/$USER/cuo/qwalk/sampling_test/./nchoose10_sgn0/Cuvtz0_B3LYPiao.orb .
+cp /u/sciteam/$USER/cuo/qwalk/sampling_test/./nchoose10_sgn0/Cuvtz0_B3LYPiao.basis .
+aprun -n 64 /u/sciteam/$USER/mainline/bin/qwalk Cuvtz0_B3LYP_s8_g0.8.vmc &> Cuvtz0_B3LYP_s8_g0.8.vmc.out
