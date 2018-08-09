@@ -128,9 +128,9 @@ for nchoose in nchooses:
         f=open(directory+"/submit.sh","w")
         f.write(
         '#!/bin/bash\n'+\
-        'for S in {0.."+str(nchoose-1)+"}; do\n'+\
+        'for S in {0..'+str(nchoose-1)+'}; do\n'+\
         '  for G in {1..9}; do\n'+\
-        '    echo "Cuvtz0_B3LYP_s"$S"_g0."$G".vmc.pbs"\n'+\
+        '    qsub "Cuvtz0_B3LYP_s"$S"_g0."$G".vmc.pbs"\n'+\
         '  done\n'+\
         'done\n')
         f.close() 
