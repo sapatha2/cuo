@@ -84,6 +84,7 @@ for nchoose in nchooses:
         "INCLUDE Cuvtz0_B3LYP.basis\n"+\
         "CENTERS { USEGLOBAL }\n"+\
         "}\n"+\
+        "OPTIMIZE_DET\n"+\
         "DETWT { "+" ".join(w)+" }\n"+\
         "STATES {\n"+states+\
         "}\n"
