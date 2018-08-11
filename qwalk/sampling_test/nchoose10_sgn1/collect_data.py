@@ -1,15 +1,15 @@
+#Collect all data into one place 
+
 import json 
 
 E=[]
 Err=[]
 G=[]
 S=[]
-sgn=[]
-nchoose=[]
 
 for s in range(1,10):
   for g in range(1,10):
-    with open("/u/sciteam/sapatha2/scratch/nchoose10_sgn1/Cuvtz0_B3LYP_s"+str(s)+"_g0."+str(g)+".vmc.o","r") as f:
+    with open("Cuvtz0_B3LYP_s"+str(s)+"_g0."+str(g)+".vmc.o","r") as f:
       for line in f:
         if("total_energy0" in line):
           sp1=line.split("+/-")
