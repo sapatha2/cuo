@@ -1,25 +1,35 @@
 #Plot all data from collect_data.json
-
-#Plot energies
-'''
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
-d=json.load(open("energy.json","r"))
-df=pd.DataFrame(d)
+df=pd.read_json("collect_data.json")
+sns.set_style("ticks")
 
-#Ground state
+
+#Energy
+plt.title("VMC Energy")
 E0=-213.361501
 err0=0.001006581014
 df['E']-=E0
 df['E']*=27.2
 df['Err']*=27.2
+g=sns.FacetGrid(hue='S',data=df,sharey=False)
+g.map(plt.errorbar,'G','E','Err',marker='o')
+plt.show()
 
-for S in range(max(d['S'])):
-  ind=(df['S']==S)
-  plt.errorbar(df['G'][ind]*0.1,df['E'][ind],yerr=df['Err'][ind],marker='o')
+#Parameter derivatives
+plt.title("Parameter derivatives")
+g=sns.FacetGrid(hue='S',col='Nd',data=df,sharey=False)
+g.map(plt.errorbar,'G','Pd','Pderr',marker='o')
+plt.show()
 
-plt.ylabel("E(VMC) - E0(VMC), eV")
-plt.xlabel("Ground state weight")
+#Energy derivatives
+'''
+df['Ed']=2*df['Ed']-df['E']*df['Pd']
+#df['Ederr']= #THIS IS THE HARD THING TO DO
+g=sns.FacetGrid(hue='S',col='Nd',data=df,sharey=False)
+g.map(plt.errorbar,'G','Ed','Ederr',marker='o')
 plt.show()
 '''
