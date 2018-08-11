@@ -1,6 +1,5 @@
 import json 
 
-'''
 E=[]
 Err=[]
 G=[]
@@ -10,7 +9,7 @@ nchoose=[]
 
 for s in range(1,10):
   for g in range(1,10):
-    with open("/u/sciteam/sapatha2/scratch/nchoose10_sgn0/Cuvtz0_B3LYP_s"+str(s)+"_g0."+str(g)+".vmc.o","r") as f:
+    with open("/u/sciteam/sapatha2/scratch/nchoose10_sgn1/Cuvtz0_B3LYP_s"+str(s)+"_g0."+str(g)+".vmc.o","r") as f:
       for line in f:
         if("total_energy0" in line):
           sp1=line.split("+/-")
@@ -24,9 +23,9 @@ sgn=[0]*len(E)
 nchoose=[10]*len(E)
 
 d={'E':E,'Err':Err,'G':G,'S':S,'sgn':sgn,'nchoose':nchoose}
-json.dump(d,open("energy.json","w"))
-'''
+json.dump(d,open("energy_nchoose10_sgn1.json","w"))
 
+'''
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -47,4 +46,4 @@ for S in range(max(d['S'])):
 plt.ylabel("E(VMC) - E0(VMC), eV")
 plt.xlabel("Ground state weight")
 plt.show()
-
+'''
