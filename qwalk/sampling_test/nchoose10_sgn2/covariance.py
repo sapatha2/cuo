@@ -77,12 +77,13 @@ def test_denergy_err(jsonfn):
   dpenergy=    array(gosling['properties']['derivative_dm']['dpenergy']['vals'])
   dpenergy_err=array(gosling['properties']['derivative_dm']['dpenergy']['err'])
 
-  print('value')
-  print(dpenergy-dpwf*energy)
-  print('old error')
-  print( (dpenergy_err**2 + (dpwf*energy_err)**2 + (dpwf_err*energy)**2)**0.5 )
-  print('new error')
-  print(newerr)
+  #print('value')
+  val=(dpenergy-dpwf*energy)
+  #print('old error')
+  #print( (dpenergy_err**2 + (dpwf*energy_err)**2 + (dpwf_err*energy)**2)**0.5 )
+  #print('new error')
+  #print(newerr)
+  return val,newerr
 
 def test_stderr():
   from subprocess import check_output

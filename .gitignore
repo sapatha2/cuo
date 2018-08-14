@@ -8,3 +8,4 @@
 *.ER
 *.OU
 outputs/
+*.json
