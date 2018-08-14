@@ -62,15 +62,14 @@ def compute_totcov(cov,energy,dpwf):
   newcov=einsum('ij,jk,kl->il',jacobian,cov,jacobian.T)
   return newcov.diagonal()
 
-def test_denergy_err():
+def test_denergy_err(jsonfn):
   from subprocess import check_output
-  jsonfn='json_vmc/ext_0.50_6_10.json'
   blockdf=gather_json(jsonfn)
   newcov=compute_totcov(blockdf.cov(),blockdf['energy'].mean(),blockdf[[c for c in blockdf.columns if 'dpwf' in c]].values.mean(axis=0))
   newerr=(newcov/blockdf.shape[0])**0.5
 
   # Old (incorrect) error computation.
-  gosling=loads(check_output(['gosling','-json',jsonfn.replace('.json','.log')]).decode())
+  gosling=loads(check_output(['/u/sciteam/sapatha2/mainline/bin/gosling','-json',jsonfn.replace('.json','.log')]).decode())
   energy    =gosling['properties']['total_energy']['value'][0]
   energy_err=gosling['properties']['total_energy']['error'][0]
   dpwf=    array(gosling['properties']['derivative_dm']['dpwf']['vals'])
