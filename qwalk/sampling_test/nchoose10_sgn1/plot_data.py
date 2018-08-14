@@ -30,8 +30,9 @@ plt.show()
 '''
 
 #Energy derivatives
-df['Ed']=2*df['Ed']-df['E']*df['Pd']
+df['Ed']=(df['Ed']-df['E']*df['Pd'])  #Dropped factor of two
 #df['Ederr']= #THIS IS THE HARD THING TO DO
 g=sns.FacetGrid(hue='S',col='Nd',data=df,sharey=False)
-g.map(plt.errorbar,'G','Ed','Ederr',marker='o')
+#g.map(plt.errorbar,'G','Ed','Ederr',marker='o')
+g.map(plt.errorbar,'G','Ed',marker='o')
 plt.show()
