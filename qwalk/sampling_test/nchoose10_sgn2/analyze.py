@@ -65,8 +65,8 @@ std_from_vals=[0.0024379592918424603, 0.0037122329229159375, 0.00734758837302587
 std_from_errs=[0.0026398380000000003, 0.0028292169999999998, 0.0041952330000000005, 0.003074668, 0.004554167999999999, 0.003922716, 0.00293469, 0.003619098, 0.003758008, 0.0050047979999999995]
 
 import matplotlib.pyplot as plt 
-plt.plot(std_from_vals,'bo',label='std from values')
-plt.plot(std_from_errs,'go',label='average of errors')
+plt.plot(std_from_vals,'bo',label='std(d<H>/dp)')
+plt.plot(std_from_errs,'go',label='linear estimation')
 plt.legend(loc=1)
 plt.xlabel("Parameter number")
 plt.ylabel("Error bar value")
