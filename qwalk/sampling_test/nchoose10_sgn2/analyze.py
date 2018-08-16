@@ -3,7 +3,8 @@ from covariance import gather_json,test_denergy_err
 from numpy import array 
 import numpy as np 
 
-#Checking errors multiple runs
+########################################################
+#CHECKING LINEAR ESTIMATOR 
 '''
 vals=[]
 errs=[]
@@ -61,7 +62,9 @@ print(std_from_vals)
 print(std_from_errs) 
 '''
 
+#ERROR LOOKING AT STANDARD DEVIATION OF VALUES OVER RUNS - EXACT
 std_from_vals=[0.0024379592918424603, 0.0037122329229159375, 0.007347588373025873, 0.003644718895037174, 0.0058462793158079625, 0.004601906261637669, 0.003686646338454504, 0.006312806614058519, 0.0028809215401943877, 0.007795750965597927]
+#ERROR ESTIMATED BY LINEAR EXPANSION
 std_from_errs=[0.0026398380000000003, 0.0028292169999999998, 0.0041952330000000005, 0.003074668, 0.004554167999999999, 0.003922716, 0.00293469, 0.003619098, 0.003758008, 0.0050047979999999995]
 
 import matplotlib.pyplot as plt 
@@ -71,3 +74,5 @@ plt.legend(loc=1)
 plt.xlabel("Parameter number")
 plt.ylabel("Error bar value")
 plt.show()
+
+########################################################
