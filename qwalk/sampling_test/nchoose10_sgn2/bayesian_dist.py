@@ -1,7 +1,7 @@
 import numpy as np
 import scipy
 from scipy.integrate import dblquad
-
+from covariance import gather_json
 
 def evaluate_posterior(qvals,xavg,Scov,xlims=None,ylims=None):
   if xlims==None:
@@ -54,7 +54,8 @@ def test():
 
 def testblock():
   import pandas as pd
-  df=pd.read_json("blocks.json")
+  #df=pd.read_json("blocks.json")
+  df=gather_json("Cuvtz0_B3LYP_s1_g0.9.vmc.json")
   cov=df.cov()
   import matplotlib.pyplot as plt
   
@@ -85,7 +86,8 @@ def testblock():
 
 def bootstrapblock():
   import pandas as pd
-  df=pd.read_json("blocks.json")
+  #df=pd.read_json("blocks.json")
+  df=gather_json("Cuvtz0_B3LYP_s1_g0.9.vmc.json")
   nsample=100
   for ip in range(9):
     qs=[]

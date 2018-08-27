@@ -61,7 +61,7 @@ for i in range(vals.shape[0]):
 print(std_from_vals)
 print(std_from_errs) 
 '''
-
+'''
 #ERROR LOOKING AT STANDARD DEVIATION OF VALUES OVER RUNS - EXACT
 std_from_vals=[0.0024379592918424603, 0.0037122329229159375, 0.007347588373025873, 0.003644718895037174, 0.0058462793158079625, 0.004601906261637669, 0.003686646338454504, 0.006312806614058519, 0.0028809215401943877, 0.007795750965597927]
 #ERROR ESTIMATED BY LINEAR EXPANSION
@@ -74,5 +74,9 @@ plt.legend(loc=1)
 plt.xlabel("Parameter number")
 plt.ylabel("Error bar value")
 plt.show()
-
+'''
 ########################################################
+
+from analyze_jsonlog import compute_and_save
+
+compute_and_save(["Cuvtz0_B3LYP_s1_g0.9.vmc.json"],save_name="saved_data.csv")
