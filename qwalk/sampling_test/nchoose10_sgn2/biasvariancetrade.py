@@ -43,21 +43,3 @@ for i in range(len(fnames)):
 #Write to CSV
 new_df.to_csv("new_saved_data.csv")
 '''
-
-#Plotting
-df=pd.read_csv("saved_data.csv")
-new_df=pd.read_csv("new_saved_data.csv")
-ind=np.argsort(-df['err'])
-ind=ind[df['err']>=0.015].values
-
-new_df=new_df.iloc[ind]
-#for i in range(len(new_df)):
-for i in range(1): 
-  fname=new_df.iloc[i]['filename']
-  deriv=new_df.iloc[i]['deriv']
-  tmp=df[df['filename']==fname]
-  tmp=df[df['deriv']==deriv]
-  f=plt.figure()
-  plt.errorbar(tmp['gsw'],tmp['value'],yerr=tmp['err'])
-  plt.errorbar(new_df.iloc[i]['gsw'],new_df.iloc[i]['value'],yerr=new_df.iloc[i]['err'])
-  f.savefig("tmp.pdf",bbox_inches='tight')
