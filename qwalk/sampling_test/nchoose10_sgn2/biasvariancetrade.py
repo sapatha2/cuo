@@ -7,9 +7,9 @@ import pandas as pd
 from analyze_jsonlog import compute_and_save,compute_and_save_cut
 import matplotlib.pyplot as plt
 
-'''
 #Identify large err(d<H>/dp) states
 err_cut=0.15 #Error cutoff, include data points with errors bigger than this
+an_cut=0.001
 df=pd.read_csv("saved_data.csv")
 new_df=pd.read_csv("saved_data.csv")
 df=df.sort_values(by=["err"],ascending=False)[df['err']>=0.015]
@@ -24,15 +24,15 @@ for i in range(len(fnames)):
   val=dat['value'].values
   cut=10.0
   #Get new estimator
-  while(err>=0.015 and cut>1e-3):
-    cut/=4
+  while(err>=0.015 and cut>an_cut):
+    cut/=(10/an_cut)**(1./11.)
     x=compute_and_save_cut([fnames[i]],cut,ps[i])
     res=x[x['deriv']==df['deriv'].values[i]]
     val=res['value'].values[0]
     err=res['err'].values[0]
     print(fnames[i],cut,val,err)
   
-  if(cut>1e-3):
+  if(cut>an_cut):
     #Put back into data frame
     ind=np.argsort(-new_df['err'])[i]
     new_df.at[ind,"value"]=val
@@ -41,5 +41,4 @@ for i in range(len(fnames)):
     print(val,err)
   
 #Write to CSV
-new_df.to_csv("new_saved_data.csv")
-'''
+new_df.to_csv("new_saved_data"+str(an_cut)+".csv")
