@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import probplot
 from scipy.integrate import quad 
 from scipy import interpolate 
+from sklearn.metrics import r2_score
 
 #######################################################################################################
 #ESTIMATION OF LARGE ERROR BAR POINTS BY DROPPING BLOCKS
@@ -98,6 +99,7 @@ for index,row in df_cut.iterrows():
 '''
 
 #PLOT TOTAL CUTOFF WITH POLYFITS
+'''
 j=0
 for index,row in df_cut.iterrows():
   j+=1
@@ -128,11 +130,13 @@ for index,row in df_cut.iterrows():
     c=np.polyfit(gsw[:9],dHdp,deg=2)
     p_interp=np.linspace(gsw[0],gsw[8],100)
     plt.plot(p_interp,c[0]*p_interp**2 + c[1]*p_interp + c[2],'k--')
-  
+
+  #20K BLOCK RUN
   if(j==1):
     plt.errorbar(0.1,-0.06425238737804996,yerr=0.0043890512733563095,fmt='ro')
 
 plt.show()
+'''
 
 #LARGE CALCULATION S=3, G=0.1 DISTRIBUTION AND MEAN 
 '''
@@ -146,114 +150,20 @@ plt.show()
 df=compute_and_save(['Cuvtz0_B3LYP_s3_g0.1.vmc.json'],save_name='longsaved_data.csv')
 '''
 
-
 #######################################################################################################
 #INTEGRATION OF DERIVATIVES 
 #######################################################################################################
 
-'''
-#WORKING WITH SAMPLE 3, d<H>/dp1 FOR NOW
-def getcoeff():
-  #Coefficients from integration 
-  coeffs=[]
-  for index,row in df_cut.iterrows():
-    fname=row['filename']
-    fnames=[fname.split(".")[0]+"."+str(int(x))+"."+fname.split(".")[2]+".json" for x in range(1,10)]
-
-    for p in range(10):
-      deriv=row['deriv'].split("_")[0]+"_"+str(p)
-
-      old_data=df[df['filename'].isin(fnames)]
-      old_data=old_data[old_data['deriv']==deriv]
-      
-      new_data=new_df[new_df['filename'].isin(fnames)]
-      new_data=new_data[new_data['deriv']==deriv]
-      
-      if(deriv==row['deriv']):
-        coeff=[]
-        #Do procedure above
-        gsw=new_data['gsw'].values**2
-        ind2=np.array(range(len(gsw)))[np.abs(gsw-gsw[9])<1e-3]
-        for k in range(11):
-          dHdp=new_data['value'].values[:]
-          dHdp[ind2[0]]=dHdp[9+k]
-          dHdp=dHdp[:9]
-        
-          #POLYFIT
-          c=np.polyfit(gsw[:9],dHdp,deg=2)
-          coeff.append(c)
-        coeffs.append(coeff)
-      else:
-        #Do not
-        gsw=old_data['gsw'].values**2
-        dHdp=old_data['value'].values[:]
-        c=np.polyfit(gsw[:9],dHdp,deg=2)
-        coeffs.append(c)
-  
-  return coeffs
-'''
-
-'''
-#WORKING WITH SAMPLE 3 FOR NOW 
-def integcoeff(coeff):
-  #Sign structure
-  sgn=[1, -1, 1, -1, -1, 1, 1, -1, 1, 1]
-
-  #Get individual results
-  g=np.linspace(0.1,0.99,20) #Variable to integrate over
-  ind_integ=[]
-  for p in range(10):
-    result=[]
-    if(p==1):
-      #Complicated stuff
-      for j in range(len(coeff[p])):
-        def f(x):
-          return (coeff[p][j][0]*x**2 + coeff[p][j][1]*x + coeff[p][j][0])/np.sqrt(1-x)
-        resu=[] #Array of <H>(x) integrated in one dimension
-        for i in range(len(g)):
-          res = quad(f,1.0,g[i])
-          resu.append(-1*res[0]*sgn[p]*np.sqrt(1/(g[i]*(1-g[i])))/np.sqrt(10))
-        result.append(resu)
-    else:
-      def f(x):
-        return (coeff[p][0]*x**2 + coeff[p][1]*x + coeff[p][0])/np.sqrt(1-x)
-      result=[] #Array of <H>(x) integrated in one dimension
-      for i in range(len(g)):
-        res = quad(f,1.0,g[i])
-        result.append(-1*res[0]*sgn[p]*np.sqrt(1/(g[i]*(1-g[i])))/np.sqrt(10))
-    ind_integ.append(result)
-
-  #Get sums
-  fres=[]
-  for i in range(len(coeff[1])):
-    data=np.zeros(len(g))
-    for p in range(10):
-      if(p==1):
-        data+=np.array(ind_integ[p][i])
-      else:
-        data+=np.array(ind_integ[p])
-    fres.append(list(data))
-  fres=np.array(fres)
-
-  #Final integrals
-  return g,fres
-
-x,integ=integcoeff(getcoeff())
-for i in range(len(integ)):
-  plt.plot(x,integ[i],'o')
-plt.show()
-'''
-
-'''
 def integrate():
   coeffs=[]
   for index,row in df_cut.iterrows():
     fname=row['filename']
     fnames=[fname.split(".")[0]+"."+str(int(x))+"."+fname.split(".")[2]+".json" for x in range(1,10)]
-    print(fname) 
-    #Get dHdps
-    dHdps=[]
+    
+    #if(fname=='Cuvtz0_B3LYP_s4_g0.4.vmc.json'):
+    dHdgs=[np.zeros(9) for i in range(11)]
     sgn=[1, -1, 1, -1, -1, 1, 1, -1, 1, 1]
+    
     for p in range(10):
       deriv=row['deriv'].split("_")[0]+"_"+str(p)
 
@@ -264,7 +174,6 @@ def integrate():
       new_data=new_data[new_data['deriv']==deriv]
       
       if(deriv==row['deriv']):
-        dd=[]
         #Do procedure above
         gsw=new_data['gsw'].values**2
         ind2=np.array(range(len(gsw)))[np.abs(gsw-gsw[9])<1e-3]
@@ -272,30 +181,43 @@ def integrate():
           dHdp=new_data['value'].values[:]
           dHdp[ind2[0]]=dHdp[9+k]
           dHdp=dHdp[:9]
-          gsw=gsw[:9]
-          dd.append(np.array(list(dHdp*sgn[p]*-1*0.5/np.sqrt(10*gsw**2*(1-gsw)))+[0]))
-        dHdps.append(dd)
+          #plt.plot(dHdp,'o')
+          #plt.show()
+          dHdg=-dHdp[:]*(sgn[p]/np.sqrt(10*(1-gsw[:9])))/gsw[:9]
+          dHdgs[k]+=dHdg 
       else:
         gsw=old_data['gsw'].values**2
         dHdp=old_data['value'].values[:]
-        gsw=gsw[:9]
-        dHdps.append(np.array(list(dHdp*sgn[p]*-1*0.5/np.sqrt(10*gsw**2*(1-gsw)))+[0]))
-    
-    print(dHdps)
+        dHdg=-dHdp[:]*(sgn[p]/np.sqrt(10*(1-gsw[:9])))/gsw[:9]
+        for i in range(11):
+          dHdgs[i]+=dHdg
 
-    #Calculate dHdg
-    dHdgs=[]
-    for i in range(len(dHdps[1])):
-      res=np.zeros(len(gsw)+1)
-      for p in range(10):
-        if(p==1):
-          res+=dHdps[p][i]
-        else:
-          res+=dHdps[p]
-      dHdgs.append(res)
+    dHdgs=np.array([list(x)+[0] for x in dHdgs])
     
-    print(dHdgs)
-    break
+    #Get H
+    Hs=[np.zeros(9) for i in range(11)]
+    for i in range(11):
+      t=(dHdgs[i][:-1]+dHdgs[i][1:])[:]/2*-0.1
+      t=np.cumsum(np.array(t)[::-1])[::-1]
+      Hs[i]=t[:]
+
+    #Plot against calculated H
+    H_data=df[df['filename'].isin(fnames)]
+    H_data=H_data[H_data['deriv']=='energy']
+    r2scores=[]
+    plt.suptitle(str(fname.split("_")[2])+", "+str(row['deriv']))
+    plt.subplot(211)
+    plt.xlabel("GSW")
+    plt.ylabel("E-E0")
+    plt.plot(H_data['gsw'].values**2,H_data['value'].values+213.361501,'o')
+    for i in range(11):
+      r2scores.append(r2_score(H_data['value'].values,Hs[i]-213.361501))
+      plt.plot(H_data['gsw'].values**2,Hs[i],'*')
+    plt.subplot(212)
+    plt.xlabel("Cutoff")
+    plt.ylabel("R2")
+    cutoff=[30/(2.3609861416**j) for j in range(11)]
+    plt.plot(cutoff, r2scores,'.')
+    plt.show()
 
 integrate()
-'''
