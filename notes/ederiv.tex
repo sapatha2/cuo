@@ -162,4 +162,35 @@ Hence we see that
 $$\textbf{For finite MC samples, (7) has mean 0 but diverging variance.}$$
 This seems to be the core problem, that the $1/r^2$ behavior of dE/dp near the nodes makes estimating the value of dE/dp using a finite MC sample difficult.
 
+\section{Estimator for derivative}
+Noting that the derivative $\partial_p \Psi$ diverges near the node because $\Psi_p(\textbf{N}) \neq 0$, we can simply subtract off that term to ensure that the divergence is gone near the nodes. Therefore, consider the following estimator (conditions described later).
+\begin{equation} 
+\boxed{\hat{\theta}=\begin{cases}
+\frac{\Psi_p(\textbf{r})}{\Psi(\textbf{r})} & \text{away from node} \\
+ \frac{\Psi_p(\textbf{r})-\Psi_p(\textbf{N})}{\Psi(\textbf{r})} & \text{near node}      
+\end{cases}}
+\end{equation}
+
+There are a couple additional facts that are useful here. Since $\Psi$ is linear near the node across which the sign of the wave function changes, it follows that 
+\begin{equation}
+\Psi(\textbf{r}+\textbf{N}) = -\Psi(\textbf{N}-\textbf{r}) \text{ as } ||\textbf{r} - \textbf{N}|| \rightarrow 0
+\end{equation}
+meaning that if we integrate in a small ball around the nodal point then the integral of the wave function itself should vanish!
+
+Let's then consider breaking up our integration domain into nodal "balls" of radius \textit{r} and the rest of the domain. Therefore in the conditional of equation (13) "away from node" means not contained in \textit{any} nodal balls, and "near node" means contained within the nodal ball centered at \textbf{N}. We can then consider the expectation value of the estimator in (13):
+
+$$
+E[\hat{\theta}]=\int_{\Omega} d\textbf{r} \frac{\Psi_p}{\Psi} |\Psi|^2 - \int d\textbf{N} \int_{B(\textbf{N},r)} d\textbf{r} \frac{\Psi_p(\textbf{N})}{\Psi}|\Psi|^2 = 
+$$
+$$
+E[\frac{\Psi_p}{\Psi}] - \int d\textbf{N} \Psi_p(\textbf{N}) \int_{B(\textbf{N},r)} d\textbf{r}\Psi(\textbf{r}) = E[\frac{\Psi_p}{\Psi}].
+$$
+
+\begin{equation}
+\boxed{E[\hat{\theta}]=E[\frac{\Psi_p}{\Psi}], \text{PDF} = |\Psi|^2}
+\end{equation}
+
+Hence we see that the estimator we have in (13) exactly reproduces the expectation value of the parameter derivative but also removes the singularity near the nodes. The only question left is then how to implement this estimator, which involves thinking about how to define a ball of radius \textit{r}, figure out whether a sample is near a node, and how to figure out which node the sample is near! \textbf{For fun:} the collection of "balls" attached to the nodal surface can be thought of like a Fiber bundle!
+
+
 \end{document}
