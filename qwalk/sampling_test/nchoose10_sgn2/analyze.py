@@ -7,13 +7,6 @@ from analyze_jsonlog import compute_and_save
 import pandas as pd 
 import matplotlib.pyplot as plt 
 
-'''
-fnames=["Cuvtz0_B3LYP_s"+str(i)+"_g0."+str(j)+".vmc.json" for i in range(1,10) \
-for j in range(1,10)]
-
-compute_and_save(fnames,save_name="saved_data.csv")
-'''
-
 #Old
 oldvals=[
 -212.932287,
@@ -169,3 +162,22 @@ plt.errorbar(np.arange(10),newvals[21:],yerr=newerrs[21:],fmt='go')
 plt.ylabel("value")
 plt.xlabel("parameter")
 plt.show()
+
+for fname in fnames:
+  df=gather_json_df(fname)
+
+  #old way 
+  rsdf=bootstrap(df,100)
+  print(rsdf)
+  print(rsdf.mean())
+  print(rsdf.std())
+
+  #Calculate values
+  for i in range(10):
+    df['dpenergy_'+str(i)]=df['dpwf_'+str(i)]*(df['energy'])
+    df['de_'+str(i)]=df['dpwf_'+str(i)]*(df['energy']-df['energy'].mean()) #new way
+
+  print(df.mean())
+  print(df.std()/np.sqrt(800))
+
+  break
