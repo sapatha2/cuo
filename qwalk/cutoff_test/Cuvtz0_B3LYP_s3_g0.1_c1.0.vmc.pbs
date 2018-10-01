@@ -7,12 +7,12 @@
 #PBS -o Cuvtz0_B3LYP_s3_g0.1_c1.0.vmc.pout 
 mkdir -p /scratch/sciteam/$USER/./nchoose10_sgn2
 cd /scratch/sciteam/$USER/./nchoose10_sgn2
-cp /u/sciteam/$USER/cuo/qwalk/sampling_test/./nchoose10_sgn2/Cuvtz0_B3LYP_s3_g0.1_c1.0.vmc .
-cp /u/sciteam/$USER/cuo/qwalk/sampling_test/./nchoose10_sgn2/Cuvtz0_B3LYP_s3_g0.1.slater .
-cp -u /u/sciteam/$USER/cuo/qwalk/sampling_test/./nchoose10_sgn2/Cuvtz0_B3LYP.optjast3 .
-cp -u /u/sciteam/$USER/cuo/qwalk/sampling_test/./nchoose10_sgn2/Cuvtz0_B3LYP.sys .
-cp -u /u/sciteam/$USER/cuo/qwalk/sampling_test/./nchoose10_sgn2/Cuvtz0_B3LYP.orb .
-cp -u /u/sciteam/$USER/cuo/qwalk/sampling_test/./nchoose10_sgn2/Cuvtz0_B3LYP.basis .
-cp -u /u/sciteam/$USER/cuo/qwalk/sampling_test/./nchoose10_sgn2/Cuvtz0_B3LYPiao.orb .
-cp -u /u/sciteam/$USER/cuo/qwalk/sampling_test/./nchoose10_sgn2/Cuvtz0_B3LYPiao.basis .
+cp /u/sciteam/$USER/cuo/qwalk/cutoff_test/Cuvtz0_B3LYP_s3_g0.1_c1.0.vmc .
+cp /u/sciteam/$USER/cuo/qwalk/cutoff_test/Cuvtz0_B3LYP_s3_g0.1.slater .
+cp -u /u/sciteam/$USER/cuo/qwalk/cutoff_test/Cuvtz0_B3LYP.optjast3 .
+cp -u /u/sciteam/$USER/cuo/qwalk/cutoff_test/Cuvtz0_B3LYP.sys .
+cp -u /u/sciteam/$USER/cuo/qwalk/cutoff_test/Cuvtz0_B3LYP.orb .
+cp -u /u/sciteam/$USER/cuo/qwalk/cutoff_test/Cuvtz0_B3LYP.basis .
+cp -u /u/sciteam/$USER/cuo/qwalk/cutoff_test/Cuvtz0_B3LYPiao.orb .
+cp -u /u/sciteam/$USER/cuo/qwalk/cutoff_test/Cuvtz0_B3LYPiao.basis .
 aprun -n 64 /u/sciteam/$USER/mainline/bin/qwalk Cuvtz0_B3LYP_s3_g0.1_c1.0.vmc &> Cuvtz0_B3LYP_s3_g0.1_c1.0.vmc.out
