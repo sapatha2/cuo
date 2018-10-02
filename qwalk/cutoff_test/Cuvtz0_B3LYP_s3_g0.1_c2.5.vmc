@@ -1,8 +1,8 @@
 method { 
   vmc 
-  nblock 800
+  nblock 20000 
   average { average_derivative_dm 
-    dist_cut 2.2 
+    dist_cut 2.5 
     average { tbdm_basis 
       mode obdm
       orbitals {

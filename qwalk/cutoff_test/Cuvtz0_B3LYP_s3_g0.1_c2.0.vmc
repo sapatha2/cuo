@@ -2,7 +2,7 @@ method {
   vmc 
   nblock 20000
   average { average_derivative_dm 
-    dist_cut 0.0
+    dist_cut 2.0 
     average { tbdm_basis 
       mode obdm
       orbitals {

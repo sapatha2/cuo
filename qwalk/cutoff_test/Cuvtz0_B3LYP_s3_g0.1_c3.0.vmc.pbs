@@ -1,13 +1,13 @@
 #!/bin/bash 
 #PBS -q low
 #PBS -l nodes=2:ppn=32:xe 
-#PBS -l walltime=01:00:00
-#PBS -N Cuvtz0_B3LYP_s3_g0.1_c2.2.vmc
-#PBS -e Cuvtz0_B3LYP_s3_g0.1_c2.2.vmc.perr 
-#PBS -o Cuvtz0_B3LYP_s3_g0.1_c2.2.vmc.pout 
+#PBS -l walltime=24:00:00
+#PBS -N Cuvtz0_B3LYP_s3_g0.1_c3.0.vmc
+#PBS -e Cuvtz0_B3LYP_s3_g0.1_c3.0.vmc.perr 
+#PBS -o Cuvtz0_B3LYP_s3_g0.1_c3.0.vmc.pout 
 mkdir -p /scratch/sciteam/$USER/./nchoose10_sgn2
 cd /scratch/sciteam/$USER/./nchoose10_sgn2
-cp /u/sciteam/$USER/cuo/qwalk/cutoff_test/Cuvtz0_B3LYP_s3_g0.1_c2.2.vmc .
+cp /u/sciteam/$USER/cuo/qwalk/cutoff_test/Cuvtz0_B3LYP_s3_g0.1_c3.0.vmc .
 cp /u/sciteam/$USER/cuo/qwalk/cutoff_test/Cuvtz0_B3LYP_s3_g0.1.slater .
 cp -u /u/sciteam/$USER/cuo/qwalk/cutoff_test/Cuvtz0_B3LYP.optjast3 .
 cp -u /u/sciteam/$USER/cuo/qwalk/cutoff_test/Cuvtz0_B3LYP.sys .
@@ -15,4 +15,4 @@ cp -u /u/sciteam/$USER/cuo/qwalk/cutoff_test/Cuvtz0_B3LYP.orb .
 cp -u /u/sciteam/$USER/cuo/qwalk/cutoff_test/Cuvtz0_B3LYP.basis .
 cp -u /u/sciteam/$USER/cuo/qwalk/cutoff_test/Cuvtz0_B3LYPiao.orb .
 cp -u /u/sciteam/$USER/cuo/qwalk/cutoff_test/Cuvtz0_B3LYPiao.basis .
-aprun -n 64 /u/sciteam/$USER/mainline/bin/qwalk Cuvtz0_B3LYP_s3_g0.1_c2.2.vmc &> Cuvtz0_B3LYP_s3_g0.1_c2.2.vmc.out
+aprun -n 64 /u/sciteam/$USER/mainline/bin/qwalk Cuvtz0_B3LYP_s3_g0.1_c3.0.vmc &> Cuvtz0_B3LYP_s3_g0.1_c3.0.vmc.out
