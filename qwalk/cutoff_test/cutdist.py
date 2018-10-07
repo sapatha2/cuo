@@ -38,8 +38,8 @@ dropped=json.load(open(fname+".json","r"))
 #Plot QQ or something 
 fname='Cuvtz0_B3LYP_s3_g0.1_c'+str(cutoff)+'.vmc.json'
 d=gather_json_df(fname)
-data=list(d['dpwf_3'])
-data+=dropped[3]
+data=list(d['dpwf_1'])
+data+=dropped[1]
 print(len(data))
 res = probplot(data, plot=plt)
 plt.show()
