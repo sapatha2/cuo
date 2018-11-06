@@ -8,8 +8,11 @@ import numpy as np
 from analyze_jsonlog import gather_json_df
 from scipy.stats import probplot
 
+'''
 #cutoff=[0.0,0.25,0.50,0.75,1.0,1.5,2.0,2.5,3.0]
-cutoff=[0.855,1.185,1.275,1.35]
+#cutoff=[0.855,1.185,1.275,1.35]
+cutoff=[0.6,0.65,0.7,0.725]
+
 vals=[]
 errs=[]
 for cut in cutoff:
@@ -19,11 +22,16 @@ for cut in cutoff:
   print(d.mean()['dpwf_1'])
   print(d.std()['dpwf_1']/np.sqrt(d.shape[0]))
 
-  res = probplot(d['dpwf_1'], plot=plt)
-  plt.show()
+  #res = probplot(d['dpwf_1'], plot=plt)
+  #plt.show()
 
   vals.append(d.mean()['dpwf_1'])
   errs.append(d.std()['dpwf_1']/np.sqrt(d.shape[0]))
 
-plt.errorbar(cutoff,vals,yerr=errs,fmt='o')
-plt.show()
+#plt.errorbar(cutoff,vals,yerr=errs,fmt='o')
+#plt.show()
+'''
+
+fname='Cuvtz0_B3LYP_s3_g0.1_cAll.vmc.json'
+d=gather_json_df(fname)
+print(d.shape)
