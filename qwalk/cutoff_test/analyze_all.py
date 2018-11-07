@@ -7,7 +7,7 @@ import json
 from scipy.stats import probplot
 
 #analyze_all1.pdf
-for myf in ["/u/sciteam/sapatha2//scratch/nchoose10_sgn2/all"+str(i)+"/Cuvtz0_B3LYP_s3_g0.1_cAll.vmc" for i in range(1,7)]:
+for myf in ["/u/sciteam/sapatha2//scratch/nchoose10_sgn2/all"+str(i)+"/Cuvtz0_B3LYP_s3_g0.1_cAll.vmc" for i in [1,2,6]]:
   cutoff=[]
   dpwf1=[]
   dpwf1err=[]
@@ -38,8 +38,9 @@ for myf in ["/u/sciteam/sapatha2//scratch/nchoose10_sgn2/all"+str(i)+"/Cuvtz0_B3
   plt.xlabel("Cutoff")
   plt.ylabel("Percent steps dropped")
 #plt.show()
-plt.savefig('analyze_all1.pdf')
+plt.savefig('analyze_all1r.pdf')
 
+'''
 #analyze_all2.pdf
 cutoff=["0","0.25","0.5","0.6","0.65","0.7","0.75","0.775","0.8"]
 count=0
@@ -61,3 +62,5 @@ for myf in ["/u/sciteam/sapatha2//scratch/nchoose10_sgn2/all"+str(i)+"/Cuvtz0_B3
     probplot(dpwfblocks[j],plot=plt)
     #plt.show() 
     plt.savefig('analyze_all2_'+str(cutoff[j])+'_'+str(count)+'.png')
+    plt.close()
+'''
