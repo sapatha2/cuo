@@ -10,8 +10,8 @@ from scipy.stats import probplot
 cutoff=['0', '0.0001', '0.00012', '0.00014', '0.00016', '0.00018', '0.0002', '0.00022', '0.00024', '0.00026', '0.00028', '0.0003',
 '0.00035', '0.00045', '0.0005', '0.00055', '0.00065', '0.0007', '0.00075', '0.0008', '0.00085', '0.0009', '0.00095', '0.001']
 
-p=12
-parm=9
+p=9
+parm=1
 myf="/u/sciteam/sapatha2/scratch/nchoose10_sgn2/all"+str(p)+"/Cuvtz0_B3LYP_s3_g0.1_cAll.vmc"
 dpwfblocks=[[] for i in range(len(cutoff))]
 dpeblocks= [[] for i in range(len(cutoff))] 
@@ -55,7 +55,8 @@ for n in [1000,500,200,100,1]:
     #probplot(dpe[0,0,i,:],plot=plt) 
     #plt.show()
     #x=np.mean(d[:,0,i,:],axis=1)
-    if(min(dpe[0,0,i,:])<-100):
+    if(min(dpe[0,0,i,:])<30):
+    #if(min(dpe[0,0,i,:])<-110):
       x=cutoff
       y=np.mean(dpe[:,0,i,:],axis=1)
       yerr=np.std(dpe[:,0,i,:],axis=1)/np.sqrt(dpe.shape[3])
