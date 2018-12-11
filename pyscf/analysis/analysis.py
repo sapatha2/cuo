@@ -13,7 +13,7 @@ charge=0
 #for method in ['ROHF','B3LYP','PBE0']:
 #for basis in ['vdz','vtz']:
 
-for mol_spin in [1]:
+for mol_spin in [3]:
   for r in [1.963925]:
     for method in ['B3LYP','UB3LYP']:
       for basis in ['vtz']:
