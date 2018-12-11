@@ -1,7 +1,7 @@
 #PySCF input file for CuO calculations 
 import json
 from pyscf import gto,scf,mcscf, fci,lo,ci,cc
-from pyscf.scf import ROHF,ROKS
+from pyscf.scf import ROHF,ROKS,UHF,UKS
 import numpy as np
 import pandas as pd
 
@@ -19,7 +19,7 @@ for nm in ['molecule','bond-length','charge','spin','method','basis','pseudopote
 
 for mol_spin in [1,3]:
   for r in [1.725,1.963925]:
-    for method in ['ROHF','B3LYP','PBE0']:
+    for method in ['UHF','UB3LYP','UPBE0','ROHF','B3LYP','PBE0']:
       for basis in ['vdz','vtz']:
         for el in ['Cu']:
           for charge in [0]: 
@@ -82,11 +82,18 @@ for mol_spin in [1,3]:
               assert len(TM_3d_orbitals)==5     
 
               ##############################################################################################
-              if(method=="ROHF"):
-                m=ROHF(mol)
-              else:
-                m=ROKS(mol)
-                m.xc=method
+              if("U" in method): 
+                if("HF" in method): 
+                  m=UHF(mol)
+                else:
+                  m=UKS(mol)
+                  m.xc=method[1:]
+              else: 
+                if(method=="ROHF"):
+                  m=ROHF(mol)
+                else:
+                  m=ROKS(mol)
+                  m.xc=method
               ##############################################################################################
               
               dm=np.zeros(m.init_guess_by_minao().shape)
@@ -135,11 +142,18 @@ for mol_spin in [1,3]:
             #Once we get past the vdz basis, just read-in the existing chk file...
             else:
               ##############################################################################################
-              if(method=="ROHF"):
-                m=ROHF(mol)
-              else:
-                m=ROKS(mol)
-                m.xc=method
+              if("U" in method): 
+                if("HF" in method): 
+                  m=UHF(mol)
+                else:
+                  m=UKS(mol)
+                  m.xc=method[1:]
+              else: 
+                if(method=="ROHF"):
+                  m=ROHF(mol)
+                else:
+                  m=ROKS(mol)
+                  m.xc=method
               ##############################################################################################
               
               #dm=m.from_chk(el+'vdz'+str(charge)+"_"+method+".chk")
