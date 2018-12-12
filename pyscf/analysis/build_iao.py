@@ -35,7 +35,7 @@ for mol_spin in [1,3]:
 #build minimum basis b3lyp_iao.pickle (cu: 1s, 1d; o: 1p)
 '''
 cu_basis=[]
-for i in (mol.basis["cu"]):
+for i in (mol.basis["Cu"]):
   if(len(cu_basis)==0): 
     if(i[0]==0): cu_basis.append(i)
   elif(len(cu_basis)==1):
@@ -43,7 +43,7 @@ for i in (mol.basis["cu"]):
   else:
     pass
 o_basis=[]
-for i in (mol.basis["o"]):
+for i in (mol.basis["O"]):
   if(len(o_basis)==0): 
     if(i[0]==1): o_basis.append(i)
   else:
@@ -70,6 +70,7 @@ for i in (mol.basis["O"]):
     if(i[0]==1): o_basis.append(i)
   else:
     pass
+
 minbasis={'Cu':cu_basis,'O':o_basis}
 print(minbasis)
 #Build IAOs
