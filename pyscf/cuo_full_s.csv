@@ -1,4 +1,5 @@
 molecule,bond-length,charge,spin,method,basis,pseudopotential,totalenergy,totalenergy-stocherr,totalenergy-syserr,pyscf-version
-CuO,1.963925,0,1,B3LYP,vdz,trail,-213.56509588678244,0.0,0.0,new
-CuO,1.963925,0,1,B3LYP,vtz,trail,-213.57999035532185,0.0,0.0,new
-CuO,1.963925,0,1,UB3LYP,vdz,trail,-213.56671931613232,0.0,0.0,new
+CuO,1.963925,0,1,B3LYP,vdz,trail,-213.5650959,0,0,new
+CuO,1.963925,0,1,B3LYP,vtz,trail,-213.5799904,0,0,new
+CuO,1.963925,0,3,B3LYP,vdz,trail,-213.5124103,0,0,new
+CuO,1.963925,0,3,B3LYP,vtz,trail,-213.522801,0,0,new
