@@ -61,11 +61,18 @@ for mol_spin in [1,3]:
             '''
 
             #Check e matrix
-            '''
             s=m.get_ovlp()
             H1=np.diag(m.mo_energy)
             e1u=reduce(np.dot,(a.T,s,m.mo_coeff,H1,m.mo_coeff.T,s.T,a))
             e1u=(e1u+e1u.T)/2.
+            labels=["3s","4s","3px","3py","3pz","3dxy","3dyz","3dz2","3dxz","3dx2y2","2s","2px","2py","2pz"]
+            plt.matshow(e1u-np.diag(np.diag(e1u)),cmap=plt.cm.bwr)
+            plt.xticks(np.arange(len(labels)),labels,rotation=90)
+            plt.yticks(np.arange(len(labels)),labels)
+            plt.colorbar()
+            plt.show()
+            exit(0)
+            
             w,__=np.linalg.eigh(e1u)
             plt.plot(m.mo_energy[:len(w)],'go',label='MO')
             plt.plot(w,'b*',label='IAO')
@@ -74,7 +81,6 @@ for mol_spin in [1,3]:
             plt.title(f.split(".")[0]+" S="+str(mol_spin)+" DFT eigenvalues")
             plt.savefig(f.split(".")[0]+"_s"+str(mol_spin)+"_evals.pdf",bbox_inches='tight')
             plt.close()
-            '''
 
             #Plot orbitals
             '''

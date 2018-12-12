@@ -2,7 +2,7 @@
 
 import json
 from pyscf import gto,scf,mcscf, fci,lo,ci,cc
-from pyscf.scf import ROHF,ROKS,UHF,UKS
+from pyscf.scf import ROHF,ROKS,UHF,UKS, addons
 import numpy as np
 import pandas as pd
 
@@ -12,6 +12,11 @@ df=json.load(open("trail.json"))
 #re={'CuO':1.725}
 #re={'CuO':1.963925}
 #nd={'Cu':(5,4)} 
+
+symm_dict={}
+#symm_dict['CuO']={'A1' :(2,2), 'E1x': (1,1), 'E1y': (1,1), 'E2x': (1,1), 'E2y': (1,1)}
+symm_dict['CuO0_1']={'A1' :(5,5), 'E1x': (3,3), 'E1y': (3,2), 'E2x': (1,1), 'E2y': (1,1)}
+symm_dict['CuO0_3']={'A1' :(6,5), 'E1x': (3,3), 'E1y': (2,2), 'E2x': (1,1), 'E2y': (1,1)}
 
 datacsv={}
 for nm in ['molecule','bond-length','charge','spin','method','basis','pseudopotential','totalenergy',
@@ -36,7 +41,6 @@ for mol_spin in [1,3]:
               mol.basis[e]=gto.basis.parse(df[e][basis])
             mol.charge=charge
             mol.spin=mol_spin
-            print('spin',molname,mol.spin)
             #mol.build(atom="%s 0. 0. 0.; O 0. 0. %g"%(el,re[molname]),verbose=4)
             mol.build(atom="%s 0. 0. 0.; O 0. 0. %g"%(el,r),verbose=4,symmetry=True)
             
@@ -128,10 +132,17 @@ for mol_spin in [1,3]:
                   if ( ('xy' in aos[d]) or ('yz' in aos[d]) or ('z^2' in aos[d]) or ('x2-y2' in aos[d]) ):
                     print('We are singly filling this d-orbital: '+np.str(aos[d]) )
                     dm[0,d,d]=1
-       
-              m=scf.newton(m)
+      
               m.chkfile=el+basis+"_r"+str(r)+"_c"+str(charge)+"_s"+str(mol_spin)+"_"+method+".chk"
-
+              m.irrep_nelec = symm_dict[el+'O'+str(charge)+'_'+str(mol.spin)]
+              m.max_cycle=100
+              m = addons.remove_linear_dep_(m)
+              #m.direct_scf_tol=1e-5
+              m.conv_tol=1e-6
+              
+              #m.level_shift_factor=0.1
+              #m=scf.newton(m)
+              
               #Only need an initial guess for CrO and CuO...
               if (el=='Cr' or el=='Cu'):
                 total_energy=m.kernel(dm)
@@ -162,7 +173,12 @@ for mol_spin in [1,3]:
               #m.chkfile=el+basis+str(charge)+"_"+method+".chk"        
               dm=m.from_chk(el+'vdz'+"_r"+str(r)+"_c"+str(charge)+"_s"+str(mol_spin)+"_"+method+".chk")
               m.chkfile=el+basis+"_r"+str(r)+"_c"+str(charge)+"_s"+str(mol_spin)+"_"+method+".chk"
-              m=scf.newton(m)
+              #m=scf.newton(m)
+              m.irrep_nelec = symm_dict[el+'O'+str(charge)+'_'+str(mol.spin)]
+              m.max_cycle=100
+              m = addons.remove_linear_dep_(m)
+              #m.direct_scf_tol=1e-5
+              m.conv_tol=1e-6
               total_energy=m.kernel(dm)
               m.analyze()
 
