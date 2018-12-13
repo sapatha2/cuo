@@ -12,8 +12,8 @@ from pyscf2qwalk import print_qwalk_mol
 #for method in ['ROHF','B3LYP','PBE0']:
 #for basis in ['vdz','vtz']:
 
-#occ=np.arange(6,15)-1 #for bases without _full
-occ=np.arange(15)-1   #for bases with _full
+occ=np.arange(6,15)-1 #for bases without _full
+#occ=np.arange(15)-1   #for bases with _full
 mo_coeff=None
 for mol_spin in [-1,1,3]:
   for r in [1.963925]:
@@ -51,6 +51,7 @@ for i in (mol.basis["O"]):
 minbasis={'cu':cu_basis,'o':o_basis}
 '''
 #build minimum basis b3lyp_iao_b.pickle (cu: 2s, 1p, 1d; o: 1s, 1p)
+'''
 cu_basis=[]
 for i in (mol.basis["Cu"]):
   if(len(cu_basis)<2): 
@@ -70,9 +71,13 @@ for i in (mol.basis["O"]):
   else:
     pass
 minbasis={'Cu':cu_basis,'O':o_basis}
-print(minbasis)
+'''
+
+#minimum basis using BFD PBC
+#from sco_basis import minbasis
+
 #Build IAOs
 s=m.get_ovlp()
 a=lo.iao.iao(mol, mo_coeff, minao=minbasis)
 a=lo.vec_lowdin(a,s)
-a.dump('b3lyp_iao_b_full.pickle')
+a.dump('b3lyp_iao_testsco.pickle')

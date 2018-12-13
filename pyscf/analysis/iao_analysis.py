@@ -17,7 +17,6 @@ from functools import reduce
 f='b3lyp_iao_b.pickle'
 a=np.load(f)
 print(a.shape)
-mo_coeff=None
 for mol_spin in [-1,1,3]:
   for r in [1.963925]:
     for method in ['B3LYP']:
@@ -34,6 +33,7 @@ for mol_spin in [-1,1,3]:
             #Build RDM on IAO basis 
             s=m.get_ovlp()
             mo_occ=np.array([np.ceil(m.mo_occ-m.mo_occ/2),np.floor(m.mo_occ/2)])
+            print(mo_occ)
             M=m.mo_coeff[:,mo_occ[0]>0]
             M=reduce(np.dot,(a.T,s,M))
             dm_u=np.dot(M,M.T)
@@ -46,7 +46,8 @@ for mol_spin in [-1,1,3]:
             print('Full trace: ', np.trace(dm_u),np.trace(dm_d))                         #Full Trace
             if(dm_u.shape[0]>12):
               print('Active trace: ',sum(np.diag(dm_u)[act]),sum(np.diag(dm_d)[act]))      #Active Trace
-           
+            print(np.diag(dm_u)[act],np.diag(dm_d)[act])
+            
             ''' 
             #b3lyp_iao 
             Full trace:  8.840832814616048 7.841332423958144
@@ -93,6 +94,7 @@ for mol_spin in [-1,1,3]:
             '''
             
             #Eigenvalue comparison
+            '''
             w,__=np.linalg.eigh(e1)
             plt.plot(m.mo_energy[:len(w)]*27.2114,'go',label='MO')
             plt.plot(w,'b*',label='IAO')
@@ -101,6 +103,7 @@ for mol_spin in [-1,1,3]:
             plt.title(f.split(".")[0]+" S="+str(mol_spin)+" DFT eigenvalues")
             plt.savefig(f.split(".")[0]+"_s"+str(mol_spin)+"_evals.pdf",bbox_inches='tight')
             plt.close()
+            '''
 
             '''
             #Plot orbitals
