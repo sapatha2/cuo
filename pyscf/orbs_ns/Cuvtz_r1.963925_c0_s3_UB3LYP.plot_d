@@ -1,0 +1,17 @@
+method {
+  plot
+  orbitals {
+  cutoff_mo
+    magnify 1
+    nmo 163
+    orbfile Cuvtz_r1.963925_c0_s1_UB3LYP.orb 
+    include Cuvtz_r1.963925_c0_s1_UB3LYP.basis
+    centers { useglobal }
+  }
+  PLOTORBITALS { 
+    134   135   136   137   138   139   140   141   142  143 
+    144   145   146   147   148   149   150   151   152  153 
+    154   155   156   157   158   159   160   161   162  163 
+  }
+}
+include Cuvtz_r1.963925_c0_s1_UB3LYP.sys

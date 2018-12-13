@@ -14,16 +14,18 @@ df=json.load(open("trail.json"))
 #nd={'Cu':(5,4)} 
 
 symm_dict={}
-#symm_dict['CuO']={'A1' :(2,2), 'E1x': (1,1), 'E1y': (1,1), 'E2x': (1,1), 'E2y': (1,1)}
-symm_dict['CuO0_1']={'A1' :(5,5), 'E1x': (3,3), 'E1y': (3,2), 'E2x': (1,1), 'E2y': (1,1)}
-symm_dict['CuO0_3']={'A1' :(6,5), 'E1x': (3,2), 'E1y': (3,2), 'E2x': (1,1), 'E2y': (1,1)}
+#symm_dict['CuO0_1']={'A1' :(5,5), 'E1x': (3,3), 'E1y': (3,2), 'E2x': (1,1), 'E2y': (1,1)}
+#symm_dict['CuO0_3']={'A1' :(6,5), 'E1x': (3,2), 'E1y': (3,2), 'E2x': (1,1), 'E2y': (1,1)}
+
+#SECOND CALCULATION TO GET IAOS SYMMETRIC!
+symm_dict['CuO0_1']={'A1' :(5,5), 'E1x': (3,2), 'E1y': (3,3), 'E2x': (1,1), 'E2y': (1,1)}
 
 datacsv={}
 for nm in ['molecule','bond-length','charge','spin','method','basis','pseudopotential','totalenergy',
            'totalenergy-stocherr','totalenergy-syserr','pyscf-version']:
   datacsv[nm]=[]
 
-for mol_spin in [3]:
+for mol_spin in [1]:
   #for r in [1.725,1.963925]:
   for r in [1.963925]:
     #for method in ['UHF','UB3LYP','UPBE0','ROHF','B3LYP','PBE0']:
@@ -182,6 +184,7 @@ for mol_spin in [3]:
               total_energy=m.kernel(dm)
               m.analyze()
 
+            '''
             datacsv['molecule'].append(molname)
             datacsv['bond-length'].append(r)
             datacsv['charge'].append(charge)
@@ -194,3 +197,4 @@ for mol_spin in [3]:
             datacsv['totalenergy-syserr'].append(0.0)
             datacsv['pyscf-version'].append('new')
             pd.DataFrame(datacsv).to_csv("cuo_full_s.csv",index=False)
+            '''

@@ -15,7 +15,7 @@ from pyscf2qwalk import print_qwalk_mol
 #occ=np.arange(6,15)-1 #for bases without _full
 occ=np.arange(15)-1   #for bases with _full
 mo_coeff=None
-for mol_spin in [-1,1,3]:
+for mol_spin in [1,3]:
   for r in [1.963925]:
     for method in ['B3LYP']:
       for basis in ['vtz']:
@@ -35,7 +35,7 @@ for mol_spin in [-1,1,3]:
 #build minimum basis b3lyp_iao.pickle (cu: 1s, 1d; o: 1p)
 '''
 cu_basis=[]
-for i in (mol.basis["Cu"]):
+for i in (mol.basis["cu"]):
   if(len(cu_basis)==0): 
     if(i[0]==0): cu_basis.append(i)
   elif(len(cu_basis)==1):
@@ -43,13 +43,14 @@ for i in (mol.basis["Cu"]):
   else:
     pass
 o_basis=[]
-for i in (mol.basis["O"]):
+for i in (mol.basis["o"]):
   if(len(o_basis)==0): 
     if(i[0]==1): o_basis.append(i)
   else:
     pass
 minbasis={'cu':cu_basis,'o':o_basis}
 '''
+
 #build minimum basis b3lyp_iao_b.pickle (cu: 2s, 1p, 1d; o: 1s, 1p)
 cu_basis=[]
 for i in (mol.basis["Cu"]):
