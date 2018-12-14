@@ -43,11 +43,15 @@ def gensingles(mo_occ,occ,virt):
   #return np.array(ex_list),np.array(de_occ),np.array(new_occ),np.array(spin)
   return np.array(mo_dm_list),np.array(de_occ),np.array(new_occ),np.array(spin)
 
-def genex(mo_occ,a,ncore,act,nact,N,Ndet,detgen,c):
+def genex(mf,mo_occ,a,ncore,act,nact,N,Ndet,detgen,c):
   dm_list=[]
+  sigu_list=[]
   assert(Ndet>1)
   assert(N>0)
   assert(c<=1.0)
+
+  s=mf.get_ovlp()
+  M0=reduce(np.dot,(a.T, s, mf.mo_coeff)) #IAO -> MO for spin up
   
   #Loop states to calculate N+1 states of Ndet+1 determinants
   #First state is always just GS, next are added to GS
@@ -85,25 +89,38 @@ def genex(mo_occ,a,ncore,act,nact,N,Ndet,detgen,c):
       elif(detgen=='s'):
         det_list[i,:,:]=mo_occ[:,:]
         spin=np.random.randint(2)
-        if(ncore+nact[spin]==act[spin][-1]):
-          pass
-        else:
-          q=np.random.randint(low=ncore,high=ncore+nact[spin])
-          r=np.random.randint(low=ncore+nact[spin],high=act[spin][-1])
-          det_list[i,spin,q]=0
-          det_list[i,spin,r]=1
+        #if(ncore+nact[spin]==act[spin][-1]):
+        #  pass
+        #else:
+        while(ncore+nact[spin]==act[spin][-1]):
+          spin=np.random.randint(2)
+        q=np.random.randint(low=ncore,high=ncore+nact[spin])
+        r=np.random.randint(low=ncore+nact[spin],high=act[spin][-1])
+        det_list[i,spin,q]=0
+        det_list[i,spin,r]=1
       #Doubles excitations only (Also a bit slow)
       elif(detgen=='d'):
         det_list[i,:,:]=mo_occ[:,:]
         spin=np.random.randint(3)
         if(nact[0]==1 and nact[1]==1): spin=2
         if(spin<2):
+          #if(act[spin][-1]-ncore-nact[spin]<=2):
+          #  pass
+          #else:
+          while(act[spin][-1]-ncore-nact[spin]<=2):
+            spin=np.random.randint(2)
           q=np.random.choice(np.arange(ncore,ncore+nact[spin]),size=2,replace=False)
           r=np.random.choice(np.arange(ncore+nact[spin],act[spin][-1]),size=2,replace=False)
           det_list[i,spin,q]=0
           det_list[i,spin,r]=1
         else:
+          ok=1
           for sp in range(spin):
+            if(ncore+nact[sp]==act[sp][-1]):
+              spin=np.randon.randint(2)
+              ok=0
+              i-=1
+          if(ok):
             q=np.random.randint(low=ncore,high=ncore+nact[sp])
             r=np.random.randint(low=ncore+nact[sp],high=act[sp][-1])
             det_list[i,sp,q]=0
@@ -131,7 +148,18 @@ def genex(mo_occ,a,ncore,act,nact,N,Ndet,detgen,c):
             M[ind[0],ind[1]]=1
             M[ind[1],ind[0]]=1
             dl[s]+=w[a]*w[b]*M
-
+  
+    #Calculate Us
+    cncm=np.einsum('isn,jsm->ijsnm',det_list,det_list)
+    tmp=np.einsum('ijsnm,skm->ijsnk',cncm,np.array([M0,M0]))
+    MU=np.einsum('ijsnk,skn->ksij',tmp,np.array([M0,M0]))
+        
+    sigu=np.einsum('ksij,i->ksj',MU,w)
+    sigu=np.einsum('ksj,j->ks',sigu,w)
+    
+    sigu_list.append(sigu[:,0]*sigu[:,1])
     dm_list.append(dl)
+
   dm_list=np.array(dm_list)
-  return dm_list
+  sigu_list=np.array(sigu_list)
+  return dm_list,sigu_list

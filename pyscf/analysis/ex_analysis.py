@@ -50,17 +50,17 @@ for mol_spin in [-1,1,3]:
   ##################
   #BUILD EXCITATIONS 
   mo_occ=np.array([np.ceil(m.mo_occ-m.mo_occ/2),np.floor(m.mo_occ/2)])
-  
+
   #Singles excitations only 
   #dm_list,__,__,__=gensingles(mo_occ,occ[str(mol_spin)],virt[str(mol_spin)])
-  
+
   #Arbitrary excitations
   detgen='s'
   N=100
   Ndet=2
   c=0.0
   st=str(mol_spin)
-  dm_list=genex(mo_occ,a,ncore[st],act[st],nact[st],N,Ndet,detgen,c)
+  dm_list,u=genex(m,mo_occ,a,ncore[st],act[st],nact[st],N,Ndet,detgen,c)
 
   #IAO rdms
   s=m.get_ovlp()
@@ -68,8 +68,8 @@ for mol_spin in [-1,1,3]:
   M=reduce(np.dot,(a.T,s,M))
   iao_dm_list=np.einsum('ijkl,mk->ijml',dm_list,M)
   iao_dm_list=np.einsum('ijml,nl->ijmn',iao_dm_list,M)
+  
   ##################
-
   #Traces
   '''
   plt.subplot(211)
@@ -87,14 +87,12 @@ for mol_spin in [-1,1,3]:
   plt.savefig(f.split(".")[0]+'_s'+str(mol_spin)+'_tr.pdf',bbox_inches='tight')
   plt.close()
   '''
-
-  #Energies
-  e=np.einsum('ijkl,l->ijk',dm_list,m.mo_energy)
-  e=np.einsum('ijk->ij',e)
+  
+  e=np.einsum('ijll,l->ij',dm_list,m.mo_energy)
   e=e[:,0]+e[:,1]
   e-=e[0] #Eigenvalue difference
   e+=escf[str(mol_spin)] #Base SCF difference
-  
+
   #Number occupations 
   n=np.einsum('ijmm->ijm',iao_dm_list)
   labels=np.array(["3s","4s","3px","3py","3pz","3dxy","3dyz","3dz2","3dxz","3dx2y2","2s","2px","2py","2pz"])
@@ -107,20 +105,29 @@ for mol_spin in [-1,1,3]:
   tlabels=[x[0]+"-"+x[1] for x in tlabels]
   t=iao_dm_list[:,0,trel[0],trel[1]]+iao_dm_list[:,1,trel[0],trel[1]]
 
+  #U
+  ulabels=list(labels)
+  ulabels=np.array([x+'_u' for x in ulabels])
+  u=u[:,rel]
+
   #Data object
-  d=np.concatenate((e[:,np.newaxis],n,t),axis=1)
+  d=np.concatenate((e[:,np.newaxis],n,t,u),axis=1)
   if(data is None): data=d
   else: data=np.concatenate((data,d),axis=0)
 
 #Full data frame
-df=pd.DataFrame(data,columns=["E"]+list(labels[rel])+list(tlabels))
+df=pd.DataFrame(data,columns=["E"]+list(labels[rel])+list(tlabels)+list(ulabels[rel]))
 df['E']-=df['E'][0]
 df['E']*=27.2114
 df['3dd']=df['3dxy']+df['3dx2y2']
 df['3dpi']=df['3dxz']+df['3dyz']
-df['2ppi']=df['2px']+df['2py']
+#df['2ppi']=df['2px']+df['2py']
 df['tpi']=df['3dyz-2py']+df['3dxz-2px']
-df=df.drop(columns=['3dxz','3dyz','2px','2py','3dyz-2py','3dxz-2px','3dx2y2','3dxy'])
+df['3dd_u']=df['3dxy_u']+df['3dx2y2_u']
+df['3dpi_u']=df['3dxz_u']+df['3dyz_u']
+df['2ppi_u']=df['2px_u']+df['2py_u']
+df=df.drop(columns=['3dxz','3dyz','2px','2py','3dyz-2py','3dxz-2px','3dx2y2','3dxy',
+'3dxz_u','3dyz_u','2px_u','2py_u','3dx2y2_u','3dxy_u'])
 
 #Pairplot
 #sns.pairplot(df)
@@ -137,11 +144,11 @@ print('Rank data matrix: ',rank)
 
 #Linear regression 
 '''
-X=df['4s']
 model=sm.OLS(y,X)
 res_ols=model.fit()
 print(res_ols.summary())
 yhat=res_ols.predict(X)
+plt.xlabel("Actual eV")
 plt.plot(y,yhat,'bo')
 plt.plot(y,y,'-')
 plt.show()
@@ -153,8 +160,11 @@ cscores_err=[]
 scores=[]
 conds=[]
 nparms=[]
-#for i in range(1,X.shape[1]+1):
-for i in range(1,9):
+for z in list(X):
+  if("u" in z):
+    X=X.drop(columns=[z])
+for i in range(1,X.shape[1]+1):
+#for i in range(1,9):
   print("n_nonzero_coefs="+str(i))
   omp = OrthogonalMatchingPursuit(n_nonzero_coefs=i)
   omp.fit(X,y)
@@ -172,16 +182,18 @@ for i in range(1,9):
   print(np.array(list(X))[ind])
   print(omp.coef_[ind],omp.intercept_)
   
-  #plt.xlabel("Predicted energy (eV)")
-  #plt.ylabel("DFT Energy (eV)")
-  #plt.plot(omp.predict(X),y,'og')
-  #plt.plot(y,y,'b-')
+  plt.xlabel("Predicted energy (eV)")
+  plt.ylabel("DFT Energy (eV)")
+  plt.plot(omp.predict(X),y,'og')
+  plt.plot(y,y,'b-')
   #plt.savefig(fname.split("p")[0][:-1]+".fit_fix.pdf",bbox_inches='tight')
-  #plt.show()
-  plt.plot(np.arange(len(omp.coef_)),omp.coef_,'o-',label="Nparms= "+str(i))
+  plt.show()
+  #plt.plot(np.arange(len(omp.coef_)),omp.coef_,'o-',label="Nparms= "+str(i))
+'''
 plt.axhline(0,color='k',linestyle='--')
 plt.xticks(np.arange(len(list(X))),list(X),rotation=90)
 plt.ylabel("Parameter (eV)")
 plt.legend(loc='best')
 #plt.savefig(fname.split("p")[0][:-1]+".omp_fix.pdf",bbox_inches='tight')
 plt.show()
+'''
