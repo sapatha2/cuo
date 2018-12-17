@@ -51,11 +51,8 @@ for mol_spin in [-1,1,3]:
   #BUILD EXCITATIONS 
   mo_occ=np.array([np.ceil(m.mo_occ-m.mo_occ/2),np.floor(m.mo_occ/2)])
 
-  #Singles excitations only 
-  #dm_list,__,__,__=gensingles(mo_occ,occ[str(mol_spin)],virt[str(mol_spin)])
-
   #Arbitrary excitations
-  detgen='a'
+  detgen='s'
   N=200
   Ndet=5
   c=0.9
@@ -103,7 +100,8 @@ for mol_spin in [-1,1,3]:
   trel=np.array([[1,1,6,8,7],[7,13,12,11,13]])
   tlabels=np.array([labels[trel[0]],labels[trel[1]]]).T
   tlabels=[x[0]+"-"+x[1] for x in tlabels]
-  t=iao_dm_list[:,0,trel[0],trel[1]]+iao_dm_list[:,1,trel[0],trel[1]]
+  t=iao_dm_list[:,0,trel[0],trel[1]]+iao_dm_list[:,0,trel[1],trel[0]]+\
+    iao_dm_list[:,1,trel[0],trel[1]]+iao_dm_list[:,1,trel[1],trel[0]] #Hermitian conjugates required
 
   #U
   ulabels=list(labels)

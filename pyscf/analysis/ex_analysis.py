@@ -57,7 +57,8 @@ for i in range(2):
     else:
       y=np.array(sub_df[p].values,dtype=float)
       yerr=np.array(sub_df[p+'_err'].values,dtype=float)
-      x=j+np.random.normal(size=len(y),scale=0.1)
+      #x=j+np.random.normal(size=len(y),scale=0.1)
+      x=j+np.linspace(-0.25,0.25,num=len(y))
       if(j==0):
         plt.errorbar(x,y,yerr=yerr,fmt=c[i]+marker[i],label='detgen='+detgen)
       else:
@@ -71,4 +72,5 @@ plt.xticks(np.arange(j+1),list(sub_df)[:10])
 plt.axhline(0.0,color='k',ls='--')
 plt.legend(loc='best')
 plt.title("1-body fit, varying sampling schemes")
-plt.show()
+#plt.show()
+plt.savefig('ex_analysisF.pdf')
