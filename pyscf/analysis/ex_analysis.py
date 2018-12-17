@@ -55,10 +55,10 @@ for mol_spin in [-1,1,3]:
   #dm_list,__,__,__=gensingles(mo_occ,occ[str(mol_spin)],virt[str(mol_spin)])
 
   #Arbitrary excitations
-  detgen='s'
+  detgen='a'
   N=100
-  Ndet=2
-  c=0.0
+  Ndet=5
+  c=0.9
   st=str(mol_spin)
   dm_list,u=genex(m,mo_occ,a,ncore[st],act[st],nact[st],N,Ndet,detgen,c)
 
@@ -119,13 +119,15 @@ for mol_spin in [-1,1,3]:
 df=pd.DataFrame(data,columns=["E"]+list(labels[rel])+list(tlabels)+list(ulabels[rel]))
 df['E']-=df['E'][0]
 df['E']*=27.2114
-df['3dd']=df['3dxy']+df['3dx2y2']
+#df['3dd']=df['3dxy']+df['3dx2y2']
 df['3dpi']=df['3dxz']+df['3dyz']
-#df['2ppi']=df['2px']+df['2py']
+df['2ppi']=df['2px']+df['2py']
 df['tpi']=df['3dyz-2py']+df['3dxz-2px']
 df['3dd_u']=df['3dxy_u']+df['3dx2y2_u']
 df['3dpi_u']=df['3dxz_u']+df['3dyz_u']
 df['2ppi_u']=df['2px_u']+df['2py_u']
+df['3dz2-2pz']*=-1  #Get the sign structure correct
+df['4s-2pz']*=-1    #Get the sign structure correct
 df=df.drop(columns=['3dxz','3dyz','2px','2py','3dyz-2py','3dxz-2px','3dx2y2','3dxy',
 '3dxz_u','3dyz_u','2px_u','2py_u','3dx2y2_u','3dxy_u'])
 
@@ -179,8 +181,15 @@ for i in range(1,X.shape[1]+1):
   Xr=X.values[:,ind]
   conds.append(np.linalg.cond(Xr))
   print("Cond: ",np.linalg.cond(Xr))
-  print(np.array(list(X))[ind])
-  print(omp.coef_[ind],omp.intercept_)
+  
+  #Formatted print 
+  names=np.array(list(np.array(list(X))[ind])+["E0"])
+  vals=np.array(list(omp.coef_[ind])+[omp.intercept_])
+  print(len(names),len(vals))
+  for i in range(len(names)):
+    print(str(names[i])+": "+str(vals[i]))
+  #print(np.array(list(X))[ind])
+  #print(omp.coef_[ind],omp.intercept_)
   
   plt.xlabel("Predicted energy (eV)")
   plt.ylabel("DFT Energy (eV)")
