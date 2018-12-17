@@ -7,10 +7,12 @@ import statsmodels.api as sm
 #from sklearn.model_selection import cross_val_score
 
 #Load
-detgen=['s']*10+['a']*10
-N=['200']*20
-Ndet=['2']+['5']*9+['2']+['5']*9
-c=['0.0','0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9']
+detgen=['s']*9+['a']*9
+N=['200']*18
+#Ndet=['5']*18
+Ndet=['10']*18
+#Ndet=['20']*18
+c=['0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9']
 c+=c
 
 data=None
@@ -25,19 +27,16 @@ for i in range(len(detgen)):
   for z in list(X):
     if('_u' in z): X=X.drop(columns=[z])
 
-  if(Ndet[i]=='2'):
-    pass
-  else:
-    ols=sm.OLS(y,X).fit()
-    
-    params=ols.params
-    errs=  ols.bse
-    data_row=np.concatenate((params.values,errs.values))
-    data_row=np.concatenate((np.array([detgen[i],N[i],Ndet[i],c[i]]),data_row))
-    if(data is None): data=data_row
-    else: 
-      if(len(data.shape)<2): data=data[:,np.newaxis]
-      data=np.concatenate((data,data_row[:,np.newaxis]),axis=1)
+  ols=sm.OLS(y,X).fit()
+  
+  params=ols.params
+  errs=  ols.bse
+  data_row=np.concatenate((params.values,errs.values))
+  data_row=np.concatenate((np.array([detgen[i],N[i],Ndet[i],c[i]]),data_row))
+  if(data is None): data=data_row
+  else: 
+    if(len(data.shape)<2): data=data[:,np.newaxis]
+    data=np.concatenate((data,data_row[:,np.newaxis]),axis=1)
 
 err_labels=errs.index
 err_labels=[x+'_err' for x in err_labels]
@@ -68,9 +67,9 @@ for i in range(2):
 #ex_analysis1.pdf
 plt.ylabel("Parameter value (eV)")
 plt.xlabel("Parameter")
-plt.xticks(np.arange(j+1),list(sub_df)[:10])
+plt.xticks(np.arange(j),list(sub_df)[:10])
 plt.axhline(0.0,color='k',ls='--')
 plt.legend(loc='best')
 plt.title("1-body fit, varying sampling schemes")
-#plt.show()
-plt.savefig('ex_analysisF.pdf')
+plt.show()
+#plt.savefig('ex_analysisF.pdf')
