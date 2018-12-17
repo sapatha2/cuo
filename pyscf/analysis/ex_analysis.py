@@ -1,88 +1,74 @@
 import numpy as np 
 import matplotlib.pyplot as plt
-from methods import gensingles,genex
-from pyscf import lib,gto,scf,mcscf,fci,lo,ci,cc
-from pyscf.scf import ROHF,UHF,ROKS
-from functools import reduce
 import pandas as pd 
 import seaborn as sns 
 import statsmodels.api as sm 
-from sklearn.linear_model import OrthogonalMatchingPursuit
-from sklearn.model_selection import cross_val_score
+#from sklearn.linear_model import OrthogonalMatchingPursuit
+#from sklearn.model_selection import cross_val_score
 
 #Load
+detgen=['s']*10+['a']*10
+N=['200']*20
+Ndet=['2']+['5']*9+['2']+['5']*9
+c=['0.0','0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9']
+c+=c
 
-#Pairplot
-#sns.pairplot(df)
-#plt.savefig(f.split('.')[0]+'_pp.pdf',bbox_inches='tight')
+data=None
+for i in range(len(detgen)):
+  f='b3lyp_iao_b_'+detgen[i]+'_N'+N[i]+'_Ndet'+Ndet[i]+'_c'+c[i]+'.pickle'
+  df=pd.read_pickle(f)
 
-#Matrix rank check
-y=df['E']
-X=df.drop(columns=['E'])
-for z in list(X):
-  if("u" in z):
-    X=X.drop(columns=[z])
-u,s,v=np.linalg.svd(X)
-rank=np.linalg.matrix_rank(X,tol=1e-6)
-print(s)
-print('N parms: ', X.shape[1])
-print('Rank data matrix: ',rank)
+  #1-body Linear regression 
+  y=df['E']
+  X=df.drop(columns=['E'])
+  ind=[]
+  for z in list(X):
+    if('_u' in z): X=X.drop(columns=[z])
 
-#Linear regression 
-#X=sm.add_constant(X)
-model=sm.OLS(y,X)
-res_ols=model.fit()
-print(res_ols.summary())
-yhat=res_ols.predict(X)
-plt.xlabel("Actual eV")
-plt.plot(y,yhat,'bo')
-plt.plot(y,y,'-')
-plt.show()
+  if(Ndet[i]=='2'):
+    pass
+  else:
+    ols=sm.OLS(y,X).fit()
+    
+    params=ols.params
+    errs=  ols.bse
+    data_row=np.concatenate((params.values,errs.values))
+    data_row=np.concatenate((np.array([detgen[i],N[i],Ndet[i],c[i]]),data_row))
+    if(data is None): data=data_row
+    else: 
+      if(len(data.shape)<2): data=data[:,np.newaxis]
+      data=np.concatenate((data,data_row[:,np.newaxis]),axis=1)
 
-#OMP
-cscores=[]
-cscores_err=[]
-scores=[]
-conds=[]
-nparms=[]
-for i in range(1,X.shape[1]+1):
-#for i in range(1,9):
-  print("n_nonzero_coefs="+str(i))
-  omp = OrthogonalMatchingPursuit(n_nonzero_coefs=i)
-  omp.fit(X,y)
-  nparms.append(i)
-  scores.append(omp.score(X,y))
-  tmp=cross_val_score(omp,X,y,cv=5)
-  cscores.append(tmp.mean())
-  cscores_err.append(tmp.std()*2)
-  print("R2: ",omp.score(X,y))
-  print("R2CV: ",tmp.mean(),"(",tmp.std()*2,")")
-  ind=np.abs(omp.coef_)>0
-  Xr=X.values[:,ind]
-  conds.append(np.linalg.cond(Xr))
-  print("Cond: ",np.linalg.cond(Xr))
-  
-  #Formatted print 
-  names=np.array(list(np.array(list(X))[ind])+["E0"])
-  vals=np.array(list(omp.coef_[ind])+[omp.intercept_])
-  print(len(names),len(vals))
-  for i in range(len(names)):
-    print(str(names[i])+": "+str(vals[i]))
-  #print(np.array(list(X))[ind])
-  #print(omp.coef_[ind],omp.intercept_)
-  
-  plt.xlabel("Predicted energy (eV)")
-  plt.ylabel("DFT Energy (eV)")
-  plt.plot(omp.predict(X),y,'og')
-  plt.plot(y,y,'b-')
-  #plt.savefig(fname.split("p")[0][:-1]+".fit_fix.pdf",bbox_inches='tight')
-  plt.show()
-  #plt.plot(np.arange(len(omp.coef_)),omp.coef_,'o-',label="Nparms= "+str(i))
-'''
-plt.axhline(0,color='k',linestyle='--')
-plt.xticks(np.arange(len(list(X))),list(X),rotation=90)
-plt.ylabel("Parameter (eV)")
+err_labels=errs.index
+err_labels=[x+'_err' for x in err_labels]
+labels=["detgen","N","Ndet","c"]+list(params.index)+list(err_labels)
+data=pd.DataFrame(data.T,columns=labels)
+
+#Plot parameter values
+ex=['s','a']
+c=['r','g']
+marker=['v','s']
+for i in range(2):
+  detgen=ex[i]
+  sub_df=data[data['detgen']==detgen].drop(columns=['detgen','N','Ndet','c'])
+  j=0
+  for p in list(sub_df):
+    if('err' in p): pass
+    else:
+      y=np.array(sub_df[p].values,dtype=float)
+      yerr=np.array(sub_df[p+'_err'].values,dtype=float)
+      x=j+np.random.normal(size=len(y),scale=0.1)
+      if(j==0):
+        plt.errorbar(x,y,yerr=yerr,fmt=c[i]+marker[i],label='detgen='+detgen)
+      else:
+        plt.errorbar(x,y,yerr=yerr,fmt=c[i]+marker[i])
+      j+=1
+
+#ex_analysis1.pdf
+plt.ylabel("Parameter value (eV)")
+plt.xlabel("Parameter")
+plt.xticks(np.arange(j+1),list(sub_df)[:10])
+plt.axhline(0.0,color='k',ls='--')
 plt.legend(loc='best')
-#plt.savefig(fname.split("p")[0][:-1]+".omp_fix.pdf",bbox_inches='tight')
+plt.title("1-body fit, varying sampling schemes")
 plt.show()
-'''
