@@ -50,10 +50,10 @@ for mol_spin in [-1,1,3]:
   ##################
   #BUILD EXCITATIONS 
   mo_occ=np.array([np.ceil(m.mo_occ-m.mo_occ/2),np.floor(m.mo_occ/2)])
-  detgen='a'
+  detgen='s'
   N=200
   Ndet=20
-  c=0.7
+  c=0.9
   st=str(mol_spin)
   dm_list,u=genex(m,mo_occ,a,ncore[st],act[st],nact[st],N,Ndet,detgen,c)
 
