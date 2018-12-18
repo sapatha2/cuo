@@ -28,7 +28,15 @@ for i in range(len(detgen)):
     if('_u' in z): X=X.drop(columns=[z])
 
   ols=sm.OLS(y,X).fit()
-  
+  '''
+  plt.title('Ndet='+str(Ndet[i])+',c='+str(c[i]))
+  plt.plot(y,ols.predict(X),'go')
+  plt.plot(y,y,'r--')
+  plt.xlabel('E_B3LYP-E_0 (eV)')
+  plt.ylabel('E_PRED-E_0 (eV)')
+  plt.show()
+  '''
+
   params=ols.params
   errs=  ols.bse
   data_row=np.concatenate((params.values,errs.values))
