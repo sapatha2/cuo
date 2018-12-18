@@ -1,0 +1,11 @@
+#!/bin/bash 
+#PBS -q low 
+#PBS -l nodes=20:ppn=32:xe 
+#PBS -l walltime=24:00:00 
+#PBS -N gslin 
+#PBS -e gslin.perr 
+#PBS -o gslin.pout 
+mkdir -p /scratch/sciteam/$USER/cuo/qwalk/vmc
+cd /scratch/sciteam/$USER/cuo/qwalk/vmc
+cp -u /u/sciteam/$USER/cuo/qwalk/vmc/* .
+aprun -n 640 /u/sciteam/$USER/fork/bin/qwalk gs.linear &> gs.linear.out
