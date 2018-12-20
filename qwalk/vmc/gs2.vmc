@@ -14,9 +14,9 @@ method {
   }
 }
 
-include gs.sys
+include gs2.sys
 trialfunc { 
   slater-jastrow
-  wf1 { include gs.slater } 
-  wf2 { include gs.optjast3 } 
+  wf1 { include gs2.slater } 
+  wf2 { include gs2.optjast3 } 
 }

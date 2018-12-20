@@ -1,6 +1,6 @@
 method { 
   vmc
-  nblock 2000 
+  nblock 20
   average { tbdm_basis
     mode obdm
     orbitals { 

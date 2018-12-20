@@ -1,11 +1,11 @@
 #!/bin/bash 
 #PBS -q low 
-#PBS -l nodes=2:ppn=32:xe 
-#PBS -l walltime=02:00:00 
+#PBS -l nodes=1:ppn=1:xe 
+#PBS -l walltime=01:00:00 
 #PBS -N gsvmc 
 #PBS -e gsvmc.perr 
 #PBS -o gsvmc.pout 
 mkdir -p /scratch/sciteam/$USER/cuo/qwalk/vmc
 cd /scratch/sciteam/$USER/cuo/qwalk/vmc
 cp -u /u/sciteam/$USER/cuo/qwalk/vmc/* .
-aprun -n 64 /u/sciteam/$USER/fork/bin/qwalk gs.vmc &> gs.vmc.out
+aprun -n 1 /u/sciteam/$USER/fork/bin/qwalk gs.vmc1 &> gs.vmc1.out
