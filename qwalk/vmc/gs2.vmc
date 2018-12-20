@@ -18,5 +18,5 @@ include gs2.sys
 trialfunc { 
   slater-jastrow
   wf1 { include gs2.slater } 
-  wf2 { include gs2.optjast3 } 
+  wf2 { include gs.optjast3 } 
 }
