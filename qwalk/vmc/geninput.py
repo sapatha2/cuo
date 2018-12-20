@@ -38,7 +38,7 @@ def genpbs(N,basename,fout):
       string='#!/bin/bash\n'+\
       '#PBS -q low\n'+\
       '#PBS -l nodes=2:ppn=32:xe\n'+\
-      '#PBS -l walltime=02:00:00\n'+\
+      '#PBS -l walltime=01:00:00\n'+\
       '#PBS -N '+fname+'\n'\
       '#PBS -e '+fname+'.perr\n'+\
       '#PBS -o '+fname+'.pout\n'+\
@@ -59,7 +59,7 @@ def genvmc(N,basename,fout):
       
       string='method {\n'+\
       '  vmc\n'+\
-      '  nblock 2000\n'+\
+      '  nblock 500\n'+\
       '  average { tbdm_basis\n'+\
       '    mode obdm\n'+\
       '    orbitals {\n'+\
@@ -155,5 +155,10 @@ def genslater(detgen,N,Ndet,gsw,basename,fout):
       f.write(string)
       f.close()      
   return 1
+
 if __name__=='__main__':
-  geninput('s',100,10,0.7,basename='run1/')
+  detgen='s'
+  N=50
+  Ndet=10
+  gsw=0.7
+  geninput(detgen,N,Ndet,gsw,basename='run1s/')
