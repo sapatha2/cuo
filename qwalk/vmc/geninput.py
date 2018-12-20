@@ -54,7 +54,37 @@ def genpbs(N,basename,fout):
   return 1
 
 def genvmc(N,basename,fout):
-  return -1
+  for state in ['','2']:
+    for j in range(1,N+1):
+      fname='ex'+state+fout+'_'+str(j)
+      
+      string='method {\n'+\
+      '  vmc\n'+\
+      '  nblock 2000\n'+\
+      '  average { tbdm_basis\n'+\
+      '    mode obdm\n'+\
+      '    orbitals {\n'+\
+      '      magnify 1\n'+\
+      '      nmo 14\n'+\
+      '      orbfile iao.orb\n'+\
+      '      include iao.basis\n'+\
+      '      centers { useglobal }\n'+\
+      '    }\n'+\
+      '    states { 2 6 7 8 9 10 12 13 14 }\n'+\
+      '  }\n'+\
+      '}\n'+\
+      '\n'+\
+      'include gs'+state+'.sys\n'+\
+      'trialfunc {\n'+\
+      '  slater-jastrow\n'+\
+      '  wf1 { include '+fname+'.slater }\n'+\
+      '  wf2 { include gs.optjast3 }\n'+\
+      '}\n'
+
+      f=open(basename+'/'+fname+'.vmc','w')
+      f.write(string)
+      f.close()      
+  return 1
 
 def genslater(N,Ndet,gsw,basename,fout):
   return -1 
