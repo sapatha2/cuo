@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm 
 import pandas as pd
 
-fname='s_Ndet10_gsw0.7_df.pickleR'
+fname='a_Ndet10_gsw0.9_df.pickleR'
 df=pd.read_pickle(fname)
 
 #OLS
@@ -17,5 +17,5 @@ plt.ylabel('E_VMC (eV)')
 plt.xlabel('E_Pred (eV)')
 plt.errorbar(ols.predict(X),y,yerr=df['energy_err'],fmt='bo')
 plt.plot(y,y,'g--')
-plt.title('Singles space 1-body fit')
-plt.savefig('s_Ndet10_gsw0.7_df.pdf')
+plt.title('Full active space 1-body fit')
+plt.savefig('a_Ndet10_gsw0.9_df.pdf')

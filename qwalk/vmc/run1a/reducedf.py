@@ -1,7 +1,7 @@
 import pandas as pd 
 import numpy as np 
 
-fname='s_Ndet10_gsw0.7_df.pickle'
+fname='a_Ndet10_gsw0.9_df.pickle'
 df=pd.read_pickle(fname)
 
 #Correct labels
