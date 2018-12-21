@@ -95,9 +95,9 @@ def gather_all(detgen,N,Ndet,gsw,basename):
   df.to_pickle(basename+'/'+detgen+'_Ndet'+str(Ndet)+'_gsw'+str(gsw)+'_df.pickle')
 
 if __name__=='__main__':
-  detgen='a'
+  detgen='s'
   N=50
   Ndet=10
-  gsw=0.8
-  basename='run2a'
+  gsw=0.7
+  basename='run2s'
   gather_all(detgen,N,Ndet,gsw,basename)

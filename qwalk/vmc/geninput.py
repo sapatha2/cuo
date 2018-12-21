@@ -161,4 +161,4 @@ if __name__=='__main__':
   N=50
   Ndet=10
   gsw=0.8
-  geninput(detgen,N,Ndet,gsw,basename='run2a/')
+  geninput(detgen,N,Ndet,gsw,basename='run3a/')

@@ -9,8 +9,8 @@ def subpbs(detgen,N,Ndet,gsw,basename):
       os.system('qsub '+fname)
 
 if __name__=='__main__':
-  detgen='a'
+  detgen='s'
   N=50
   Ndet=10
-  gsw=0.8
-  subpbs(detgen,N,Ndet,gsw,basename='run2a/')
+  gsw=0.7
+  subpbs(detgen,N,Ndet,gsw,basename='run2s/')
