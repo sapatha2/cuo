@@ -157,8 +157,8 @@ def genslater(detgen,N,Ndet,gsw,basename,fout):
   return 1
 
 if __name__=='__main__':
-  detgen='s'
+  detgen='a'
   N=50
   Ndet=10
-  gsw=0.7
-  geninput(detgen,N,Ndet,gsw,basename='run1s/')
+  gsw=0.8
+  geninput(detgen,N,Ndet,gsw,basename='run2a/')

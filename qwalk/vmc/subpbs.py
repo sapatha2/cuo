@@ -12,5 +12,5 @@ if __name__=='__main__':
   detgen='a'
   N=50
   Ndet=10
-  gsw=0.9
-  subpbs(detgen,N,Ndet,gsw,basename='run1a/')
+  gsw=0.8
+  subpbs(detgen,N,Ndet,gsw,basename='run2a/')

@@ -98,6 +98,6 @@ if __name__=='__main__':
   detgen='a'
   N=50
   Ndet=10
-  gsw=0.9
-  basename='run1a'
+  gsw=0.8
+  basename='run2a'
   gather_all(detgen,N,Ndet,gsw,basename)
