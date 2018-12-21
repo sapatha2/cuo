@@ -8,7 +8,7 @@ df=pd.read_pickle(fname)
 
 #OLS
 y=df['energy']
-X=df.drop(columns=['energy','energy_err','obdm_3dd_3dd'])
+X=df.drop(columns=['energy','energy_err','obdm_3dpi_3dpi'])
 X=sm.add_constant(X)
 ols=sm.OLS(y,X).fit()
 print(ols.summary())
