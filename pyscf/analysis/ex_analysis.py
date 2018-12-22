@@ -10,8 +10,8 @@ import statsmodels.api as sm
 detgen=['s']*9+['a']*9
 N=['200']*18
 #Ndet=['5']*18
-#Ndet=['10']*18
-Ndet=['20']*18
+Ndet=['10']*18
+#Ndet=['20']*18
 c=['0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9']
 c+=c
 
@@ -23,19 +23,20 @@ for i in range(len(detgen)):
   #1-body Linear regression 
   y=df['E']
   X=df.drop(columns=['E'])
+  #X=df.drop(columns=['E','3dd'])
+  #X=sm.add_constant(X)
   ind=[]
   for z in list(X):
     if('_u' in z): X=X.drop(columns=[z])
 
   ols=sm.OLS(y,X).fit()
-  '''
+  print(ols.summary())
   plt.title('Ndet='+str(Ndet[i])+',c='+str(c[i]))
   plt.plot(y,ols.predict(X),'go')
   plt.plot(y,y,'r--')
   plt.xlabel('E_B3LYP-E_0 (eV)')
   plt.ylabel('E_PRED-E_0 (eV)')
   plt.show()
-  '''
 
   params=ols.params
   errs=  ols.bse
