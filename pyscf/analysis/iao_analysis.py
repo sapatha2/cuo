@@ -33,21 +33,26 @@ for mol_spin in [-1,1,3]:
             #Build RDM on IAO basis 
             s=m.get_ovlp()
             mo_occ=np.array([np.ceil(m.mo_occ-m.mo_occ/2),np.floor(m.mo_occ/2)])
-            print(mo_occ)
             M=m.mo_coeff[:,mo_occ[0]>0]
             M=reduce(np.dot,(a.T,s,M))
             dm_u=np.dot(M,M.T)
             M=m.mo_coeff[:,mo_occ[1]>0]
             M=reduce(np.dot,(a.T,s,M))
             dm_d=np.dot(M,M.T)
-            
+          
+            #plt.title("S="+str(mol_spin))
+            #plt.matshow(dm_u+dm_d - np.diag(np.diag(dm_u+dm_d)),vmin=-1,vmax=1,cmap=plt.cm.bwr)
+            #plt.show()
+
             #Check traces
             act=np.array([1,5,6,7,8,9,11,12,13])
+            labels=["3s","4s","3px","3py","3pz","3dxy","3dyz","3dz2","3dxz","3dx2y2","2s","2px","2py","2pz"]
             print('Full trace: ', np.trace(dm_u),np.trace(dm_d))                         #Full Trace
             if(dm_u.shape[0]>12):
               print('Active trace: ',sum(np.diag(dm_u)[act]),sum(np.diag(dm_d)[act]))      #Active Trace
             print(np.diag(dm_u)[act],np.diag(dm_d)[act])
-            
+            print(labels)
+
             ''' 
             #b3lyp_iao 
             Full trace:  8.840832814616048 7.841332423958144
@@ -82,7 +87,16 @@ for mol_spin in [-1,1,3]:
             e1=reduce(np.dot,(a.T,s,m.mo_coeff,H1,m.mo_coeff.T,s.T,a))*27.2114
             e1=(e1+e1.T)/2.
             labels=["3s","4s","3px","3py","3pz","3dxy","3dyz","3dz2","3dxz","3dx2y2","2s","2px","2py","2pz"]
-           
+            
+            fig=plt.figure()
+            ax=fig.add_subplot(111)
+            cax=ax.matshow(e1,vmin=-1,vmax=1,cmap=plt.cm.bwr)
+            ax.set_xticks(np.arange(len(labels)))
+            ax.set_yticks(np.arange(len(labels)))
+            ax.set_xticklabels(labels,rotation=90)
+            ax.set_yticklabels(labels)
+            plt.show()
+            
             '''
             #Rotated H1 matrix
             plt.title(f.split(".")[0]+" S="+str(mol_spin)+" H1")

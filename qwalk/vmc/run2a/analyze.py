@@ -6,14 +6,14 @@ import numpy as np
 from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import OrthogonalMatchingPursuit
 
-fname='s_Ndet10_gsw0.7_df.pickleR'
+fname='a_Ndet10_gsw0.8_df.pickleR'
 df=pd.read_pickle(fname)
 #sns.pairplot(df.drop(columns=['energy_err']))
 #plt.savefig('s_Ndet10_gsw0.7_pairplot.pdf')
 #exit(0)
 
 y=df['energy']
-X=df.drop(columns=['energy','energy_err','obdm_3dd_3dd'])
+X=df.drop(columns=['energy','energy_err','obdm_3dd_3dd','obdm_2pz_2pz'])
 
 #OLS
 X=sm.add_constant(X)
@@ -27,6 +27,7 @@ plt.plot(y,y,'g--')
 plt.title('Full active space 1-body fit')
 #plt.savefig('s_Ndet10_gsw0.7_df.pdf')
 plt.show()
+exit(0)
 
 #OMP
 '''
