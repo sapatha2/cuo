@@ -34,7 +34,8 @@ def genpbs(N,basename,fout):
   for state in ['','2']:
     for j in range(1,N+1):
       fname='ex'+state+fout+'_'+str(j)
-      
+     
+      #Blue waters input  
       string='#!/bin/bash\n'+\
       '#PBS -q low\n'+\
       '#PBS -l nodes=2:ppn=32:xe\n'+\
@@ -59,9 +60,9 @@ def genvmc(N,basename,fout):
       
       string='method {\n'+\
       '  vmc\n'+\
-      '  nblock 500\n'+\
+      '  nblock 100\n'+\
       '  average { tbdm_basis\n'+\
-      '    mode obdm\n'+\
+      '    mode obdm'+\
       '    orbitals {\n'+\
       '      magnify 1\n'+\
       '      nmo 14\n'+\

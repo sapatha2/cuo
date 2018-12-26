@@ -1,8 +1,7 @@
 method {
   vmc
-  nblock 500
+  nblock 100
   average { tbdm_basis
-    mode obdm
     orbitals {
       magnify 1
       nmo 14
