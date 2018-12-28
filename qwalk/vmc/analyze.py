@@ -4,9 +4,7 @@ import statsmodels.api as sm
 import pandas as pd
 import numpy as np 
 
-#flist=['run1s/s_Ndet10_gsw0.7_df.pickleR','run2s/s_Ndet10_gsw0.7_df.pickleR']
-#flist=['run2a/a_Ndet10_gsw0.8_df.pickleR','run3a/a_Ndet10_gsw0.8_df.pickleR']
-flist=['run2a/a_Ndet10_gsw0.8_df.pickleR']
+flist=['run1s/s_Ndet10_gsw0.7_gosling.pickleR']
 df=None
 for fname in flist:
   small=pd.read_pickle(fname)

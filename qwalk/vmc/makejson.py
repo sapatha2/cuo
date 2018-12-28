@@ -8,9 +8,9 @@ def makejson(detgen,N,Ndet,gsw,basename):
   return 1
 
 if __name__=='__main__':
-  detgen='s'
+  detgen='a'
   N=50
   Ndet=10
-  gsw=0.7
-  basename='run1s'
+  gsw=0.8
+  basename='run2a'
   makejson(detgen,N,Ndet,gsw,basename)

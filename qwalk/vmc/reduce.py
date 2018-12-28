@@ -1,27 +1,12 @@
 import pandas as pd 
 import numpy as np 
 
-fname='run2a/a_Ndet10_gsw0.8_df2rdm.pickle'
+fname='run1s/s_Ndet10_gsw0.7_gosling.pickle'
 df=pd.read_pickle(fname)
+labels=["4s","3dxy","3dyz","3dz2","3dxz","3dx2y2","2px","2py","2pz"]
 
-#Correct labels
-labels=np.array(["4s","3dxy","3dyz","3dz2","3dxz","3dx2y2","2px","2py","2pz"])
-iaos=  np.array([ 2,   6,     7,     8,     9,     10,      12,   13,   14])
-fix_cols=[]
-for col in list(df):
-  l=col.split("_")
-  if(len(l)>=4):
-    a=int(col.split("_")[2])
-    b=int(col.split("_")[3])
-    i=np.where(iaos==a)[0][0]
-    j=np.where(iaos==b)[0][0]
-    fix_col=col.split("_")
-    fix_col[2]=labels[i]
-    fix_col[3]=labels[j]
-    fix_col='_'.join(fix_col)
-  else: fix_col=col
-  fix_cols.append(fix_col)
-df.columns=fix_cols
+print(min(df['energy']))
+exit(0)
 
 #Energy units
 df['energy']*=27.2114 #eV
@@ -32,13 +17,6 @@ nu=['obdm_up_'+i+'_'+j for i in labels for j in labels]
 nd=['obdm_down_'+i+'_'+j for i in labels for j in labels]
 ntot=['obdm_'+i+'_'+j for i in labels for j in labels]
 n=df[nu].values+df[nd].values
-df[ntot]=pd.DataFrame(n,index=df.index)
-df=df.drop(columns=nd+nu)
-
-nu=[x+'_err' for x in nu]
-nd=[x+'_err' for x in nd]
-ntot=[x+'_err' for x in ntot]
-n=np.sqrt(df[nu].values**2 + df[nd].values**2)
 df[ntot]=pd.DataFrame(n,index=df.index)
 df=df.drop(columns=nd+nu)
 
