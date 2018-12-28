@@ -3,7 +3,39 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm 
 import pandas as pd
 import numpy as np 
+sns.set(style="ticks")
 
+labels=np.array(["4s","3dxy","3dyz","3dz2","3dxz","3dx2y2","2px","2py","2pz"])
+fname='run1s/s_Ndet10_gsw0.7_gosling.pickle'
+df=pd.read_pickle(fname)
+olabels=np.where('obdm' in list(df))[0]
+print(olabels)
+exit(0)
+Ulabels=['tbdm_updown_%s_%s_%s_%s'%(s,s,s,s) for s in labels]
+X=df[['energy']+Ulabels]
+X['tbdm_updown_3dd_3dd_3dd_3dd']=X['tbdm_updown_3dxy_3dxy_3dxy_3dxy']+X['tbdm_updown_3dx2y2_3dx2y2_3dx2y2_3dx2y2']
+X['tbdm_updown_3dpi_3dpi_3dpi_3dpi']=X['tbdm_updown_3dxz_3dxz_3dxz_3dxz']+X['tbdm_updown_3dyz_3dyz_3dyz_3dyz']
+X['tbdm_updown_2ppi_2ppi_2ppi_2ppi']=X['tbdm_updown_2px_2px_2px_2px']+X['tbdm_updown_2py_2py_2py_2py']
+X['tbdm_updown_d_d_d_d']=-1*(X['tbdm_updown_3dd_3dd_3dd_3dd']+X['tbdm_updown_3dpi_3dpi_3dpi_3dpi']+X['tbdm_updown_3dz2_3dz2_3dz2_3dz2'])
+X=X.drop(columns=['tbdm_updown_3dxy_3dxy_3dxy_3dxy','tbdm_updown_3dx2y2_3dx2y2_3dx2y2_3dx2y2',
+'tbdm_updown_3dxz_3dxz_3dxz_3dxz','tbdm_updown_3dyz_3dyz_3dyz_3dyz',
+'tbdm_updown_2px_2px_2px_2px','tbdm_updown_2py_2py_2py_2py'])
+#sns.pairplot(X)
+#plt.show()
+
+X['obdm_4s_4s']=df['obdm_up_4s_4s']+df['obdm_down_4s_4s']
+X['obdm_2pz_2pz']=df['obdm_up_2pz_2pz']+df['obdm_down_2pz_2pz']
+X['obdm_4s_2pz']=df['obdm_up_4s_2pz']+df['obdm_down_4s_2pz']
+X['obdm_3dz2_2pz']=df['obdm_up_3dz2_2pz']+df['obdm_down_3dz2_2pz']
+
+'''
+labels=np.array(list(df))
+std=df.std()
+ind=(std>3e-1)
+print(labels[ind])
+'''
+
+'''
 flist=['run1s/s_Ndet10_gsw0.7_gosling.pickleR']
 df=None
 for fname in flist:
@@ -28,3 +60,4 @@ plt.plot(y,y,'g--')
 plt.title('Singles space 1-body fit')
 #plt.savefig('s_Ndet10_gsw0.7_df.pdf')
 #plt.show()
+'''
