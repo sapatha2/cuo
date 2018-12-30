@@ -1,7 +1,9 @@
 import pandas as pd 
 import numpy as np 
+import matplotlib.pyplot as plt
 
-flist=['run1s/s_Ndet10_gsw0.7_gosling.pickle','run2a/a_Ndet10_gsw0.8_gosling.pickle']
+#flist=['run1s/s_Ndet10_gsw0.7_gosling.pickle','run2a/a_Ndet10_gsw0.8_gosling.pickle']
+flist=['run2a/a_Ndet10_gsw0.8_gosling.pickle']
 df=None
 for f in flist:
   if(df is None): df=pd.read_pickle(f)
@@ -17,6 +19,12 @@ nu=['obdm_up_'+i+'_'+j for i in labels for j in labels]
 nd=['obdm_down_'+i+'_'+j for i in labels for j in labels]
 ntot=['obdm_'+i+'_'+j for i in labels for j in labels]
 n=df[nu].values+df[nd].values
+nu=['obdm_up_'+i+'_'+i for i in labels]
+nd=['obdm_down_'+i+'_'+i for i in labels]
+print(df[nu].iloc[0])
+print(df[nd].iloc[0])
+exit(0)
+
 df[ntot]=pd.DataFrame(n,index=df.index)
 df=df.drop(columns=nd+nu)
 n=['obdm_'+str(i)+'_'+str(i) for i in labels]
@@ -128,20 +136,26 @@ print('\n'.join(list(rdf)))
 print(rdf.shape)
 
 #Pairplot
-import seaborn as sns
-import matplotlib.pyplot as plt
+'''
 sns.pairplot(rdf[['energy','tbdm_updown_3d_3d_3d_3d','tbdm_updown_4s_4s_4s_4s','tbdm_updown_2p_2p_2p_2p',
 'tbdm_V_4s_3d','tbdm_V_4s_2p','tbdm_V_3d_2p']])
 #sns.pairplot(rdf[['energy','tbdm_updown_3d_3d_3d_3d','tbdm_V_3d_2p','obdm_3dz2_3dz2','obdm_2pz_2pz','obdm_4s_4s',
 #'obdm_4s_2pz','obdm_3dz2_2pz']])
 plt.show()
-
+'''
 
 #OLS
-'''
+import seaborn as sns
 import statsmodels.api as sm
 y=rdf['energy']
-X=rdf[['obdm_4s_4s', 'tbdm_updown_3d_3d_3d_3d']]
+#X=rdf.drop(columns=['energy_err'])
+#for z in list(rdf):
+#  if('tbdm' in z): X=X.drop(columns=[z])
+#X=rdf.drop(columns=['energy','energy_err'])
+X=rdf[['obdm_4s_4s','obdm_3dpi_2ppi','obdm_2ppi_2ppi','tbdm_updown_4s_4s_4s_4s','tbdm_updown_3dpi_3dpi_3dpi_3dpi','tbdm_updown_2ppi_2ppi_2ppi_2ppi']]
+#sns.pairplot(X)
+#plt.show()
+#exit(0)
 X=sm.add_constant(X)
 ols=sm.OLS(y,X).fit()
 print(ols.summary())
@@ -149,7 +163,6 @@ plt.plot(ols.predict(X),y,'o')
 plt.plot(y,y,'--')
 plt.show()
 exit(0)
-'''
 
 '''
 #OMP
