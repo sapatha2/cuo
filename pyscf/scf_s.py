@@ -8,27 +8,26 @@ import pandas as pd
 
 df=json.load(open("trail.json"))
 
-#spins={'CuO':3}
-#re={'CuO':1.725}
-#re={'CuO':1.963925}
-#nd={'Cu':(5,4)} 
-
+name=['2X','4Delta','4Phi','2Y','4SigmaP','2Delta','4SigmaM']
+mol_spin={'2X':1,'4Delta':3,'4Phi':3,'2Y':1,'4SigmaP':3,'2Delta':1,'4SigmaM':3}
 symm_dict={}
-#symm_dict['CuO0_1']={'A1' :(5,5), 'E1x': (3,3), 'E1y': (3,2), 'E2x': (1,1), 'E2y': (1,1)}
-#symm_dict['CuO0_3']={'A1' :(6,5), 'E1x': (3,2), 'E1y': (3,2), 'E2x': (1,1), 'E2y': (1,1)}
+symm_dict['2X']=     {'A1' :(5,5), 'E1x': (3,2), 'E1y': (3,3), 'E2x': (1,1), 'E2y': (1,1)} #Ground state
+symm_dict['4Pi']=    {'A1' :(6,4), 'E1x': (3,2), 'E1y': (3,3), 'E2x': (1,1), 'E2y': (1,1)} #3sigma 2pi^3 5sigma
+symm_dict['4Delta']= {'A1' :(6,5), 'E1x': (3,1), 'E1y': (3,3), 'E2x': (1,1), 'E2y': (1,1)} #1pi^3 2pi^3 5sigma
+symm_dict['4Phi']=   {'A1' :(6,5), 'E1x': (3,2), 'E1y': (3,3), 'E2x': (1,0), 'E2y': (1,1)} #1delta^3 2pi^3 5sigma
 
-#SECOND CALCULATION TO GET IAOS SYMMETRIC!
-symm_dict['CuO0_1']={'A1' :(5,5), 'E1x': (3,2), 'E1y': (3,3), 'E2x': (1,1), 'E2y': (1,1)}
+symm_dict['2Y']=     {'A1' :(5,4), 'E1x': (3,3), 'E1y': (3,3), 'E2x': (1,1), 'E2y': (1,1)} #4sigma 2pi^4
+symm_dict['4SigmaP']={'A1' :(6,3), 'E1x': (3,3), 'E1y': (3,3), 'E2x': (1,1), 'E2y': (1,1)} #3sigma 4sigma 5sigma
+symm_dict['2Delta']= {'A1' :(5,5), 'E1x': (3,3), 'E1y': (3,3), 'E2x': (1,0), 'E2y': (1,1)} #1delta^3 4sigma2 2pi^4
+symm_dict['4SigmaM']={'A1' :(6,5), 'E1x': (3,2), 'E1y': (3,2), 'E2x': (1,1), 'E2y': (1,1)} #2pi^2 5sigma
 
 datacsv={}
 for nm in ['molecule','bond-length','charge','spin','method','basis','pseudopotential','totalenergy',
            'totalenergy-stocherr','totalenergy-syserr','pyscf-version']:
   datacsv[nm]=[]
 
-for mol_spin in [1]:
-  #for r in [1.725,1.963925]:
+for run in name:
   for r in [1.963925]:
-    #for method in ['UHF','UB3LYP','UPBE0','ROHF','B3LYP','PBE0']:
     for method in ['B3LYP']:
       for basis in ['vdz','vtz']:
         for el in ['Cu']:
@@ -42,7 +41,7 @@ for mol_spin in [1]:
               mol.ecp[e]=gto.basis.parse_ecp(df[e]['ecp'])
               mol.basis[e]=gto.basis.parse(df[e][basis])
             mol.charge=charge
-            mol.spin=mol_spin
+            mol.spin=mol_spin[run]
             #mol.build(atom="%s 0. 0. 0.; O 0. 0. %g"%(el,re[molname]),verbose=4)
             mol.build(atom="%s 0. 0. 0.; O 0. 0. %g"%(el,r),verbose=4,symmetry=True)
             
@@ -135,8 +134,8 @@ for mol_spin in [1]:
                     print('We are singly filling this d-orbital: '+np.str(aos[d]) )
                     dm[0,d,d]=1
       
-              m.chkfile=el+basis+"_r"+str(r)+"_c"+str(charge)+"_s"+str(mol_spin)+"_"+method+".chk"
-              m.irrep_nelec = symm_dict[el+'O'+str(charge)+'_'+str(mol.spin)]
+              m.chkfile=el+basis+"_r"+str(r)+"_c"+str(charge)+"_s"+str(mol.spin)+"_"+method+"_"+run+".chk"
+              m.irrep_nelec = symm_dict[run]
               m.max_cycle=100
               m = addons.remove_linear_dep_(m)
               #m.direct_scf_tol=1e-5
@@ -171,24 +170,19 @@ for mol_spin in [1]:
                   m.xc=method
               ##############################################################################################
               
-              #dm=m.from_chk(el+'vdz'+str(charge)+"_"+method+".chk")
-              #m.chkfile=el+basis+str(charge)+"_"+method+".chk"        
-              dm=m.from_chk(el+'vdz'+"_r"+str(r)+"_c"+str(charge)+"_s"+str(mol_spin)+"_"+method+".chk")
-              m.chkfile=el+basis+"_r"+str(r)+"_c"+str(charge)+"_s"+str(mol_spin)+"_"+method+".chk"
-              #m=scf.newton(m)
-              m.irrep_nelec = symm_dict[el+'O'+str(charge)+'_'+str(mol.spin)]
+              dm=m.from_chk(el+'vdz'+"_r"+str(r)+"_c"+str(charge)+"_s"+str(mol.spin)+"_"+method+"_"+run+".chk")
+              m.chkfile=el+basis+"_r"+str(r)+"_c"+str(charge)+"_s"+str(mol.spin)+"_"+method+"_"+run+".chk"
+              m.irrep_nelec = symm_dict[run]
               m.max_cycle=100
               m = addons.remove_linear_dep_(m)
-              #m.direct_scf_tol=1e-5
               m.conv_tol=1e-6
               total_energy=m.kernel(dm)
               m.analyze()
 
-            '''
-            datacsv['molecule'].append(molname)
+            datacsv['molecule'].append(run)
             datacsv['bond-length'].append(r)
             datacsv['charge'].append(charge)
-            datacsv['spin'].append(mol_spin)
+            datacsv['spin'].append(mol.spin)
             datacsv['method'].append(method)
             datacsv['basis'].append(basis)
             datacsv['pseudopotential'].append('trail')
@@ -196,5 +190,4 @@ for mol_spin in [1]:
             datacsv['totalenergy-stocherr'].append(0.0)
             datacsv['totalenergy-syserr'].append(0.0)
             datacsv['pyscf-version'].append('new')
-            pd.DataFrame(datacsv).to_csv("cuo_full_s.csv",index=False)
-            '''
+            pd.DataFrame(datacsv).to_csv("cuo_exp.csv",index=False)

@@ -1,0 +1,15 @@
+molecule,bond-length,charge,spin,method,basis,pseudopotential,totalenergy,totalenergy-stocherr,totalenergy-syserr,pyscf-version
+2X,1.963925,0,1,B3LYP,vdz,trail,-213.56509588678222,0.0,0.0,new
+2X,1.963925,0,1,B3LYP,vtz,trail,-213.57999035532242,0.0,0.0,new
+4Delta,1.963925,0,3,B3LYP,vdz,trail,-213.4811287228777,0.0,0.0,new
+4Delta,1.963925,0,3,B3LYP,vtz,trail,-213.48885758538796,0.0,0.0,new
+4Phi,1.963925,0,3,B3LYP,vdz,trail,-213.4811637664651,0.0,0.0,new
+4Phi,1.963925,0,3,B3LYP,vtz,trail,-213.48923961987418,0.0,0.0,new
+2Y,1.963925,0,1,B3LYP,vdz,trail,-213.51424443685642,0.0,0.0,new
+2Y,1.963925,0,1,B3LYP,vtz,trail,-213.53073118639225,0.0,0.0,new
+4SigmaP,1.963925,0,3,B3LYP,vdz,trail,-213.427409301206,0.0,0.0,new
+4SigmaP,1.963925,0,3,B3LYP,vtz,trail,-213.43753106493813,0.0,0.0,new
+2Delta,1.963925,0,1,B3LYP,vdz,trail,-213.46050981284145,0.0,0.0,new
+2Delta,1.963925,0,1,B3LYP,vtz,trail,-213.47079317418803,0.0,0.0,new
+4SigmaM,1.963925,0,3,B3LYP,vdz,trail,-213.5124103318829,0.0,0.0,new
+4SigmaM,1.963925,0,3,B3LYP,vtz,trail,-213.52280101106214,0.0,0.0,new
