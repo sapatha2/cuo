@@ -6,14 +6,14 @@ sys.path.append('../../../downfolding/')
 from shivesh_downfold_tools import get_qwalk_dm, sum_onebody, sum_J, sum_U, sum_V
 
 full_labels=np.array(["4s","3dxy","3dyz","3dz2","3dxz","3dx2y2","2px","2py","2pz"])
-
+name={'':'2X','2':'4SigmaM','3':'2Y'}
 def gather_all(detgen,N,Ndet,gsw,basename):
   ''' 
   Gathers all your data and stores into 
   '''
   df=None
   for j in range(N+1):
-    for state in ['','2']:
+    for state in ['','2','3']:
       if(j==0): f='base/gs'+state+'.vmc_tbdm.gosling.json'  #GS
       else: f=basename+'/ex'+state+'_'+detgen+'_Ndet'+str(Ndet)+'_gsw'+str(gsw)+'_'+str(j)+'.vmc.gosling.json'
       
@@ -41,7 +41,7 @@ def gather_all(detgen,N,Ndet,gsw,basename):
       J_labels=['J_'+full_labels[orb1[i]]+'_'+full_labels[orb2[i]] for i in range(len(orb1))]
       J=sum_J(tbdm,orb1,orb2) 
 
-      d=pd.DataFrame(np.array([energy,energy_err]+list(one_body)+list(U)+list(V)+list(J))[:,np.newaxis].T,columns=['energy','energy_err']+one_labels+U_labels+V_labels+J_labels)
+      d=pd.DataFrame(np.array([name[state],energy,energy_err]+list(one_body)+list(U)+list(V)+list(J))[:,np.newaxis].T,columns=['base_state','energy','energy_err']+one_labels+U_labels+V_labels+J_labels)
       if(df is None): df=d
       else: df=pd.concat((df,d),axis=0)      
   
@@ -113,9 +113,9 @@ def gather_all(detgen,N,Ndet,gsw,basename):
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 if __name__=='__main__':
-  detgen='s'
+  detgen='a'
   N=50
   Ndet=10
-  gsw=0.7
-  basename='run1s'
+  gsw=0.8
+  basename='run1a'
   df=gather_all(detgen,N,Ndet,gsw,basename)
