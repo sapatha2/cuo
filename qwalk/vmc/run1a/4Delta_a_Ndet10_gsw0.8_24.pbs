@@ -1,0 +1,11 @@
+#!/bin/bash
+#PBS -q low
+#PBS -l nodes=2:ppn=32:xe
+#PBS -l walltime=04:00:00
+#PBS -N 4Delta_a_Ndet10_gsw0.8_24
+#PBS -e 4Delta_a_Ndet10_gsw0.8_24.perr
+#PBS -o 4Delta_a_Ndet10_gsw0.8_24.pout
+mkdir -p /scratch/sciteam/$USER/cuo/qwalk/vmc/run1a
+cd /scratch/sciteam/$USER/cuo/qwalk/vmc/run1a
+cp -u /u/sciteam/$USER/cuo/qwalk/vmc/run1a/* .
+aprun -n 64 /u/sciteam/$USER/fork/bin/qwalk 4Delta_a_Ndet10_gsw0.8_24.vmc &> 4Delta_a_Ndet10_gsw0.8_24.vmc.out

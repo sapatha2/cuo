@@ -31,9 +31,9 @@ def geninput(detgen,N,Ndet,gsw,basename):
   return 
 
 def genpbs(N,basename,fout):
-  for state in ['','2','3']:
+  for state in ['2X','2Y','4SigmaM','4Phi','4Delta','2Delta','4SigmaP']:
     for j in range(1,N+1):
-      fname='ex'+state+fout+'_'+str(j)
+      fname=state+fout+'_'+str(j)
      
       #Blue waters input  
       string='#!/bin/bash\n'+\
@@ -54,9 +54,9 @@ def genpbs(N,basename,fout):
   return 1
 
 def genvmc(N,basename,fout):
-  for state in ['','2','3']:
+  for state in ['2X','2Y','4SigmaM','4Phi','4Delta','2Delta','4SigmaP']:
     for j in range(1,N+1):
-      fname='ex'+state+fout+'_'+str(j)
+      fname=state+fout+'_'+str(j)
       
       string='method {\n'+\
       '  vmc\n'+\
@@ -73,11 +73,11 @@ def genvmc(N,basename,fout):
       '  }\n'+\
       '}\n'+\
       '\n'+\
-      'include gs'+state+'.sys\n'+\
+      'include '+state+'.sys\n'+\
       'trialfunc {\n'+\
       '  slater-jastrow\n'+\
       '  wf1 { include '+fname+'.slater }\n'+\
-      '  wf2 { include gs.optjast3 }\n'+\
+      '  wf2 { include 2X.optjast3 }\n'+\
       '}\n'
 
       f=open(basename+'/'+fname+'.vmc','w')
@@ -86,11 +86,11 @@ def genvmc(N,basename,fout):
   return 1
 
 def genslater(detgen,N,Ndet,gsw,basename,fout):
-  occ={'':[13,12],'2':[14,11],'3':[13,12]}
+  occ={'2X':[13,12],'2Y':[13,12],'4SigmaM':[14,11],'4Phi':[14,11],'4Delta':[14,11],'2Delta':[13,12],'4SigmaP':[14,11]}
   act=[6,14] #Active space is independent of spin state
-  for state in ['','2','3']:
+  for state in ['2X','2Y','4SigmaM','4Phi','4Delta','2Delta','4SigmaP']:
     for j in range(1,N+1):
-      fname='ex'+state+fout+'_'+str(j)
+      fname=state+fout+'_'+str(j)
 
       #Generate weight vector 
       gauss=np.random.normal(size=Ndet-1)
@@ -141,8 +141,8 @@ def genslater(detgen,N,Ndet,gsw,basename,fout):
       'ORBITALS  {\n'+\
       '  MAGNIFY 1.0\n'+\
       '  NMO 14\n'+\
-      '  ORBFILE gs'+state+'.orb\n'+\
-      '  INCLUDE gs'+state+'.basis\n'+\
+      '  ORBFILE '+state+'.orb\n'+\
+      '  INCLUDE '+state+'.basis\n'+\
       '  CENTERS { USEGLOBAL }\n'+\
       '}\n'+\
       '\n'+\
@@ -158,7 +158,7 @@ def genslater(detgen,N,Ndet,gsw,basename,fout):
 
 if __name__=='__main__':
   detgen='a'
-  N=50
+  N=25
   Ndet=10
   gsw=0.8
   geninput(detgen,N,Ndet,gsw,basename='run1a')

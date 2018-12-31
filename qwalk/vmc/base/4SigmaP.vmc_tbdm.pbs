@@ -1,0 +1,11 @@
+#!/bin/bash 
+#PBS -q low 
+#PBS -l nodes=2:ppn=32:xe 
+#PBS -l walltime=04:00:00 
+#PBS -N 4SigmaP_tbdm
+#PBS -e 4SigmaP_tbdm.perr 
+#PBS -o 4SigmaP_tbdm.pout 
+mkdir -p /scratch/sciteam/$USER/cuo/qwalk/vmc/base
+cd /scratch/sciteam/$USER/cuo/qwalk/vmc/base
+cp -u /u/sciteam/$USER/cuo/qwalk/vmc/base/* .
+aprun -n 64 /u/sciteam/$USER/fork/bin/qwalk 4SigmaP.vmc_tbdm &> 4SigmaP.vmc_tbdm.out
