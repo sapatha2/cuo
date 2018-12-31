@@ -41,7 +41,9 @@ def gather_all(detgen,N,Ndet,gsw,basename):
       J_labels=['J_'+full_labels[orb1[i]]+'_'+full_labels[orb2[i]] for i in range(len(orb1))]
       J=sum_J(tbdm,orb1,orb2) 
 
-      d=pd.DataFrame(np.array([name[state],energy,energy_err]+list(one_body)+list(U)+list(V)+list(J))[:,np.newaxis].T,columns=['base_state','energy','energy_err']+one_labels+U_labels+V_labels+J_labels)
+      d=pd.DataFrame(np.array([energy,energy_err]+list(one_body)+list(U)+list(V)+list(J))[:,np.newaxis].T,columns=['energy','energy_err']+one_labels+U_labels+V_labels+J_labels)
+      d=d.astype('double')
+      d['base_state']=name[state]
       if(df is None): df=d
       else: df=pd.concat((df,d),axis=0)      
   
@@ -106,16 +108,16 @@ def gather_all(detgen,N,Ndet,gsw,basename):
   'J_3dxz_2pz','J_3dyz_2pz','J_3dxy_2pz','J_3dx2y2_2pz','J_3dxz_2px','J_3dxz_2py','J_3dyz_2px','J_3dyz_2pz',
   'J_3dxy_2px','J_3dxy_2py','J_3dx2y2_2px','J_3dx2y2_2py','J_3dz2_2px','J_3dz2_2py'])
 
-  fout=basename+'/ex'+state+'_'+detgen+'_Ndet'+str(Ndet)+'_gsw'+str(gsw)+'_gosling.pickle'
+  fout=basename+'/ex_'+detgen+'_Ndet'+str(Ndet)+'_gsw'+str(gsw)+'_gosling.pickle'
   df.to_pickle(fout)
   return df
 
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 if __name__=='__main__':
-  detgen='a'
+  detgen='s'
   N=50
   Ndet=10
-  gsw=0.8
-  basename='run1a'
+  gsw=0.7
+  basename='run1s'
   df=gather_all(detgen,N,Ndet,gsw,basename)
