@@ -5,7 +5,8 @@
 #PBS -N gs2vmc 
 #PBS -e gs2vmc.perr 
 #PBS -o gs2vmc.pout 
-mkdir -p /scratch/sciteam/$USER/cuo/qwalk/vmc
-cd /scratch/sciteam/$USER/cuo/qwalk/vmc
+mkdir -p /scratch/sciteam/$USER/cuo/qwalk/vmc/base
+cd /scratch/sciteam/$USER/cuo/qwalk/vmc/base
 cp -u /u/sciteam/$USER/cuo/qwalk/vmc/base/* .
+cp -u /u/sciteam/$USER/cuo/qwalk/vmc/req_files/* .
 aprun -n 64 /u/sciteam/$USER/fork/bin/qwalk gs2.vmc_tbdm &> gs2.vmc_tbdm.out

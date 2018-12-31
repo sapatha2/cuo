@@ -2,8 +2,8 @@ SLATER
   ORBITALS  { 
   MAGNIFY 1.0 
   NMO 14 
-  ORBFILE ../orbs/Cuvtz_r1.963925_c0_s3_B3LYP.orb
-  INCLUDE ../orbs/Cuvtz_r1.963925_c0_s3_B3LYP.basis
+  ORBFILE gs2.orb
+  INCLUDE gs2.basis
   CENTERS { USEGLOBAL }
   }
 
