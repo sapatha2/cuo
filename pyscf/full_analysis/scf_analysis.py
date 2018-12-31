@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 from pyscf2qwalk import print_qwalk_mol
 
 charge=0
-for name in ['2Y']:
-  mol_spin=1
+for name in ['4Phi','4Delta','2Delta','4SigmaM']:
+  mol_spin=int(name[0])-1
   for r in [1.963925]:
     for method in ['B3LYP']:
       for basis in ['vtz']:
@@ -23,4 +23,4 @@ for name in ['2Y']:
             m.__dict__.update(lib.chkfile.load(chkfile, 'scf'))
 
             #Generate files for plotting orbitals in ../orbs
-            print_qwalk_mol(mol,m,basename="../full_orbs/"+el+basis+"_r"+str(r)+"_c"+str(charge)+"_s"+str(mol_spin)+"_"+method+"_"+name)
+            #print_qwalk_mol(mol,m,basename="../full_orbs/"+el+basis+"_r"+str(r)+"_c"+str(charge)+"_s"+str(mol_spin)+"_"+method+"_"+name)

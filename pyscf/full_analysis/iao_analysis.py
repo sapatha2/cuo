@@ -23,11 +23,10 @@ el='Cu'
 charge=0
 
 #Gather states
-for chkfile in ['../chkfiles/Cuvtz_r1.963925_c0_s-1_B3LYP.chk',
-                '../chkfiles/Cuvtz_r1.963925_c0_s1_B3LYP.chk',              #2X 
-                '../full_chk/Cuvtz_r1.963925_c0_s1_B3LYP_2Y.chk',           #2Y 
-                '../chkfiles/Cuvtz_r1.963925_c0_s3_B3LYP.chk']:             #4SigmaM
-
+for name in ['2X','2Y','4SigmaM','4Phi','4Delta','2Delta','4SigmaP']:
+  spin=int(name[0])-1
+  chkfile='../full_chk/Cuvtz_r1.963925_c0_s'+str(spin)+'_B3LYP_'+name+'.chk'
+  
   mol=lib.chkfile.load_mol(chkfile)
   m=ROHF(mol)
   m.__dict__.update(lib.chkfile.load(chkfile,'scf'))
@@ -60,7 +59,7 @@ for chkfile in ['../chkfiles/Cuvtz_r1.963925_c0_s-1_B3LYP.chk',
   
   #Eigenvalue comparison
   w,__=np.linalg.eigh(e1)
-  plt.plot(m.mo_energy[:len(w)]*27.2114,'go',label='MO')
+  plt.plot(sorted(m.mo_energy[:len(w)]*27.2114),'go',label='MO')
   plt.plot(w,'b*',label='IAO')
   plt.xlabel('Eigenvalue')
   plt.ylabel('Energy (eV)')

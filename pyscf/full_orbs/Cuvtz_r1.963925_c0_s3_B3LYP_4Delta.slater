@@ -1,0 +1,16 @@
+SLATER
+  ORBITALS  { 
+  MAGNIFY 1.0 
+  NMO 14 
+  ORBFILE ../full_orbs/Cuvtz_r1.963925_c0_s3_B3LYP_4Delta.orb
+  INCLUDE ../full_orbs/Cuvtz_r1.963925_c0_s3_B3LYP_4Delta.basis
+  CENTERS { USEGLOBAL }
+  }
+
+  DETWT { 1.0 }
+  STATES {
+  #Spin up orbitals 
+  1 2 3 4 5 6 7 8 9 10 11 12 13 14 
+  #Spin down orbitals 
+  1 2 3 4 5 6 7 8 9 10 11 
+  }
