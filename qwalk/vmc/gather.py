@@ -6,16 +6,15 @@ sys.path.append('../../../downfolding/')
 from shivesh_downfold_tools import get_qwalk_dm, sum_onebody, sum_J, sum_U, sum_V
 
 full_labels=np.array(["4s","3dxy","3dyz","3dz2","3dxz","3dx2y2","2px","2py","2pz"])
-name={'':'2X','2':'4SigmaM','3':'2Y'}
 def gather_all(detgen,N,Ndet,gsw,basename):
   ''' 
   Gathers all your data and stores into 
   '''
   df=None
   for j in range(N+1):
-    for state in ['','2','3']:
-      if(j==0): f='base/gs'+state+'.vmc_tbdm.gosling.json'  #GS
-      else: f=basename+'/ex'+state+'_'+detgen+'_Ndet'+str(Ndet)+'_gsw'+str(gsw)+'_'+str(j)+'.vmc.gosling.json'
+    for name in ['2X','2Y','4SigmaM','4Delta','4Phi','2Delta','4SigmaP']:
+      if(j==0): f='base/'+name+'.vmc_tbdm.gosling.json'  #GS
+      else: f=basename+'/'+name+'_'+detgen+'_Ndet'+str(Ndet)+'_gsw'+str(gsw)+'_'+str(j)+'.vmc.gosling.json'
       
       data=json.load(open(f,'r'))
       obdm,__,tbdm,__=get_qwalk_dm(data['properties']['tbdm_basis'])
@@ -36,14 +35,12 @@ def gather_all(detgen,N,Ndet,gsw,basename):
       V_labels=['V_'+full_labels[orb1[i]]+'_'+full_labels[orb2[i]] for i in range(len(orb1))]
       V=sum_V(tbdm,orb1,orb2) 
 
-      orb1=[0,0,0,0,0,1,1,1,1,2,2,2,3,3,4,0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5]
-      orb2=[1,2,3,4,5,2,3,4,5,3,4,5,4,5,5,6,7,8,6,7,8,6,7,8,6,7,8,6,7,8,6,7,8]
       J_labels=['J_'+full_labels[orb1[i]]+'_'+full_labels[orb2[i]] for i in range(len(orb1))]
       J=sum_J(tbdm,orb1,orb2) 
 
       d=pd.DataFrame(np.array([energy,energy_err]+list(one_body)+list(U)+list(V)+list(J))[:,np.newaxis].T,columns=['energy','energy_err']+one_labels+U_labels+V_labels+J_labels)
       d=d.astype('double')
-      d['base_state']=name[state]
+      d['base_state']=name
       if(df is None): df=d
       else: df=pd.concat((df,d),axis=0)      
   
@@ -115,9 +112,9 @@ def gather_all(detgen,N,Ndet,gsw,basename):
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 if __name__=='__main__':
-  detgen='s'
-  N=50
+  detgen='a'
+  N=25
   Ndet=10
-  gsw=0.7
-  basename='run1s'
+  gsw=0.8
+  basename='run1a'
   df=gather_all(detgen,N,Ndet,gsw,basename)

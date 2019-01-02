@@ -13,9 +13,9 @@ method {
   }
 }
 
-include 2Phi.sys
+include 4Phi.sys
 trialfunc { 
   slater-jastrow
-  wf1 { include 2Phi.slater } 
+  wf1 { include 4Phi.slater } 
   wf2 { include 2X.optjast3 } 
 }
