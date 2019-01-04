@@ -7,21 +7,25 @@ from pyscf import lib,gto,scf,mcscf,fci,lo,ci,cc
 from pyscf.scf import ROHF,UHF,ROKS
 from functools import reduce
 
-df=pd.read_pickle('b3lyp_mo_symm_a_N100_Ndet50_c0.5_beta0.pickle')
+df=pd.read_pickle('b3lyp_mo_symm_a_N100_Ndet10_c0.8_beta0.pickle')
+#df=df[df['spin']==1]
 y=df['E']
-X=df.drop(columns=['E'])
+y[df['spin']==3]+=2.3
+df['3dpi']=df['xz']+df['yz']
+df['pi']=df['x']+df['y']
+X=df.drop(columns=['E','spin','xz','yz','x','y'])
 
 #Traces check
-'''
 tr=X.sum(axis=1)
 plt.plot(tr,'o')
 plt.show()
-'''
+
 #Linear regression
 ols=sm.OLS(y,X).fit()
-#print(ols.summary())
-#plt.plot(ols.predict(X),y,'o')
-#plt.show()
+print(ols.summary())
+plt.plot(ols.predict(X),y,'o')
+plt.show()
+exit(0)
 
 #Rotate to IAO basis
 opt_mo=pd.read_pickle('b3lyp_mo_symm.pickle')

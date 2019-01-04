@@ -32,16 +32,16 @@ act={'-1':[np.arange(5,14),np.arange(5,14)],
 '''
 ncore={'-1':9,
         '1':[0,1,2,3,4,8,9],
-        '3':9}
+        '3':[0,1,2,3,4,8,9]}
 nact={'-1':[6,5],
        '1':[6,5],
        '3':[7,4]}
 act={'-1':[np.arange(5,14),np.arange(5,14)],
       '1':[[5,6,7,10,11,12,13],[5,6,7,10,11,12,13]],
-      '3':[np.arange(5,14),np.arange(5,14)]}
+      '3':[[5,6,7,10,11,12,13],[5,6,7,10,11,12,13]]}
 
 data=None
-for mol_spin in [1]:
+for mol_spin in [1,3]:
   chkfile="../chkfiles/"+el+basis+"_r"+str(r)+"_c"+str(charge)+"_s"+str(mol_spin)+"_"+method+".chk"
   mol=lib.chkfile.load_mol(chkfile)
   if("U" in method): m=UHF(mol)
@@ -53,8 +53,8 @@ for mol_spin in [1]:
   mo_occ=np.array([np.ceil(m.mo_occ-m.mo_occ/2),np.floor(m.mo_occ/2)])
   detgen='a'
   N=100
-  Ndet=50
-  c=0.5
+  Ndet=10
+  c=0.8
   beta=0 #Beta for weights
   st=str(mol_spin)
   dm_list=genex(mo_occ,m.mo_energy,ncore[st],act[st],nact[st],N,Ndet,detgen,c,beta)
@@ -75,15 +75,15 @@ for mol_spin in [1]:
   #Number occupations 
   n=np.einsum('ijmm->ijm',iao_dm_list)
   n=n[:,0,:]+n[:,1,:]
-  labels=['dz2','yz','xz','z','y','x','s']
+  labels=['yz','y','xz','x','3dz2','pz','s']
   
   #Data object
-  d=np.concatenate((e[:,np.newaxis],n),axis=1)
+  d=np.concatenate((e[:,np.newaxis],n,np.ones(N+1)[:,np.newaxis]*mol_spin),axis=1)
   if(data is None): data=d
   else: data=np.concatenate((data,d),axis=0)
 
 #Full data frame
-df=pd.DataFrame(data,columns=["E"]+list(labels))
+df=pd.DataFrame(data,columns=["E"]+list(labels)+["spin"])
 df['E']*=27.2114
 
 #Dump 
