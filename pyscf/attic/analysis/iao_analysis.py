@@ -17,7 +17,7 @@ from functools import reduce
 f='b3lyp_iao_b.pickle'
 a=np.load(f)
 print(a.shape)
-for mol_spin in [-1,1,3]:
+for mol_spin in [1]:
   for r in [1.963925]:
     for method in ['B3LYP']:
       for basis in ['vtz']:
@@ -29,6 +29,23 @@ for mol_spin in [-1,1,3]:
             if("U" in method): m=UHF(mol)
             else: m=ROHF(mol)
             m.__dict__.update(lib.chkfile.load(chkfile, 'scf'))
+
+            #Highest 3 MOs transformed into IAO basis 
+            s=m.get_ovlp()
+            act=np.zeros(s.shape[1])
+            act[10:14]=1
+            H1=np.diag(act*m.mo_energy)
+            e1=reduce(np.dot,(a.T,s,m.mo_coeff,H1,m.mo_coeff.T,s.T,a))*27.2114
+            e1=(e1+e1.T)/2.
+
+            labels=["3s","4s","3px","3py","3pz","3dxy","3dyz","3dz2","3dxz","3dx2y2","2s","2px","2py","2pz"]
+            #plt.title(f.split(".")[0]+" S="+str(mol_spin)+" H1")
+            plt.matshow(e1,cmap=plt.cm.bwr,vmax=-1.7,vmin=1.7)
+            plt.xticks(np.arange(len(labels)),labels,rotation=90)
+            plt.yticks(np.arange(len(labels)),labels)
+            plt.colorbar()
+            plt.show()
+            exit(0)
 
             #Build RDM on IAO basis 
             s=m.get_ovlp()

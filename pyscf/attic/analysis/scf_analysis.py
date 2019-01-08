@@ -32,7 +32,7 @@ for mol_spin in [-1]:
               plt.plot(m.mo_energy[0],'*',label=method)
               plt.plot(m.mo_energy[1],'*')
             else:
-              plt.plot(m.mo_energy,'o',label=method)
+              plt.plot(m.mo_energy*27.2114,'o',label=method)
               
 #Generate s(#)_eigenvalue_comp.pdf
 plt.title("Spin="+str(mol_spin)+" eigenvalue comparison")

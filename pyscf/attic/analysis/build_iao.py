@@ -12,16 +12,18 @@ from pyscf2qwalk import print_qwalk_mol
 #for method in ['ROHF','B3LYP','PBE0']:
 #for basis in ['vdz','vtz']:
 
-occ=np.arange(6,15)-1 #for bases without _full
+occ=np.arange(11,15)-1 #for basis with 2p, 4s only
+#occ=np.arange(6,15)-1 #for bases without _full
 #occ=np.arange(15)-1   #for bases with _full
 mo_coeff=None
-for mol_spin in [-1,1,3]:
+for mol_spin in [-1,1,3,5]:
   for r in [1.963925]:
     for method in ['B3LYP']:
       for basis in ['vtz']:
         for el in ['Cu']:
           for charge in [0]:
             chkfile="../chkfiles/"+el+basis+"_r"+str(r)+"_c"+str(charge)+"_s"+str(mol_spin)+"_"+method+".chk"
+            if(mol_spin==5): chkfile="../full_chk/Cuvtz_r1.963925_c0_s1_B3LYP_2Y.chk"
             mol=lib.chkfile.load_mol(chkfile)
             
             if("U" in method): m=UHF(mol)
@@ -51,7 +53,6 @@ for i in (mol.basis["O"]):
 minbasis={'cu':cu_basis,'o':o_basis}
 '''
 #build minimum basis b3lyp_iao_b.pickle (cu: 2s, 1p, 1d; o: 1s, 1p)
-'''
 cu_basis=[]
 for i in (mol.basis["Cu"]):
   if(len(cu_basis)<2): 
@@ -71,7 +72,6 @@ for i in (mol.basis["O"]):
   else:
     pass
 minbasis={'Cu':cu_basis,'O':o_basis}
-'''
 
 #minimum basis using BFD PBC
 #from sco_basis import minbasis
@@ -80,4 +80,4 @@ minbasis={'Cu':cu_basis,'O':o_basis}
 s=m.get_ovlp()
 a=lo.iao.iao(mol, mo_coeff, minao=minbasis)
 a=lo.vec_lowdin(a,s)
-a.dump('b3lyp_iao_testsco.pickle')
+a.dump('b3lyp_iao_test.pickle')

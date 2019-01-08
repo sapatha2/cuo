@@ -24,26 +24,26 @@ group {
 group {
   optimizebasis
   eibasis {
-    Cu
-    polypade
-    beta0 0.2
-    nfunc 4
-    rcut 7.5
-  }
-  eibasis {
     O
     polypade
     beta0 0.2
     nfunc 4
     rcut 7.5
   }
+  eibasis {
+    Cu
+    polypade
+    beta0 0.2
+    nfunc 4
+    rcut 7.5
+  }
   onebody {
-    coefficients { Cu 0.0 0.0 0.0 0.0 }
     coefficients { O 0.0 0.0 0.0 0.0 }
+    coefficients { Cu 0.0 0.0 0.0 0.0 }
   }
 threebody {
-    coefficients { Cu 0. 0. 0. 0.  0. 0. 0. 0.  0. 0. 0. 0.  }
     coefficients { O 0. 0. 0. 0.  0. 0. 0. 0.  0. 0. 0. 0.  }
+    coefficients { Cu 0. 0. 0. 0.  0. 0. 0. 0.  0. 0. 0. 0.  }
 }
   eebasis {
     ee
