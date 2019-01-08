@@ -1,5 +1,4 @@
 #PySCF input file for CuO calculations 
-
 import json
 from pyscf import gto,scf,mcscf, fci,lo,ci,cc
 from pyscf.scf import ROHF,ROKS,UHF,UKS, addons
@@ -7,6 +6,61 @@ import numpy as np
 import pandas as pd
 
 df=json.load(open("trail.json"))
+core=[3,3,1,1,1,1,0,0,0,0]
+base=[3,3,2,2,2,2,1,1,1,1]
+def remove(obj,n):
+  ret_obj=[]
+  if(n==0): return [obj]
+  for i in range(1,n+1):   
+    for j in range(len(obj)):
+      tmp=obj[:]
+      tmp[j]-=i
+      if(tmp[j]>=0): ret_obj+=remove(tmp,n-i)
+  return ret_obj
+r=remove(base,3)
+r=list(set([tuple(x) for x in r]))
+r=np.array(r)+np.array(core)
+Svec=[1,-1]*5
+Lvec=[0,0]*1+[1,-1]*2+[2,-2]*2
+S=np.dot(r,Svec)
+L=np.dot(r,Lvec)
+symm_dict=[{'A1':(x[0],x[1]),'E1x':(x[2],x[3]),'E1y':(x[4],x[5]),
+'E2x':(x[6],x[7]),'E2y':(x[8],x[9])} for x in r]
+method='B3LYP'
+
+z=0
+for run in [23]:
+  #for run in range(len(r)):
+  for r in [1.725,1.963925]:
+      for basis in ['vdz','vtz']:
+        for el in ['Cu']:
+          molname=el+'O'
+          mol=gto.Mole()
+          
+          if(S[run]<0): pass
+          else:
+            mol.ecp={}
+            mol.basis={}
+            for e in [el,'O']:
+              mol.ecp[e]=gto.basis.parse_ecp(df[e]['ecp'])
+              mol.basis[e]=gto.basis.parse(df[e][basis])
+            mol.charge=0
+            mol.spin=S[run]
+            mol.build(atom="%s 0. 0. 0.; O 0. 0. %g"%(el,r),verbose=4,symmetry=True)
+
+            m=ROHF(mol)
+            #m.chkfile=el+basis+"_r"+str(r)+"_c"+str(charge)+"_s"+str(mol.spin)+"_"+method+"_"+run+".chk"
+            m.irrep_nelec = symm_dict[run]
+            
+            m.max_cycle=100
+            m = addons.remove_linear_dep_(m)
+            m.conv_tol=1e-6
+
+            total_energy=m.kernel()
+            m.analyze()
+            exit(0)
+
+'''
 
 name=['2X','4Delta','4Phi','2Y','4SigmaP','2Delta','4SigmaM']
 mol_spin={'2X':1,'4Delta':3,'4Phi':3,'2Y':1,'4SigmaP':3,'2Delta':1,'4SigmaM':3}
@@ -191,3 +245,4 @@ for run in name:
             datacsv['totalenergy-syserr'].append(0.0)
             datacsv['pyscf-version'].append('new')
             pd.DataFrame(datacsv).to_csv("cuo_exp.csv",index=False)
+'''
