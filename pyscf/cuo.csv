@@ -1,2 +1,13 @@
-run,bond-length,method,basis,pseudopotential,S,L,E,conv
-23,1.725,B3LYP,vdz,trail,1,0,-213.62460591680133,False
+run,method,basis,pseudopotential,bond-length,S,E,conv
+0,B3LYP,vdz,trail,1.725,1,-213.57793973842507,True
+0,B3LYP,vtz,trail,1.725,1,-213.59185266431945,True
+1,B3LYP,vdz,trail,1.725,1,-213.5359154504594,True
+1,B3LYP,vtz,trail,1.725,1,-213.5504845507333,True
+2,B3LYP,vdz,trail,1.725,3,-213.5216936985633,True
+2,B3LYP,vtz,trail,1.725,3,-213.53087151794628,True
+3,B3LYP,vdz,trail,1.725,3,-213.5182064210948,True
+3,B3LYP,vtz,trail,1.725,3,-213.52766388973987,True
+4,B3LYP,vdz,trail,1.725,1,-213.47860211384022,True
+4,B3LYP,vtz,trail,1.725,1,-213.48900485202708,True
+5,B3LYP,vdz,trail,1.725,3,-213.47485151132247,True
+5,B3LYP,vtz,trail,1.725,3,-213.482858059006,True

@@ -6,55 +6,37 @@ import numpy as np
 import pandas as pd
 
 df=json.load(open("trail.json"))
+core=[3,3,1,1,1,1,0,0,0,0]
+base=[3,3,2,2,2,2,1,1,1,1]
+def remove(obj,n):
+  ret_obj=[]
+  if(n==0): return [obj]
+  for i in range(1,n+1):   
+    for j in range(len(obj)):
+      tmp=obj[:]
+      tmp[j]-=i
+      if(tmp[j]>=0): ret_obj+=remove(tmp,n-i)
+  return ret_obj
+r=remove(base,3)
+r=list(set([tuple(x) for x in r]))
+r=np.array(r)+np.array(core)
+print(np.sum(r,axis=1))
+
+Svec=[1,-1]*5
+Lvec=[0,0]*1+[1,-1]*2+[2,-2]*2
+S=np.dot(r,Svec)
+L=np.dot(r,Lvec)
+symm_dict=[{'A1':(x[0],x[1]),'E1x':(x[2],x[3]),'E1y':(x[4],x[5]),
+'E2x':(x[6],x[7]),'E2y':(x[8],x[9])} for x in r]
 charge=0
-'''
-S=[1,1,3,3,1,1,3,3,3,3,3,3]
-symm_dict=[
-{'A1':(5,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #3d10
-{'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #3d10
-{'A1':(6,5),'E1x':(3,2),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #3d10
-{'A1':(6,4),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #3d10
-{'A1':(6,6),'E1x':(3,2),'E1y':(2,2),'E2x':(1,1),'E2y':(1,1)}, #3d10
-
-{'A1':(5,5),'E1x':(3,3),'E1y':(3,3),'E2x':(1,0),'E2y':(1,1)}, #3d10\dxy
-{'A1':(6,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,0),'E2y':(1,1)}, #3d10\dxy
-{'A1':(6,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,0),'E2y':(1,1)}, #3d10\dxy
-{'A1':(6,6),'E1x':(3,2),'E1y':(3,2),'E2x':(1,0),'E2y':(1,1)}, #3d10\dxy
-
-{'A1':(6,5),'E1x':(3,3),'E1y':(3,1),'E2x':(1,1),'E2y':(1,1)}, #3d10\dyz
-{'A1':(6,6),'E1x':(3,2),'E1y':(3,1),'E2x':(1,1),'E2y':(1,1)}, #3d10\dyz
-
-{'A1':(6,3),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #3d10\dz2
-]'''
-
-'''
-S=[3,3,3]
-symm_dict=[
-{'A1':(6,5),'E1x':(3,3),'E1y':(3,3),'E2x':(1,0),'E2y':(1,0)}, #3d10\dxy\dx2y2
-{'A1':(6,6),'E1x':(3,3),'E1y':(3,2),'E2x':(1,0),'E2y':(1,0)}, #3d10\dxy\dx2y2
-{'A1':(6,6),'E1x':(3,3),'E1y':(3,1),'E2x':(1,1),'E2y':(1,0)}, #3d10\dxy\dyz
-]
-'''
-S=[1,1,3,3,1,3]
-symm_dict=[
-#3d10 sector
-{'A1':(5,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)},
-{'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(z -> pi)
-{'A1':(6,5),'E1x':(3,2),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #(pi -> s)
-{'A1':(6,4),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #(z -> s)  #One of these two is redundant
-
-#3d9 sector
-{'A1':(5,5),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,0)}, #(d -> pi)
-{'A1':(6,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,0)}, #(d -> s)
-]
 
 datacsv={}
-for nm in['run','method','basis','pseudopotential','bond-length','S','E','conv']:
+for nm in['run','method','basis','pseudopotential','bond-length','S','L','E','conv']:
   datacsv[nm]=[]
 
-for run in range(len(S)):
+for run in range(len(r)):
   for r in [1.725]:
-    for method in ['B3LYP']:
+    for method in ['UB3LYP']:
       for basis in ['vdz','vtz']:
         for el in ['Cu']:
           if(S[run]>0):          
@@ -159,7 +141,7 @@ for run in range(len(S)):
                     print('We are singly filling this d-orbital: '+np.str(aos[d]) )
                     dm[0,d,d]=1
       
-              m.chkfile=el+basis+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk"
+              m.chkfile=el+basis+"_r"+str(r)+"_l"+str(L[run])+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk"
               m.irrep_nelec = symm_dict[run]
               m.max_cycle=100
               m = addons.remove_linear_dep_(m)
@@ -192,8 +174,8 @@ for run in range(len(S)):
                   m.xc=method
               ##############################################################################################
               
-              dm=m.from_chk(el+'vdz'+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk")
-              m.chkfile=el+basis+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk"
+              dm=m.from_chk(el+'vdz'+"_r"+str(r)+"_l"+str(L[run])+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk")
+              m.chkfile=el+basis+"_r"+str(r)+"_l"+str(L[run])+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk"
               m.irrep_nelec = symm_dict[run]
               m.max_cycle=100
               m = addons.remove_linear_dep_(m)
@@ -204,10 +186,11 @@ for run in range(len(S)):
 
             datacsv['run'].append(run)
             datacsv['bond-length'].append(r)
+            datacsv['L'].append(L[run])
             datacsv['S'].append(S[run])
             datacsv['method'].append(method)
             datacsv['basis'].append(basis)
             datacsv['pseudopotential'].append('trail')
             datacsv['E'].append(total_energy)
             datacsv['conv'].append(m.converged)
-            pd.DataFrame(datacsv).to_csv("cuo_8.csv",index=False)
+            pd.DataFrame(datacsv).to_csv("cuo.csv",index=False)
