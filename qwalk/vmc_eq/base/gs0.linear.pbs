@@ -1,0 +1,11 @@
+#!/bin/bash 
+#PBS -q  
+#PBS -l nodes=8,flags=allprocs
+#PBS -l walltime=04:00:00 
+#PBS -N gs0linear
+#PBS -e gs0.linear.perr 
+#PBS -o gs0.linear.pout 
+module load openmpi/3.1.1-gcc-7.2.0
+module load intel/18.0
+cd $PBS_O_WORKDIR
+mpiexec ../../../../mainline/bin/qwalk gs0.linear &> gs0.linear.out
