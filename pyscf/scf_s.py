@@ -7,34 +7,6 @@ import pandas as pd
 
 df=json.load(open("trail.json"))
 charge=0
-'''
-S=[1,1,3,3,1,1,3,3,3,3,3,3]
-symm_dict=[
-{'A1':(5,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #3d10
-{'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #3d10
-{'A1':(6,5),'E1x':(3,2),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #3d10
-{'A1':(6,4),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #3d10
-{'A1':(6,6),'E1x':(3,2),'E1y':(2,2),'E2x':(1,1),'E2y':(1,1)}, #3d10
-
-{'A1':(5,5),'E1x':(3,3),'E1y':(3,3),'E2x':(1,0),'E2y':(1,1)}, #3d10\dxy
-{'A1':(6,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,0),'E2y':(1,1)}, #3d10\dxy
-{'A1':(6,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,0),'E2y':(1,1)}, #3d10\dxy
-{'A1':(6,6),'E1x':(3,2),'E1y':(3,2),'E2x':(1,0),'E2y':(1,1)}, #3d10\dxy
-
-{'A1':(6,5),'E1x':(3,3),'E1y':(3,1),'E2x':(1,1),'E2y':(1,1)}, #3d10\dyz
-{'A1':(6,6),'E1x':(3,2),'E1y':(3,1),'E2x':(1,1),'E2y':(1,1)}, #3d10\dyz
-
-{'A1':(6,3),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #3d10\dz2
-]'''
-
-'''
-S=[3,3,3]
-symm_dict=[
-{'A1':(6,5),'E1x':(3,3),'E1y':(3,3),'E2x':(1,0),'E2y':(1,0)}, #3d10\dxy\dx2y2
-{'A1':(6,6),'E1x':(3,3),'E1y':(3,2),'E2x':(1,0),'E2y':(1,0)}, #3d10\dxy\dx2y2
-{'A1':(6,6),'E1x':(3,3),'E1y':(3,1),'E2x':(1,1),'E2y':(1,0)}, #3d10\dxy\dyz
-]
-'''
 S=[1,1,3,3,1,3]
 symm_dict=[
 #3d10 sector
@@ -46,8 +18,6 @@ symm_dict=[
 #3d9 sector
 {'A1':(5,5),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,0)}, #(d -> pi)
 {'A1':(6,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,0)}, #(d -> s)
-]
-
 datacsv={}
 for nm in['run','method','basis','pseudopotential','bond-length','S','E','conv']:
   datacsv[nm]=[]
@@ -210,4 +180,4 @@ for run in range(len(S)):
             datacsv['pseudopotential'].append('trail')
             datacsv['E'].append(total_energy)
             datacsv['conv'].append(m.converged)
-            pd.DataFrame(datacsv).to_csv("cuo_8.csv",index=False)
+            pd.DataFrame(datacsv).to_csv("cuo_flip.csv",index=False)
