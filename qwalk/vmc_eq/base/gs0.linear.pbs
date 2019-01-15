@@ -1,7 +1,7 @@
 #!/bin/bash 
-#PBS -q  
-#PBS -l nodes=8,flags=allprocs
-#PBS -l walltime=04:00:00 
+#PBS -q secondary
+#PBS -l nodes=1,flags=allprocs
+#PBS -l walltime=02:00:00 
 #PBS -N gs0linear
 #PBS -e gs0.linear.perr 
 #PBS -o gs0.linear.pout 
