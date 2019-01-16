@@ -8,15 +8,16 @@ import matplotlib.pyplot as plt
 from pyscf2qwalk import print_qwalk_mol
 
 charge=0
-S=[1,1,3,3,1,3]
+#S=[1,1,3,3,1,3]
+S=[1,3,1,3]
 r=1.725
 method='B3LYP'
 basis='vtz'
 el='Cu'
 for run in range(len(S)):
-  chkfile="../chk/"+el+basis+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk"
+  chkfile="../chk/"+el+basis+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+"mirror.chk"
   mol=lib.chkfile.load_mol(chkfile)
   m=ROKS(mol)
   m.__dict__.update(lib.chkfile.load(chkfile, 'scf'))
   
-  print_qwalk_mol(mol,m,basename="../orbs/gs"+str(run))
+  print_qwalk_mol(mol,m,basename="../orbs/gs"+str(run)+"mirror")
