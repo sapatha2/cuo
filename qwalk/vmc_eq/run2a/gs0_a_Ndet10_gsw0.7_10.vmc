@@ -1,0 +1,21 @@
+method {
+  vmc
+  nblock 100
+  average { tbdm_basis
+    orbitals {
+      magnify 1
+      nmo 14
+      orbfile b3lyp_iao_b.orb
+      include b3lyp_iao_b.basis
+      centers { useglobal }
+    }
+    states { 2 6 7 8 9 10 12 13 14 }
+  }
+}
+
+include gs0.sys
+trialfunc {
+  slater-jastrow
+  wf1 { include gs0_a_Ndet10_gsw0.7_10.slater }
+  wf2 { include optjast3 }
+}
