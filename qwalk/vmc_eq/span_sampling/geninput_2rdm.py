@@ -104,7 +104,7 @@ def genslater(spin,N,gsw,basename,fout):
       string='SLATER\n'+\
       'ORBITALS  {\n'+\
       '  MAGNIFY 1.0\n'+\
-      '  NMO 88\n'+\
+      '  NMO 84\n'+\
       '  ORBFILE all.orb\n'+\
       '  INCLUDE all.basis\n'+\
       '  CENTERS { USEGLOBAL }\n'+\
@@ -138,7 +138,7 @@ def genslater(spin,N,gsw,basename,fout):
       string='SLATER\n'+\
       'ORBITALS  {\n'+\
       '  MAGNIFY 1.0\n'+\
-      '  NMO 88\n'+\
+      '  NMO 84\n'+\
       '  ORBFILE all.orb\n'+\
       '  INCLUDE all.basis\n'+\
       '  CENTERS { USEGLOBAL }\n'+\
@@ -164,6 +164,6 @@ def genslater(spin,N,gsw,basename,fout):
 
 if __name__=='__main__':
   N=20
-  spin=1 #2*Sz
+  spin=3 #2*Sz
   for gsw in np.arange(0.1,1.0,0.1):
     geninput(spin,N,gsw,basename='spin'+str(spin)+'gsw'+str(np.around(gsw,2)))
