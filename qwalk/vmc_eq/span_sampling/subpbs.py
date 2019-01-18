@@ -9,6 +9,6 @@ def subpbs(spin,N,gsw,basename):
 
 if __name__=='__main__':
   N=20
-  spin=1 #2*Sz
+  spin=3 #2*Sz
   for gsw in np.arange(0.1,1.0,0.1):
     subpbs(spin,N,gsw,basename='spin'+str(spin)+'gsw'+str(np.around(gsw,2)))
