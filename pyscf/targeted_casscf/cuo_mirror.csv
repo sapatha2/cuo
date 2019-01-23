@@ -1,0 +1,2 @@
+run,method,basis,pseudopotential,bond-length,S,E,conv
+0,ROHF,vdz,trail,1.725,1,-212.23877560242835,True
