@@ -1,0 +1,229 @@
+
+  SLATER
+  ORBITALS  { 
+  MAGNIFY 1.0 
+  NMO 14 
+  ORBFILE qwalk/sig0S3.orb
+  INCLUDE qwalk/sig0S3.basis
+  CENTERS { USEATOMS }
+  }
+  DETWT { -0.5706793585508406 0.009040229628411093 -0.013986239711141683 0.001019944805386809 0.061492872485506035 -0.005128877988090613 -0.001671034845411358 0.0012212663726200615 0.570687389062136 -0.04407888559265698 -0.004094515495924415 0.0038480020637695583 0.0037159884511784726 -0.03907937667883897 -0.002918751387149624 -0.00904186728129565 0.013984747050195215 -0.0010146225911676764 0.04407743693823232 -0.0040011293832794385 0.0013357755705975128 -0.061484677346734934 0.004094612469028453 0.004000589355629714 -0.0043779299411809474 -0.0040947293447691924 -0.0038477938968523974 0.0010210411475163389 0.009041943912318853 0.005128754560103161 0.0016702377193210363 -0.0037159258216393856 -0.0013355805688158758 -0.5706866497669563 -0.0440780372633066 0.003715972004567741 0.0390813352133164 0.0029201683470251034 -0.001018439598761275 -0.013984698216863566 -0.005128679618389434 -0.0012172344893497736 -0.03908087495790843 0.0013357307275288057 0.004377345288047481 0.06148475118196663 0.00384781677635819 -0.004000691527983351 -0.004377872315290529 0.0010206598712272736 0.0010145213741448015 -0.0016702727092346992 0.0012169399454621586 -0.002920405715040131 }
+  STATES {
+  #spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 12 13
+#spin down orbitals 
+1 2 3 4 5 6 7 9 10 11 12 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 12 13
+#spin down orbitals 
+1 2 3 4 5 6 7 8 10 11 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 12 13
+#spin down orbitals 
+1 2 3 4 5 6 8 9 10 11 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 12 13
+#spin down orbitals 
+1 2 3 4 6 7 8 9 10 11 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 12 13
+#spin down orbitals 
+1 2 3 4 5 7 8 9 10 12 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 12 13
+#spin down orbitals 
+1 2 3 4 5 6 8 10 11 12 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 12 13
+#spin down orbitals 
+1 2 3 4 6 7 8 10 11 12 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 12 13
+#spin down orbitals 
+1 2 3 4 6 8 9 10 11 12 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 12 14
+#spin down orbitals 
+1 2 3 4 5 6 7 9 10 11 12 13
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 12 14
+#spin down orbitals 
+1 2 3 4 5 6 7 9 10 11 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 12 14
+#spin down orbitals 
+1 2 3 4 5 6 7 8 9 12 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 12 14
+#spin down orbitals 
+1 2 3 4 5 7 8 9 11 12 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 12 14
+#spin down orbitals 
+1 2 3 4 5 6 7 10 11 12 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 12 14
+#spin down orbitals 
+1 2 3 4 5 6 9 10 11 12 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 12 14
+#spin down orbitals 
+1 2 3 4 6 7 9 10 11 12 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 8 10 11 12 13
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 13 14
+#spin down orbitals 
+1 2 3 4 5 6 8 9 10 11 12 13
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 13 14
+#spin down orbitals 
+1 2 3 4 6 7 8 9 10 11 12 13
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 9 10 11 12 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 13 14
+#spin down orbitals 
+1 2 3 4 5 7 8 9 10 12 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 11 13 14
+#spin down orbitals 
+1 2 3 4 5 6 8 10 11 12 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 12 13 14
+#spin down orbitals 
+1 2 3 4 5 7 8 9 10 11 12 13
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 8 9 11 12 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 12 13 14
+#spin down orbitals 
+1 2 3 4 5 7 8 9 10 11 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 10 12 13 14
+#spin down orbitals 
+1 2 3 4 5 8 9 10 11 12 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 8 9 10 12 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 7 8 9 10 11 12 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 9 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 7 9 10 11 12 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 8 9 10 11 13
+#spin up orbitals 
+1 2 3 4 5 6 7 8 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 8 9 10 11 12 13
+#spin up orbitals 
+1 2 3 4 5 6 7 8 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 6 7 8 9 10 11 12 13
+#spin up orbitals 
+1 2 3 4 5 6 7 8 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 9 10 11 12 14
+#spin up orbitals 
+1 2 3 4 5 6 7 8 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 8 9 10 11 13 14
+#spin up orbitals 
+1 2 3 4 5 6 7 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 8 9 10 11 12
+#spin up orbitals 
+1 2 3 4 5 6 7 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 8 9 10 11 14
+#spin up orbitals 
+1 2 3 4 5 6 7 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 8 10 11 12 14
+#spin up orbitals 
+1 2 3 4 5 6 7 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 8 9 10 11 12 14
+#spin up orbitals 
+1 2 3 4 5 6 7 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 6 7 8 9 10 11 12 14
+#spin up orbitals 
+1 2 3 4 5 6 7 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 7 8 9 11 12 13 14
+#spin up orbitals 
+1 2 3 4 5 6 8 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 8 9 10 11 13
+#spin up orbitals 
+1 2 3 4 5 6 8 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 8 10 11 12 13
+#spin up orbitals 
+1 2 3 4 5 6 8 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 6 7 8 9 10 11 12 13
+#spin up orbitals 
+1 2 3 4 5 6 8 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 9 10 11 12 14
+#spin up orbitals 
+1 2 3 4 5 6 8 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 8 10 11 13 14
+#spin up orbitals 
+1 2 3 4 5 6 8 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 7 8 9 10 12 13 14
+#spin up orbitals 
+1 2 3 4 5 7 8 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 8 9 10 12 13
+#spin up orbitals 
+1 2 3 4 5 7 8 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 8 9 11 12 14
+#spin up orbitals 
+1 2 3 4 5 7 8 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 8 9 10 13 14
+#spin up orbitals 
+1 2 3 4 5 7 8 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 8 9 10 12 13 14
+#spin up orbitals 
+1 2 3 4 5 7 8 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 9 11 12 13 14
+#spin up orbitals 
+1 2 3 4 6 7 8 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 8 9 10 11 13
+#spin up orbitals 
+1 2 3 4 6 7 8 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 8 10 11 12 13
+#spin up orbitals 
+1 2 3 4 6 7 8 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 8 9 10 11 12 13
+#spin up orbitals 
+1 2 3 4 6 7 8 9 10 11 12 13 14
+#spin down orbitals 
+1 2 3 4 5 6 7 9 10 11 12 14
+ 
+  }
