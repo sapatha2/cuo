@@ -1,0 +1,11 @@
+method { 
+  linear 
+  total_nstep 1000 
+  total_fit 1000 
+}
+include pi0S1.sys
+trialfunc {
+  slater-jastrow
+  wf1 { include pi0S1.slater }
+  wf2 { include pi0S1.jast3 }
+}
