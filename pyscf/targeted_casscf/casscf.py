@@ -25,7 +25,8 @@ from pyscf2qwalk import print_qwalk,print_cas_slater
 #CASSCF (10,4) -> -212.26259298434985 (With newton, tol=1e-5)
 #CASSCF (5,9)  -> -212.273716904284   (With newton, tol=1e-5)
 
-#Run CASSCF
+#Run CASSCF vdz
+'''
 basename='gs0'
 chkfile="Cuvdz_r1.725_s1_ROHF_0.chk"
 mol=lib.chkfile.load_mol(chkfile)
@@ -46,18 +47,25 @@ casscf.fcisolver.wfnsym='E1y'
 casscf.kernel()
 casscf.verbose=4
 casscf.analyze()
+'''
 
-#casscf=mcscf.CASSCF(m,ncore=ncore,ncas=ncas,nelecas=nelecas)
-#mo=casscf.sort_mo([4,5,6,7,8,9,10,11,12,13])
-#casscf.kernel(mo)
+#Run CASSCF vtz
+#S=1,sigma0,pi0,pi1,pi2,delta5
+#S=3,sigma0,pi0
+chkfile="Cuvtz_r1.725_s1_ROHF_0.chk"
+mol=lib.chkfile.load_mol(chkfile)
+m=ROHF(mol)
+m.__dict__.update(lib.chkfile.load(chkfile,'scf'))
 
-#casscf=newton_casscf.CASSCF(m,ncore=ncore,ncas=ncas,nelecas=nelecas)
-#casscf=casscf.fix_spin(ss=0.75)
-#casscf.conv_tol=1e-5
-#casscf.chkfile=basename+'.chk'
-#casscf.fcisolver.wfnsym='E1y'
-#print(casscf.kernel()[0])
-
-#Analyze CASSCF
-#print_qwalk(mol,m,basename=basename)
-#print_cas_slater(casscf,basename+'.orb', basename+'.basis',open(basename+'slater','w'),1e-15,open(basename+'.json','w'))
+state_id=0 #which state to calculate, 0 is GS
+ncore=4
+ncas=10
+nelecas=(9,8)
+casscf=mcscf.CASSCF(m,ncore=ncore,ncas=ncas,nelecas=nelecas).state_specific_(state_id)
+casscf.chkfile='vtz_spin3_casscf'+str(state_id)+'.chk'
+casscf.frozen=[0,1,2,3] #3px, 3py, 3pz
+casscf.fix_spin_(ss=3.75)
+casscf.fcisolver.wfnsym='E1y'
+casscf.kernel()
+casscf.verbose=4
+casscf.analyze()
