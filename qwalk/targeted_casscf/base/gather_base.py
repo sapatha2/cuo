@@ -12,7 +12,8 @@ def gather_all():
   '''
   df=None
   for f in ['pi0S1.vmc_tbdm.gosling.json','pi1S1.vmc_tbdm.gosling.json','pi2S1.vmc_tbdm.gosling.json',
-    'sig0S1.vmc_tbdm.gosling.json','pi0S3.vmc_tbdm.gosling.json','sig0S3.vmc_tbdm.gosling.json']:
+    'sig0S1.vmc_tbdm.gosling.json','pi0S3.vmc_tbdm.gosling.json','sig0S3.vmc_tbdm.gosling.json',
+    'del5S1.vmc_tbdm.gosling.json']:
     print(f) 
     data=json.load(open(f,'r'))
     obdm,__,tbdm,__=get_qwalk_dm(data['properties']['tbdm_basis'])
