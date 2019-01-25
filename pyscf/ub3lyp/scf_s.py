@@ -8,6 +8,7 @@ import pandas as pd
 df=json.load(open("trail.json"))
 charge=0
 
+'''
 S=[1,1,1,1,1]
 symm_dict=[
 #3d10 sector
@@ -19,6 +20,18 @@ symm_dict=[
 {'A1':(6,5),'E1x':(3,3),'E1y':(2,3),'E2x':(1,1),'E2y':(1,0)}, #(dd -> s, Jh~1/4)
 {'A1':(6,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(0,1)}, #(dd -> s, Jh~-1/4)
 ]
+'''
+
+S=[1,1,1]
+#More states!
+symm_dict=[
+#3d10 sector
+{'A1':(6,5),'E1x':(3,2),'E1y':(2,3),'E2x':(1,1),'E2y':(1,1)}, #(pi -> s)
+{'A1':(6,4),'E1x':(3,3),'E1y':(2,3),'E2x':(1,1),'E2y':(1,1)}, #(z -> s)
+#3d9 sector
+{'A1':(5,5),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,0)}, #(dd -> pi)
+]
+
 datacsv={}
 
 for nm in['run','method','basis','pseudopotential','bond-length','S','E','conv']:
@@ -56,7 +69,7 @@ for run in range(len(S)):
 
           if basis=='vdz':
             #m=m.newton()
-            m.chkfile=el+basis+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk"
+            m.chkfile=el+basis+"_r"+str(r+5)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk"
             m.irrep_nelec = symm_dict[run]
             m.max_cycle=100
             m = addons.remove_linear_dep_(m)
@@ -71,8 +84,8 @@ for run in range(len(S)):
           
           #Once we get past the vdz basis, just read-in the existing chk file...
           else:
-            dm=m.from_chk(el+'vdz'+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk")
-            m.chkfile=el+basis+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk"
+            dm=m.from_chk(el+'vdz'+"_r"+str(r+5)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk")
+            m.chkfile=el+basis+"_r"+str(r+5)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk"
             m.irrep_nelec = symm_dict[run]
             m.max_cycle=100
             m = addons.remove_linear_dep_(m)
@@ -92,4 +105,4 @@ for run in range(len(S)):
           datacsv['pseudopotential'].append('trail')
           datacsv['E'].append(total_energy)
           datacsv['conv'].append(m.converged)
-          pd.DataFrame(datacsv).to_csv("cuo_u.csv",index=False)
+          pd.DataFrame(datacsv).to_csv("cuo_continue.csv",index=False)
