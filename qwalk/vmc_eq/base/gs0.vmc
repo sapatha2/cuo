@@ -1,12 +1,22 @@
 method {
   vmc
+<<<<<<< HEAD
   nblock 2000 
+=======
+  nblock 1600 
+>>>>>>> 25bfdb4a0a27ebfa182c5df1472ce635d5a718b6
 }
 
 include gs0.sys
 trialfunc {
+<<<<<<< HEAD
   include gs0.slater
   #slater-jastrow
   #wf1 { include gs0.slater } 
   #wf2 { include optjast3 }
+=======
+  slater-jastrow
+  wf1 { include gs0.slater } 
+  wf2 { include optjast3 }
+>>>>>>> 25bfdb4a0a27ebfa182c5df1472ce635d5a718b6
 }
