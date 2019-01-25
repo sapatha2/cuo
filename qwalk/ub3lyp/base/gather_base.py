@@ -88,4 +88,4 @@ def gather_all():
 if __name__=='__main__':
   df=gather_all()
   df['energy']-=min(df['energy'])
-  print(df[['energy','n_4s','n_3d','n_2ppi','n_2pz','J_4s_3d']])
+  print(df[['energy','energy_err','n_4s','n_3d','n_2ppi','n_2pz','J_4s_3d']])
