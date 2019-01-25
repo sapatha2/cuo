@@ -2,8 +2,8 @@ SLATER
   ORBITALS  { 
   MAGNIFY 1.0 
   NMO 145 
-  ORBFILE gs4.orb
-  INCLUDE gs4.basis
+  ORBFILE gs6.orb
+  INCLUDE gs6.basis
   CENTERS { USEGLOBAL }
   }
 
