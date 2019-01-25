@@ -1,0 +1,9 @@
+method {
+  vmc
+  nblock 2000
+}
+
+include gs4.sys
+trialfunc {
+ include gs4.slater
+}

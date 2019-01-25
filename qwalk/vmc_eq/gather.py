@@ -13,10 +13,18 @@ def gather_all(detgen,N,Ndet,gsw,basename):
   df=None
   for j in range(N+1):
     #for name in ['gs0','gs1','gs2','gs3','gs4','gs5','gs2_lo','gs3_lo','gs5_lo']:
+<<<<<<< HEAD
+    #for name in ['gs0','gs1','gs2','gs3','gs4','gs5']:
+    for name in ['gs2','gs2_lo','gs2_alt']:
+      if(j==0): f='base/'+name+'.vmc_tbdm.gosling.json'  #GS
+      else: f=basename+'/'+name+'_'+detgen+'_Ndet'+str(Ndet)+'_gsw'+str(gsw)+'_'+str(j)+'.vmc.gosling.json'
+      print(f) 
+=======
     for name in ['gs0','gs1','gs2','gs3','gs4','gs5']:
       if(j==0): f='base/'+name+'.vmc_tbdm.gosling.json'  #GS
       else: f=basename+'/'+name+'_'+detgen+'_Ndet'+str(Ndet)+'_gsw'+str(gsw)+'_'+str(j)+'.vmc.gosling.json'
       
+>>>>>>> 25bfdb4a0a27ebfa182c5df1472ce635d5a718b6
       data=json.load(open(f,'r'))
       obdm,__,tbdm,__=get_qwalk_dm(data['properties']['tbdm_basis'])
       energy=data['properties']['total_energy']['value'][0]*27.2114
@@ -111,6 +119,12 @@ def gather_all(detgen,N,Ndet,gsw,basename):
   'J_3dxz_2pz','J_3dyz_2pz','J_3dxy_2pz','J_3dx2y2_2pz','J_3dxz_2px','J_3dxz_2py','J_3dyz_2px','J_3dyz_2pz',
   'J_3dxy_2px','J_3dxy_2py','J_3dx2y2_2px','J_3dx2y2_2py','J_3dz2_2px','J_3dz2_2py'])
 
+<<<<<<< HEAD
+  print(df)
+  exit()
+  
+=======
+>>>>>>> 25bfdb4a0a27ebfa182c5df1472ce635d5a718b6
   fout=basename+'/ex_'+detgen+'_Ndet'+str(Ndet)+'_gsw'+str(gsw)+'_gosling.pickle'
   df.to_pickle(fout)
   return df
@@ -120,9 +134,16 @@ import statsmodels.api as sm
 import seaborn as sns 
 if __name__=='__main__':
   detgen='a'
+<<<<<<< HEAD
+  N=0
+  Ndet=10
+  gsw=0.7
+  basename='run2a'
+=======
   N=100
   Ndet=2
   gsw=0.0
   basename='run1a'
+>>>>>>> 25bfdb4a0a27ebfa182c5df1472ce635d5a718b6
   df=gather_all(detgen,N,Ndet,gsw,basename)
 
