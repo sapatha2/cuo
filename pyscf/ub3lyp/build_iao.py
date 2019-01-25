@@ -16,8 +16,9 @@ el='Cu'
 
 occ=np.arange(6,15)-1
 mo_coeff=None
-for run in range(8):
+for run in range(8+6):
   chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+".chk"
+  if(run>=8): chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run-8)+"mirror.chk"
   print(chkfile)
   mol=lib.chkfile.load_mol(chkfile)
   m=ROKS(mol)
@@ -60,4 +61,3 @@ a.dump('b3lyp_iao_b.pickle')
 #Write orbs
 m.mo_coeff[0][:,:a.shape[1]]=a
 print_qwalk_mol(mol,m,'scf',basename='b3lyp_iao_b')
-
