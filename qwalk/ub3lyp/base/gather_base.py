@@ -11,8 +11,8 @@ def gather_all():
   Gathers all your data and stores into 
   '''
   df=None
-  for f in ['gs0.vmc_tbdm.gosling.json','gs1.vmc_tbdm.gosling.json','gs2.vmc_tbdm.gosling.json',
-    'gs3.vmc_tbdm.gosling.json','gs4.vmc_tbdm.gosling.json']:
+  for i in range(8):
+    f='gs'+str(i)+'.vmc_tbdm.gosling.json'
     print(f) 
     data=json.load(open(f,'r'))
     obdm,__,tbdm,__=get_qwalk_dm(data['properties']['tbdm_basis'])
@@ -88,4 +88,5 @@ def gather_all():
 if __name__=='__main__':
   df=gather_all()
   df['energy']-=min(df['energy'])
-  print(df[['energy','energy_err','n_4s','n_3d','n_2ppi','n_2pz','J_4s_3d']])
+  df['tr']=df['n_4s']+df['n_3d']+df['n_2p']
+  print(df[['energy','energy_err','n_4s','n_3d','n_2ppi','n_2pz','J_4s_3d','tr']])
