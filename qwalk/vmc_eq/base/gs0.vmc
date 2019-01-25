@@ -1,11 +1,12 @@
 method {
   vmc
-  nblock 1600 
+  nblock 2000 
 }
 
 include gs0.sys
 trialfunc {
-  slater-jastrow
-  wf1 { include gs0.slater } 
-  wf2 { include optjast3 }
+  include gs0.slater
+  #slater-jastrow
+  #wf1 { include gs0.slater } 
+  #wf2 { include optjast3 }
 }

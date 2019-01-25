@@ -1,5 +1,5 @@
 #!/bin/bash 
-#PBS -q low 
+#PBS -q
 #PBS -l nodes=2:ppn=32:xe 
 #PBS -l walltime=02:00:00 
 #PBS -N gsvmc 
