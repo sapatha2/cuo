@@ -17,10 +17,9 @@ def collectdf():
   return df
 
 def analyze(df):
-  #df=df[df['spin']==1]
   df['gsw']=np.round(df['gsw'],2)
-  sns.pairplot(df,vars=['energy','n_3d','J_4s_3d'],hue='gsw')
-  plt.show()
+  sns.pairplot(df,vars=['energy','n_3d','J_4s_3d'],hue='gsw',markers=['o','.','.','.','.','.','.','.','.','.'])
+  plt.savefig('pairplot.pdf',bbox_inches='tight')
   exit(0)
   
   ###################
