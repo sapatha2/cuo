@@ -2,7 +2,7 @@ import json
 import pandas as pd
 import numpy as np 
 import sys
-sys.path.append('../../../../downfolding/')
+sys.path.append('../../../downfolding/')
 from shivesh_downfold_tools import get_qwalk_dm, sum_onebody, sum_J, sum_U, sum_V
 
 full_labels=np.array(["4s","3dxy","3dyz","3dz2","3dxz","3dx2y2","2px","2py","2pz"])
@@ -12,7 +12,7 @@ def gather_all(N,gsw,basename):
   '''
   df=None
   for j in range(1,N+1):
-    f=basename+'gsw'+str(np.round(gsw,2))+'_'+str(j)+'.vmc.gosling.json' 
+    f=basename+'/gsw'+str(np.round(gsw,2))+'_'+str(j)+'.vmc.gosling.json' 
     print(f)
 
     data=json.load(open(f,'r'))
@@ -90,4 +90,3 @@ if __name__=='__main__':
   N=20
   for gsw in np.arange(0.1,1.0,0.1): 
     gather_all(N,gsw,basename='gsw'+str(np.around(gsw,2)))
-
