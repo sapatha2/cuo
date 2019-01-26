@@ -11,8 +11,9 @@ def gather_all(N,gsw,basename):
   Gathers all your data and stores into 
   '''
   df=None
-  for j in range(1,N+1):
+  for j in range(1,N+1+8):
     f=basename+'/gsw'+str(np.round(gsw,2))+'_'+str(j)+'.vmc.gosling.json' 
+    if(j>N): f='check/chk'+str(j-N)+'.vmc.gosling.json'
     print(f)
 
     data=json.load(open(f,'r'))
@@ -38,6 +39,7 @@ def gather_all(N,gsw,basename):
     d=pd.DataFrame(dat[:,np.newaxis].T,columns=['energy','energy_err']+one_labels+U_labels+J_labels)
     d=d.astype('double')
     d['gsw']=gsw
+    if(j>N): d['gsw']=0
     if(df is None): df=d
     else: df=pd.concat((df,d),axis=0)      
   
