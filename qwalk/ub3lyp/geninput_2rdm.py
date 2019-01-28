@@ -3,7 +3,7 @@ import os
 import shutil 
 import numpy as np 
 
-def geninput(N,gsw,basename):
+def geninput(N,gsw,basestate,basename):
   '''
   input:
   detgen - type of excitations to sample
@@ -25,7 +25,7 @@ def geninput(N,gsw,basename):
     print('Directory '+str(basename)+' exists, not going to overwrite')
     exit(0)  
   fout='gsw'+str(np.round(gsw,2))
-  genslater(N,gsw,basename,fout)
+  genslater(N,gsw,basestate,basename,fout)
   genvmc(N,basename,fout)
   genpbs(N,basename,fout)
   return 
@@ -84,7 +84,7 @@ def genvmc(N,basename,fout):
     f.close()      
   return 1
 
-def genslater(N,gsw,basename,fout):
+def genslater(N,gsw,basestate,basename,fout):
   for j in range(1,N+1):
     fname=fout+'_'+str(j)
     #Generate input file, based on following state order
@@ -95,9 +95,9 @@ def genslater(N,gsw,basename,fout):
     #Generate weight vector 
     gauss=np.random.normal(size=Ndet-1)
     gauss/=np.sqrt(np.dot(gauss,gauss))
-    w=np.zeros(Ndet)+np.sqrt(gsw)
-    w[1:]=gauss*np.sqrt(1-gsw)
-   
+    w=np.zeros(Ndet)
+    w[basestate]=np.sqrt(gsw) 
+    w[w==0]=gauss
 
     states_up=np.arange(1,14)
     states_dn=np.arange(1,13)+112
@@ -129,6 +129,7 @@ def genslater(N,gsw,basename,fout):
   return 1
 
 if __name__=='__main__':
-  N=40
-  for gsw in np.arange(0.1,1.0,0.1):
-    geninput(N,gsw,basename='gsw'+str(np.around(gsw,2)))
+  N=20
+  for basestate in np.arange(1,8):
+    for gsw in np.arange(0.1,1.0,0.1):
+      geninput(N,gsw,basestate,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))

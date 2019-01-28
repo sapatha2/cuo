@@ -5,5 +5,7 @@ method {
 
 include gs4.sys
 trialfunc {
- include gs4.slater
+ slater-jastrow
+ wf1 { include gs4.slater }
+ wf2 { include optjast3 }
 }
