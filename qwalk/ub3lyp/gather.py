@@ -11,9 +11,8 @@ def gather_all(N,gsw,basename):
   Gathers all your data and stores into 
   '''
   df=None
-  for j in range(1,N+1+8):
+  for j in range(1,N+1):
     f=basename+'/gsw'+str(np.round(gsw,2))+'_'+str(j)+'.vmc.gosling.json' 
-    if(j>N): f='check/chk'+str(j-N)+'.vmc.gosling.json'
     print(f)
 
     data=json.load(open(f,'r'))
@@ -89,7 +88,7 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 import seaborn as sns 
 if __name__=='__main__':
-  N=20
-  for basestate in np.arange(1,7):
+  N=10
+  for basestate in np.arange(1,3):
     for gsw in np.arange(0.1,1.0,0.1): 
       gather_all(N,gsw,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))
