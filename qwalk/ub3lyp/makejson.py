@@ -10,6 +10,6 @@ def makejson(N,gsw,basename):
 
 if __name__=='__main__':
   N=20
-  for basestate in np.arange(1,8):
+  for basestate in np.arange(4,7):
     for gsw in np.arange(0.1,1.0,0.1):
       makejson(N,gsw,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))

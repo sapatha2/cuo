@@ -97,7 +97,8 @@ def genslater(N,gsw,basestate,basename,fout):
     gauss/=np.sqrt(np.dot(gauss,gauss))
     w=np.zeros(Ndet)
     w[basestate]=np.sqrt(gsw) 
-    w[w==0]=gauss
+    w[w==0]=gauss*np.sqrt(1-gsw)
+    assert(abs(np.dot(w,w)-1)<1e-15)
 
     states_up=np.arange(1,14)
     states_dn=np.arange(1,13)+112
@@ -129,7 +130,7 @@ def genslater(N,gsw,basestate,basename,fout):
   return 1
 
 if __name__=='__main__':
-  N=20
+  N=10
   for basestate in np.arange(1,8):
     for gsw in np.arange(0.1,1.0,0.1):
       geninput(N,gsw,basestate,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))
