@@ -25,7 +25,10 @@ method='UB3LYP'
 basis='vtz'
 el='Cu'
 
-for run in range(8):
+nppi=[]
+npz=[]
+#for run in range(19):
+for run in [0,1,2,3,4,5,6,7,14]:
   chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+".chk"
   print(chkfile)
   mol=lib.chkfile.load_mol(chkfile)
@@ -52,8 +55,11 @@ for run in range(8):
   print('Full trace: ', np.trace(dm_u),np.trace(dm_d))                         #Full Trace
   if(dm_u.shape[0]>12):
     print('Active trace: ',sum(np.diag(dm_u)[act]),sum(np.diag(dm_d)[act]))      #Active Trace
-  
+  print(np.diag(dm_u+dm_d)[act])  
   #Check e matrix
+  nppi.append(np.diag(dm_u+dm_d)[11]+np.diag(dm_u+dm_d)[12])
+  npz.append(np.diag(dm_u+dm_d)[13])
+  
   '''
   s=m.get_ovlp()
   H1=np.diag(m.mo_energy)
@@ -92,3 +98,6 @@ for run in range(8):
   print_qwalk_mol(mol,m,basename="../orbs/b3lyp_iao_b") 
   exit(0)
   '''
+plt.plot(nppi[:8],npz[:8],'go')
+plt.plot(nppi[8:],npz[8:],'o')
+plt.show()

@@ -2,12 +2,15 @@ import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt
 
-#flist=['run1s/s_Ndet10_gsw0.7_gosling.pickle','run2a/a_Ndet10_gsw0.8_gosling.pickle']
-flist=['run2a/a_Ndet10_gsw0.8_gosling.pickle']
+flist=['run1s/ex2_s_Ndet10_gsw0.7_gosling.pickle']#,'run2a/a_Ndet10_gsw0.8_gosling.pickle']
+#flist=['run2a/a_Ndet10_gsw0.8_gosling.pickle']
 df=None
 for f in flist:
   if(df is None): df=pd.read_pickle(f)
   else: df=pd.concat((df,pd.read_pickle(f)),axis=0)
+
+print(list(df))
+
 labels=["4s","3dxy","3dyz","3dz2","3dxz","3dx2y2","2px","2py","2pz"]
 
 #Energy units

@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np 
 sns.set(style="ticks")
 
+'''
 labels=np.array(["4s","3dxy","3dyz","3dz2","3dxz","3dx2y2","2px","2py","2pz"])
 fname='run1s/s_Ndet10_gsw0.7_gosling.pickle'
 df=pd.read_pickle(fname)
@@ -27,6 +28,7 @@ X['obdm_4s_4s']=df['obdm_up_4s_4s']+df['obdm_down_4s_4s']
 X['obdm_2pz_2pz']=df['obdm_up_2pz_2pz']+df['obdm_down_2pz_2pz']
 X['obdm_4s_2pz']=df['obdm_up_4s_2pz']+df['obdm_down_4s_2pz']
 X['obdm_3dz2_2pz']=df['obdm_up_3dz2_2pz']+df['obdm_down_3dz2_2pz']
+'''
 
 '''
 labels=np.array(list(df))
@@ -35,29 +37,28 @@ ind=(std>3e-1)
 print(labels[ind])
 '''
 
-'''
-flist=['run1s/s_Ndet10_gsw0.7_gosling.pickleR']
-df=None
-for fname in flist:
-  small=pd.read_pickle(fname)
-  small['detgen']=[fname.split("/")[1].split("_")[0]]*small.shape[0]
-  small['gsw']=[fname.split("_")[2]]*small.shape[0]
-  if(df is None): df=small
-  else: df=pd.concat((df,small))
 
+fname='run1s/ex2_s_Ndet10_gsw0.7_gosling.pickle'
+#fname='run2a/ex2_a_Ndet10_gsw0.8_gosling.pickle'
+df=None
+df=pd.read_pickle(fname)
+df=df[(df['energy']-min(df['energy']))<3]
 y=df['energy']
-X=df.drop(columns=['energy','energy_err','gsw','detgen','obdm_4s_3dz2','obdm_3dz2_3dz2','obdm_3dpi_3dpi'])
-for zz in list(X):
-  if('tbdm' in zz): X=df.drop(columns=zz)
+#X=df[['n_4s','n_2pz','n_2ppi','4s-2pz','3dz2-2pz','4s-3dz2','3dpi-2ppi']]
+X=df[['n_3d']]
 X=sm.add_constant(X)
-ols=sm.OLS(y,X).fit()
-print(ols.summary())
+#X=df.drop(columns=['energy','energy_err','gsw','detgen','obdm_4s_3dz2','obdm_3dz2_3dz2','obdm_3dpi_3dpi'])
+#for zz in list(X):
+#  if('tbdm' in zz): X=df.drop(columns=zz)
+X=sm.add_constant(X)
+beta=-3
+wls=sm.WLS(y,X,weights=np.exp(beta*(y-min(y)))).fit()
+print(wls.summary())
 
 plt.ylabel('E_VMC (eV)')
 plt.xlabel('E_Pred (eV)')
-plt.errorbar(ols.predict(X),y,yerr=df['energy_err'],fmt='bo')
+plt.errorbar(wls.predict(X),y,yerr=df['energy_err'],fmt='bo')
 plt.plot(y,y,'g--')
 plt.title('Singles space 1-body fit')
 #plt.savefig('s_Ndet10_gsw0.7_df.pdf')
-#plt.show()
-'''
+plt.show()

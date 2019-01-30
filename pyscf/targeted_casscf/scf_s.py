@@ -7,8 +7,6 @@ import pandas as pd
 
 df=json.load(open("trail.json"))
 charge=0
-
-'''
 S=[1,1,3,3,1,3]
 symm_dict=[
 #3d10 sector
@@ -34,13 +32,15 @@ symm_dict=[
 {'A1':(5,5),'E1x':(3,3),'E1y':(3,3),'E2x':(1,0),'E2y':(1,1)}, #(d -> pi)
 {'A1':(6,5),'E1x':(3,2),'E1y':(3,3),'E2x':(1,0),'E2y':(1,1)}, #(d -> s)
 ]
+
+'''
 datacsv={}
 
 for nm in['run','method','basis','pseudopotential','bond-length','S','E','conv']:
   datacsv[nm]=[]
 
 #for run in range(len(S)):
-for run in [0]:
+for run in [4]:
   for r in [1.725]:
     for method in ['ROHF']:
       for basis in ['vdz','vtz']:

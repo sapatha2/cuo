@@ -7,6 +7,8 @@ import pandas as pd
 
 df=json.load(open("trail.json"))
 charge=0
+
+'''
 S=[1,1,3,3,1,3]
 symm_dict=[
 #3d10 sector
@@ -19,6 +21,39 @@ symm_dict=[
 {'A1':(5,5),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,0)}, #(d -> pi)
 {'A1':(6,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,0)}, #(d -> s)
 datacsv={}
+'''
+
+#Mirrored states to build IAOs
+'''
+S=[1,3,1,3]
+symm_dict=[
+#3d10 sector
+{'A1':(5,5),'E1x':(3,2),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)},
+{'A1':(6,4),'E1x':(3,2),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(z -> s)  #One of these two is redundant
+
+#3d9 sector
+{'A1':(5,5),'E1x':(3,3),'E1y':(3,3),'E2x':(1,0),'E2y':(1,1)}, #(d -> pi)
+{'A1':(6,5),'E1x':(3,2),'E1y':(3,3),'E2x':(1,0),'E2y':(1,1)}, #(d -> s)
+]
+'''
+
+#Additional states
+S=[1,1,3,3,1,3]
+symm_dict=[
+#3d10 sector
+{'A1':(5,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)},
+{'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(z -> pi)
+{'A1':(6,5),'E1x':(3,2),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #(pi -> s)
+{'A1':(6,4),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #(z -> s)  #One of these two is redundant
+
+#3d9 sector
+{'A1':(5,5),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,0)}, #(d -> pi)
+{'A1':(6,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,0)}, #(d -> s)
+{'A1':(5,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)},
+]
+datacsv={}
+datacsv={}
+
 for nm in['run','method','basis','pseudopotential','bond-length','S','E','conv']:
   datacsv[nm]=[]
 
@@ -129,7 +164,7 @@ for run in range(len(S)):
                     print('We are singly filling this d-orbital: '+np.str(aos[d]) )
                     dm[0,d,d]=1
       
-              m.chkfile=el+basis+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk"
+              m.chkfile=el+basis+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+"mirror.chk"
               m.irrep_nelec = symm_dict[run]
               m.max_cycle=100
               m = addons.remove_linear_dep_(m)
@@ -162,8 +197,8 @@ for run in range(len(S)):
                   m.xc=method
               ##############################################################################################
               
-              dm=m.from_chk(el+'vdz'+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk")
-              m.chkfile=el+basis+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk"
+              dm=m.from_chk(el+'vdz'+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+"mirror.chk")
+              m.chkfile=el+basis+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+"mirror.chk"
               m.irrep_nelec = symm_dict[run]
               m.max_cycle=100
               m = addons.remove_linear_dep_(m)
@@ -180,4 +215,4 @@ for run in range(len(S)):
             datacsv['pseudopotential'].append('trail')
             datacsv['E'].append(total_energy)
             datacsv['conv'].append(m.converged)
-            pd.DataFrame(datacsv).to_csv("cuo_flip.csv",index=False)
+            pd.DataFrame(datacsv).to_csv("cuo_mirror.csv",index=False)
