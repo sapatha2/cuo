@@ -109,6 +109,18 @@ def genslater(N,gsw,basestate,basename,fout):
       states.append(tmp)
       states_up+=14
       states_dn+=14
+    
+    #Specifically for targeted states only
+    if(gsw==1.0): 
+      w=[1]
+      states_up=np.arange(1,14)
+      states_dn=np.arange(1,13)+Ndet*14
+      states_up+=14*basestate
+      states_dn+=14*basestate
+      tmp='  '+' '.join([str(x) for x in states_up])+'\n'
+      tmp+='  '+' '.join([str(x) for x in states_dn])+'\n\n'
+      states=[]
+      states.append(tmp)
 
     #Make input file
     string='SLATER\n'+\
@@ -132,5 +144,6 @@ def genslater(N,gsw,basestate,basename,fout):
 if __name__=='__main__':
   N=10
   for basestate in np.arange(16):
-    for gsw in np.arange(0.1,1.0,0.1):
+    for gsw in np.arange(0.1,1.1,0.1):
+      if(gsw==1.0): N=1
       geninput(N,gsw,basestate,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))

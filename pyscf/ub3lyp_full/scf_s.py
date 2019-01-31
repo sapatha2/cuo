@@ -55,7 +55,7 @@ symm_dict=[
 {'A1':(5,6),'E1x':(3,1),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(dpi -> s)
 {'A1':(6,6),'E1x':(3,3),'E1y':(2,2),'E2x':(1,0),'E2y':(1,1)}, #(dd,pi -> s,s)
 {'A1':(6,6),'E1x':(2,1),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(dpi,pi -> s,s)
-{'A1':(6,6),'E1x':(2,3),'E1y':(3,2),'E2x':(1,1),'E2y':(0,1)}, #(dd,pi -> s,s)
+{'A1':(6,6),'E1x':(2,3),'E1y':(3,2),'E2x':(1,0),'E2y':(1,1)}, #(dd,pi -> s,s)
 {'A1':(6,6),'E1x':(2,3),'E1y':(3,1),'E2x':(1,1),'E2y':(1,1)}, #(dpi,pi-> s,s)
 #2pz1
 {'A1':(6,4),'E1x':(3,3),'E1y':(3,3),'E2x':(0,1),'E2y':(1,1)}, #(dd,z -> pi,s)
@@ -67,7 +67,7 @@ datacsv={}
 for nm in['run','method','basis','pseudopotential','bond-length','S','E','conv']:
   datacsv[nm]=[]
 
-for run in range(len(symm_dict)):
+for run in range(9,len(symm_dict)):
   for r in [1.725]:
     for method in ['UB3LYP']:
       for basis in ['vdz','vtz']:
