@@ -33,10 +33,11 @@ def analyze(df):
   df['gsw']=np.round(df['gsw'],2)
   #PAIRPLOTS --------------------------------------------------------------------------
   #Full
-  #sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_2pz','U_4s'],hue='basestate',markers=['o']+['.']*9)
+  sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_2pz','U_4s'],hue='basestate',markers=['o']+['.']*9)
   #df=df[(df['basestate']==7)+(df['basestate']==-1)]
   #sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_2pz'],hue='basestate',markers=['o']+['.']*1)
-  #plt.show()
+  plt.show()
+  exit(0)
   #plt.savefig('all_base.pdf',bbox_inches='tight')
 
   #Each basestate
