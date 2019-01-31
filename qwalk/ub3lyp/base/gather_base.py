@@ -11,7 +11,7 @@ def gather_all():
   Gathers all your data and stores into 
   '''
   df=None
-  for i in range(8):
+  for i in [0,1,2,3,4,5,6,7,14]:
     f='gs'+str(i)+'.vmc_tbdm.gosling.json'
     print(f) 
     data=json.load(open(f,'r'))
