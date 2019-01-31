@@ -9,13 +9,17 @@ from sklearn.model_selection import cross_val_score
 
 def collectdf():
   df=None
-  for basestate in np.arange(8):
+  for basestate in [0,1,2,3,4,5,6,7,14]:
     for gsw in np.arange(0.1,1.0,0.1):
-      if(basestate==0): f='gsw'+str(np.round(gsw,2))+'/gosling.pickle'
-      else: f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/gosling.pickle' 
-      small_df=pd.read_pickle(f)
+      if(basestate==0): 
+        f='gsw'+str(np.round(gsw,2))+'/gosling.pickle'
+        small_df=pd.read_pickle(f).head(n=20)
+        small_df = small_df[small_df['gsw']>0]
+      else: 
+        f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/gosling.pickle' 
+        small_df=pd.read_pickle(f)
+      
       small_df['basestate']=basestate
-      if(basestate==0): small_df = small_df[small_df['gsw']>0]
       if(df is None): df = small_df
       else: df = pd.concat((df,small_df),axis=0)
     
@@ -29,10 +33,10 @@ def analyze(df):
   df['gsw']=np.round(df['gsw'],2)
   #PAIRPLOTS --------------------------------------------------------------------------
   #Full
-  sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_2pz','n_4s'],hue='basestate',markers=['o']+['.']*8)
+  #sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_2pz','U_4s'],hue='basestate',markers=['o']+['.']*9)
   #df=df[(df['basestate']==7)+(df['basestate']==-1)]
   #sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_2pz'],hue='basestate',markers=['o']+['.']*1)
-  plt.show()
+  #plt.show()
   #plt.savefig('all_base.pdf',bbox_inches='tight')
 
   #Each basestate
@@ -62,11 +66,15 @@ def analyze(df):
   '''
   y=df['energy']
   yerr=df['energy_err']
-  X=df[['n_3d','n_2pz','3dz2-2pz','4s-2pz','3dpi-2ppi']]
+  X=df[['n_3d','n_2ppi','n_2pz','3dz2-2pz','4s-2pz','3dpi-2ppi']]
   X=sm.add_constant(X)
-  ols=sm.OLS(y,X).fit()
-  print(ols.summary())
-  exit(0)
+  beta=2
+  for beta in np.arange(0,5,0.5):
+    wls=sm.WLS(y,X,weights=np.exp(-beta*(y-min(y)))).fit()
+    print(wls.summary())
+    df['pred']=wls.predict(X)
+    sns.pairplot(df,vars=['energy','pred'],hue='basestate',markers=['o']+['.']*9)
+    plt.show()
 
   #GROUND STATE ONLY
   '''
