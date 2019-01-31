@@ -9,7 +9,7 @@ from sklearn.model_selection import cross_val_score
 
 def collectdf():
   df=None
-  for basestate in [0,1,2,3,4,5,6,7,14]:
+  for basestate in [0,1,2,3,4,5,6,7]:#,14]:
     for gsw in np.arange(0.1,1.0,0.1):
       if(basestate==0): 
         f='gsw'+str(np.round(gsw,2))+'/gosling.pickle'
@@ -31,9 +31,11 @@ def collectdf():
 
 def analyze(df):
   df['gsw']=np.round(df['gsw'],2)
+  df=df[df['gsw']==0.0]
+  df=df[df['basestate']<14]
   #PAIRPLOTS --------------------------------------------------------------------------
   #Full
-  sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_2pz','U_4s'],hue='basestate',markers=['o']+['.']*9)
+  sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_2pz','U_4s','J_4s_3d'],hue='basestate')
   #df=df[(df['basestate']==7)+(df['basestate']==-1)]
   #sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_2pz'],hue='basestate',markers=['o']+['.']*1)
   plt.show()
