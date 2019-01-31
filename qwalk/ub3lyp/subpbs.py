@@ -9,6 +9,6 @@ def subpbs(N,gsw,basestate,basename):
 
 if __name__=='__main__':
   N=10
-  for basestate in np.arange(1,8):
+  for basestate in np.arange(14,15):
     for gsw in np.arange(0.1,1.0,0.1):
       subpbs(N,gsw,basestate,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))

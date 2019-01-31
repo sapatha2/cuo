@@ -91,7 +91,10 @@ def genslater(N,gsw,basestate,basename,fout):
     #(see collect_mos.py for ordering): gs0, gs1, gs2, gs3, gs4, gs5
     string=None
     Ndet=8
-    
+    if(basestate==14): 
+      Ndet=9
+      basestate=8
+
     #Generate weight vector 
     gauss=np.random.normal(size=Ndet-1)
     gauss/=np.sqrt(np.dot(gauss,gauss))
@@ -101,7 +104,7 @@ def genslater(N,gsw,basestate,basename,fout):
     assert(abs(np.dot(w,w)-1)<1e-15)
 
     states_up=np.arange(1,14)
-    states_dn=np.arange(1,13)+112
+    states_dn=np.arange(1,13)+Ndet*14
     states=[]
     for i in range(Ndet):
       tmp='  '+' '.join([str(x) for x in states_up])+'\n'
@@ -114,7 +117,7 @@ def genslater(N,gsw,basestate,basename,fout):
     string='SLATER\n'+\
     'ORBITALS  {\n'+\
     '  MAGNIFY 1.0\n'+\
-    '  NMO 224\n'+\
+    '  NMO 252\n'+\
     '  ORBFILE all.orb\n'+\
     '  INCLUDE all.basis\n'+\
     '  CENTERS { USEGLOBAL }\n'+\
@@ -127,10 +130,11 @@ def genslater(N,gsw,basestate,basename,fout):
     f=open(basename+'/'+fname+'.slater','w')
     f.write(string)
     f.close()
+    if(basestate==8): basestate=14
   return 1
 
 if __name__=='__main__':
   N=10
-  for basestate in np.arange(1,8):
+  for basestate in np.arange(14,15):
     for gsw in np.arange(0.1,1.0,0.1):
       geninput(N,gsw,basestate,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))
