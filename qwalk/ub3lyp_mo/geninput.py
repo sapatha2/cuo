@@ -61,6 +61,7 @@ def genvmc(N,basename,fout):
     '  vmc\n'+\
     '  nblock 100\n'+\
     '  average { tbdm_basis\n'+\
+    '    mode obdm\n'+\
     '    orbitals {\n'+\
     '      magnify 1\n'+\
     '      nmo 14\n'+\
