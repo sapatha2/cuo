@@ -10,7 +10,7 @@ from sklearn.model_selection import cross_val_score
 def collectdf():
   df=None
   for basestate in range(16):
-    for gsw in np.arange(0.6,1.01,0.1):
+    for gsw in np.arange(0.5,1.01,0.1):
       f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/gosling.pickle' 
       small_df=pd.read_pickle(f)
       
