@@ -90,8 +90,8 @@ import seaborn as sns
 if __name__=='__main__':
   N=10
   for basestate in np.arange(16):
-    for gsw in np.arange(0.6,1.0,0.1): 
-    #for gsw in [1.0]:  
+    #for gsw in np.arange(0.6,1.01,0.1): 
+    for gsw in [0.5]:  
       if(gsw==1.0): N=1
       else: N=10
       gather_all(N,gsw,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))
