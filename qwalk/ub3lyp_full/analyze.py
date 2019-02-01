@@ -10,7 +10,7 @@ from sklearn.model_selection import cross_val_score
 def collectdf():
   df=None
   for basestate in range(16):
-    for gsw in np.arange(0.5,1.01,0.1):
+    for gsw in np.arange(0.4,1.01,0.1):
       f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/gosling.pickle' 
       small_df=pd.read_pickle(f)
       
@@ -30,14 +30,15 @@ def analyze(df):
   #FITS --------------------------------------------------------------------------
   y=df['energy']
   yerr=df['energy_err']
-  X=df[['n_3d','n_2ppi','n_2pz','3dz2-2pz','4s-2pz','3dpi-2ppi']]
+  X=df[['n_3d','n_2pz','3dz2-2pz','4s-2pz','U_4s']]
   X=sm.add_constant(X)
-  beta=2
-  for beta in np.arange(0,5,0.5):
+  #beta=2
+  #for beta in np.arange(0,5,0.5):
+  for beta in [2]:
     wls=sm.WLS(y,X,weights=np.exp(-beta*(y-min(y)))).fit()
     print(wls.summary())
     df['pred']=wls.predict(X)
-    sns.pairplot(df,vars=['energy','pred'],hue='basestate',markers=['o']+['.']*9)
+    sns.pairplot(df,vars=['energy','pred'],hue='basestate',markers=['o']+['.']*16)
     plt.show()
 
 if __name__=='__main__':
