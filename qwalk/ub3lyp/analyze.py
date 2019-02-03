@@ -9,7 +9,7 @@ from sklearn.model_selection import cross_val_score
 
 def collectdf():
   df=None
-  for basestate in [0,1,2,3,4,5,6,7]:#,14]:
+  for basestate in [0,1,2,3,4,5,6,7]:
     for gsw in np.arange(0.1,1.0,0.1):
       if(basestate==0): 
         f='gsw'+str(np.round(gsw,2))+'/gosling.pickle'
@@ -31,15 +31,13 @@ def collectdf():
 
 def analyze(df):
   df['gsw']=np.round(df['gsw'],2)
-  df=df[df['gsw']==0.0]
-  df=df[df['basestate']<14]
+  #df=df[df['basestate']<14]
   #PAIRPLOTS --------------------------------------------------------------------------
   #Full
-  sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_2pz','U_4s','J_4s_3d'],hue='basestate')
+  #sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_2pz'],hue='basestate',markers=['o']+['.']*9)
   #df=df[(df['basestate']==7)+(df['basestate']==-1)]
   #sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_2pz'],hue='basestate',markers=['o']+['.']*1)
-  plt.show()
-  exit(0)
+  #plt.show()
   #plt.savefig('all_base.pdf',bbox_inches='tight')
 
   #Each basestate
@@ -67,17 +65,25 @@ def analyze(df):
   #sns.pairplot(df,vars=['energy','pred'],hue='gsw',markers=['o']+['.']*9)
   #plt.savefig('all_fit.pdf',bbox_inches='tight')
   '''
+  '''
   y=df['energy']
   yerr=df['energy_err']
   X=df[['n_3d','n_2ppi','n_2pz','3dz2-2pz','4s-2pz','3dpi-2ppi']]
   X=sm.add_constant(X)
   beta=2
-  for beta in np.arange(0,5,0.5):
+  #for beta in np.arange(0,5,0.5):
+  for beta in [2]:
     wls=sm.WLS(y,X,weights=np.exp(-beta*(y-min(y)))).fit()
     print(wls.summary())
     df['pred']=wls.predict(X)
     sns.pairplot(df,vars=['energy','pred'],hue='basestate',markers=['o']+['.']*9)
     plt.show()
+  '''
+  y=df['energy']
+  X=df[['n_3d','n_2ppi','n_2pz','3dz2-2pz','4s-2pz','3dpi-2ppi']]
+  X=sm.add_constant(X)
+  ols=sm.OLS(y,X).fit()
+  print(ols.summary())
 
   #GROUND STATE ONLY
   '''
