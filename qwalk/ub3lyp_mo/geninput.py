@@ -39,9 +39,9 @@ def genpbs(N,basename,fout):
     '#PBS -q secondary\n'+\
     '#PBS -l nodes=1,flags=allprocs\n'+\
     '#PBS -l walltime=00:30:00\n'+\
-    '#PBS -N '+fname+'\n'\
-    '#PBS -e '+fname+'.perr\n'+\
-    '#PBS -o '+fname+'.pout\n'+\
+    '#PBS -N '+fname+str(j)+'\n'\
+    '#PBS -e '+fname+str(j)+'.perr\n'+\
+    '#PBS -o '+fname+str(j)+'.pout\n'+\
     'module load openmpi/3.1.1-gcc-7.2.0\n'+\
     'module load intel/18.0\n'+\
     'cd ${PBS_O_WORKDIR}/'+basename+'/ \n'+\
