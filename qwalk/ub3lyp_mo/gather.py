@@ -5,7 +5,7 @@ import sys
 sys.path.append('../../../downfolding/')
 from shivesh_downfold_tools import get_qwalk_dm, sum_onebody, sum_J, sum_U, sum_V
 
-full_labels=np.array(["4s","3dxy","3dyz","3dz2","3dxz","3dx2y2","2px","2py","2pz"])
+full_labels=np.array(["3s","3pz","3py","3px","2pz","3dz2","3dxz","3dyz"])
 def gather_all(N,gsw,basename):
   ''' 
   Gathers all your data and stores into 
@@ -90,7 +90,5 @@ import seaborn as sns
 if __name__=='__main__':
   N=10
   for basestate in np.arange(8):
-    for gsw in np.arange(0.0,1.1,0.1): 
-      if(gsw==1.0): N=1
-      else: N=10
+    for gsw in np.arange(0.1,1.1,0.1): 
       gather_all(N,gsw,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))

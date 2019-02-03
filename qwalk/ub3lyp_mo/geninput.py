@@ -38,7 +38,7 @@ def genpbs(N,basename,fout):
     string='#!/bin/bash\n'+\
     '#PBS -q secondary\n'+\
     '#PBS -l nodes=1,flags=allprocs\n'+\
-    '#PBS -l walltime=00:15:00\n'+\
+    '#PBS -l walltime=00:30:00\n'+\
     '#PBS -N '+fname+'\n'\
     '#PBS -e '+fname+'.perr\n'+\
     '#PBS -o '+fname+'.pout\n'+\
@@ -65,11 +65,11 @@ def genvmc(N,basename,fout):
     '    orbitals {\n'+\
     '      magnify 1\n'+\
     '      nmo 14\n'+\
-    '      orbfile all.orb\n'+\
-    '      include all.basis\n'+\
+    '      orbfile gs0.orb\n'+\
+    '      include gs0.basis\n'+\
     '      centers { useglobal }\n'+\
     '    }\n'+\
-    '    states { 6 7 8 9 10 11 12 13 14 }\n'+\
+    '    states { 1 2 3 4 5 6 7 8 9 10 11 12 13 14 }\n'+\
     '  }\n'+\
     '}\n'+\
     '\n'+\

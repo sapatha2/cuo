@@ -8,7 +8,8 @@ def subpbs(N,gsw,basestate,basename):
     os.system('qsub '+fname)
 
 if __name__=='__main__':
-  for gsw in np.arange(1.0,0.0,-0.1):
+  #for gsw in np.arange(1.0,0.0,-0.1):
+  for gsw in [0.1,0.2]:
     if(gsw==1.0): N=1
     else: N=10
     for basestate in np.arange(16):
