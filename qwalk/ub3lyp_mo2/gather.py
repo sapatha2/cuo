@@ -20,9 +20,10 @@ def gather_all(N,gsw,basename):
     energy=data['properties']['total_energy']['value'][0]*27.2114
     energy_err=data['properties']['total_energy']['error'][0]*27.2114
 
-    orb1=[0,1,2,3,4,5,6,7,8,9,10,11,12,13]
-    one_body=sum_onebody(obdm,orb1,orb1)
-    one_labels=['n_'+str(i) for i in orb1]
+    orb1=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,5, 6 ,7 ,7 ,12]
+    orb2=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,10,11,12,13,13]
+    one_body=sum_onebody(obdm,orb1,orb2)
+    one_labels=['t_'+str(orb1[i])+'_'+str(orb2[i]) for i in range(len(orb1))]
 
     dat=np.array([energy,energy_err]+list(one_body))
     d=pd.DataFrame(dat[:,np.newaxis].T,columns=['energy','energy_err']+one_labels)
