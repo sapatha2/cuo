@@ -55,7 +55,7 @@ def gendmc(N,basename,fout):
     
     string='method {\n'+\
     '  dmc\n'+\
-    '  nblock 100\n'+\
+    '  nblock 25\n'+\
     '  timestep 0.01 \n'+\
     '  tmoves \n'+\
     '  average { tbdm_basis\n'+\
