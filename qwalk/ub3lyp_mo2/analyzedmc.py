@@ -13,8 +13,8 @@ from functools import reduce
 def collectdf():
   df=None
   for basestate in range(1):
-    for gsw in np.arange(0.1,1.01,0.1):
-      f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/gosling.pickle' 
+    for gsw in np.arange(0.1,1.0,0.1):
+      f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
       small_df=pd.read_pickle(f)
       
       small_df['basestate']=basestate
@@ -25,19 +25,19 @@ def collectdf():
 
 def analyze(df):
   df['gsw']=np.round(df['gsw'],2)
-  
-  df['n_3dd']=df['t_8_8']+df['t_9_9']
-  df['n_3dpi']=df['t_5_5']+df['t_6_6']
-  df['n_3dz2']=df['t_7_7']
+  print(list(df))
+
+  df['n_3dd']=df['t_4_4']+df['t_5_5']
+  df['n_3dpi']=df['t_1_1']+df['t_2_2']
+  df['n_3dz2']=df['t_3_3']
   df['n_3d']=df['n_3dd']+df['n_3dpi']+df['n_3dz2']
-  df['n_2ppi']=df['t_10_10']+df['t_11_11']
-  df['n_2pz']=df['t_12_12']
+  df['n_2ppi']=df['t_6_6']+df['t_7_7']
+  df['n_2pz']=df['t_8_8']
   df['n_2p']=df['n_2ppi']+df['n_2pz']
-  df['n_4s']=df['t_13_13']
-  df['t_pi']=2*(df['t_5_10']+df['t_6_11'])
-  df['t_dz']=2*df['t_7_12']
-  df['t_ds']=2*df['t_7_13']
-  df['t_sz']=2*df['t_12_13']
+  df['n_4s']=df['t_9_9']
+  df['t_pi']=2*(df['t_1_6']+df['t_2_7'])
+  df['t_dz']=2*df['t_3_8']
+  df['t_sz']=2*df['t_8_9']
 
   #PAIRPLOTS --------------------------------------------------------------------------
   #sns.pairplot(df,vars=['energy','n_3dd','n_3dpi','n_3dz2','n_3d'],hue='basestate',markers=['o']+['.']*8)
@@ -72,6 +72,7 @@ def analyze(df):
 
   #ROTATE TO IAOS --------------------------------------------------------------------------
   #Gather IAOs
+  '''
   f='../../pyscf/analyze/b3lyp_iao_b.pickle' #IAOs which span the MOs
   a=np.load(f)
 
@@ -101,7 +102,7 @@ def analyze(df):
   plt.xticks(np.arange(14),labels,rotation=90)
   plt.yticks(np.arange(14),labels)
   plt.show()
-
+  '''
 if __name__=='__main__':
   df=collectdf()
   analyze(df)
