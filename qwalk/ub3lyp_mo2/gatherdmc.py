@@ -42,9 +42,8 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 import seaborn as sns 
 if __name__=='__main__':
-  for basestate in np.arange(1):
-    #for gsw in np.arange(0.1,1.1,0.1): 
-    for gsw in [1.0]:
+  for basestate in np.arange(5,6):
+    for gsw in np.arange(0.1,1.1,0.1): 
       if(gsw==1.0): N=1
       else: N=10
       gather_all(N,gsw,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))
