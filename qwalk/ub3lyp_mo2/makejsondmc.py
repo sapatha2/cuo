@@ -9,8 +9,9 @@ def makejson(N,gsw,basename):
   return 1
 
 if __name__=='__main__':
-  for basestate in np.arange(3,5):
-    for gsw in np.arange(0.1,1.1,0.1):
+  for basestate in np.arange(1):
+    #for gsw in np.arange(0.1,1.1,0.1):
+    for gsw in [1.0]:
       if(gsw==1.0): N=1
       else: N=10
       makejson(N,gsw,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))
