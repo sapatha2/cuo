@@ -12,7 +12,7 @@ from functools import reduce
 
 def collectdf():
   df=None
-  for basestate in range(3):
+  for basestate in range(5):
     for gsw in np.arange(0.1,1.01,0.1):
       f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/gosling.pickle' 
       small_df=pd.read_pickle(f)

@@ -12,8 +12,8 @@ from functools import reduce
 
 def collectdf():
   df=None
-  for basestate in range(3):
-    for gsw in np.arange(0.1,1.0,0.1):
+  for basestate in range(5):
+    for gsw in np.arange(0.1,1.1,0.1):
       f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
       small_df=pd.read_pickle(f)
       
@@ -52,9 +52,9 @@ def analyze(df):
   #BIGGEST
   #X=df[['n_3dd','n_3d','n_2ppi','n_2pz','n_2p','n_4s','t_pi','t_sz','t_dz','t_ds']]
   #SMALLEST
-  X=df[['n_3d','n_2ppi','n_2pz']]
+  #X=df[['n_3d','n_2ppi','n_2pz']]
   #SEQUENTIALLY BETTER
-  #X=df[['n_3d','n_2ppi','n_2pz','t_pi']]
+  X=df[['n_3d','n_2ppi','n_2pz','t_pi']]
   #X=df[['n_3d','n_2ppi','n_2pz','t_ds']]
   #X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz']]
 
@@ -64,7 +64,7 @@ def analyze(df):
   print(ols.summary())
   
   df['pred']=ols.predict(X)
-  g = sns.FacetGrid(df,hue='basestate',hue_kws=dict(marker=['o']+['.']*8))
+  g = sns.FacetGrid(df,hue='basestate',hue_kws=dict(marker=['o']+['.']*8),palette=sns.color_palette('husl',9))
   g.map(plt.errorbar, "pred", "energy", "energy_err",fmt='o').add_legend()
   plt.plot(df['energy'],df['energy'],'k--')
   plt.show()
