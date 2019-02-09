@@ -12,7 +12,7 @@ from functools import reduce
 
 def collectdf():
   df=None
-  for basestate in range(5):
+  for basestate in range(8):
     for gsw in np.arange(0.1,1.1,0.1):
       f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
       small_df=pd.read_pickle(f)
@@ -54,9 +54,9 @@ def analyze(df):
   #SMALLEST
   #X=df[['n_3d','n_2ppi','n_2pz']]
   #SEQUENTIALLY BETTER
-  X=df[['n_3d','n_2ppi','n_2pz','t_pi']]
+  #X=df[['n_3d','n_2ppi','n_2pz','t_pi']]
   #X=df[['n_3d','n_2ppi','n_2pz','t_ds']]
-  #X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz']]
+  X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz']]
 
   X=sm.add_constant(X)
   ols=sm.OLS(y,X).fit()
