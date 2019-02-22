@@ -16,7 +16,7 @@ el='Cu'
 
 occ=np.arange(14) 
 mo_coeff=None
-for run in range(16):
+for run in range(10):
   chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+".chk"
   mol=lib.chkfile.load_mol(chkfile)
   m=ROKS(mol)

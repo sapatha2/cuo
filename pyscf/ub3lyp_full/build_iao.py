@@ -16,7 +16,7 @@ el='Cu'
 
 occ=np.arange(6,15)-1
 mo_coeff=None
-for run in range(16+12):
+for run in range(10):
   chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+".chk"
   if(run>=16): chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run-16)+"mirror.chk"
   print(chkfile)
@@ -52,6 +52,7 @@ for i in (mol.basis["O"]):
     pass
 minbasis={'Cu':cu_basis,'O':o_basis}
 
+'''
 #Build IAOs
 s=m.get_ovlp()
 a=lo.iao.iao(mol, mo_coeff, minao=minbasis)
@@ -61,3 +62,4 @@ a.dump('b3lyp_iao_b.pickle')
 #Write orbs
 m.mo_coeff[0][:,:a.shape[1]]=a
 print_qwalk_mol(mol,m,'scf',basename='b3lyp_iao_b')
+'''

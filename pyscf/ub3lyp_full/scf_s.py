@@ -9,65 +9,39 @@ df=json.load(open("trail.json"))
 charge=0
 S=1
 
-'''
 symm_dict=[
 #3d10 sector
 #2pz2
-{'A1':(5,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #GS **
+{'A1':(5,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #GS 
 {'A1':(6,5),'E1x':(3,3),'E1y':(2,2),'E2x':(1,1),'E2y':(1,1)}, #(pi -> s)  
-{'A1':(6,5),'E1x':(3,2),'E1y':(2,3),'E2x':(1,1),'E2y':(1,1)}, #(pi -> s) -- Spin pairs **
-{'A1':(5,6),'E1x':(3,2),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #(pi -> s) -- **
-{'A1':(6,6),'E1x':(3,2),'E1y':(2,2),'E2x':(1,1),'E2y':(1,1)}, #(2*pi -> 2*s)
+{'A1':(6,5),'E1x':(3,2),'E1y':(2,3),'E2x':(1,1),'E2y':(1,1)}, #(pi -> s) 
 #2pz1
-{'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(z -> pi) **
-{'A1':(6,4),'E1x':(3,3),'E1y':(2,3),'E2x':(1,1),'E2y':(1,1)}, #(z -> s) **
+{'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(z -> pi)
+{'A1':(6,4),'E1x':(3,3),'E1y':(2,3),'E2x':(1,1),'E2y':(1,1)}, #(z -> s) 
 
 #3d9 sector
 #2pz2
-{'A1':(5,5),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,0)}, #(dd -> pi) **
-{'A1':(6,5),'E1x':(3,3),'E1y':(2,3),'E2x':(1,1),'E2y':(1,0)}, #(dd -> s) -- Spin pairs **
-{'A1':(6,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(0,1)}, #(dd -> s) -- **
+{'A1':(5,5),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,0)}, #(dd -> pi) 
+{'A1':(6,5),'E1x':(3,3),'E1y':(2,3),'E2x':(1,1),'E2y':(1,0)}, #(dd -> s) -- Spin pairs 
+{'A1':(6,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(0,1)}, #(dd -> s) -- 
 {'A1':(5,6),'E1x':(3,3),'E1y':(3,1),'E2x':(1,1),'E2y':(1,1)}, #(dpi -> s)
+#2pz1
+{'A1':(6,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(0,1)}, #(dd,z -> pi,s)
+]
+'''
+#4s2 states
 {'A1':(6,6),'E1x':(3,3),'E1y':(2,2),'E2x':(1,1),'E2y':(1,0)}, #(dd,pi -> s,s)
 {'A1':(6,6),'E1x':(3,3),'E1y':(2,1),'E2x':(1,1),'E2y':(1,1)}, #(dpi,pi -> s,s)
 {'A1':(6,6),'E1x':(3,2),'E1y':(2,3),'E2x':(1,1),'E2y':(1,0)}, #(dd,pi -> s,s)
 {'A1':(6,6),'E1x':(3,1),'E1y':(2,3),'E2x':(1,1),'E2y':(1,1)}, #(dpi,pi-> s,s)
-#2pz1
-{'A1':(6,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(0,1)}, #(dd,z -> pi,s)
-]
-#16 base states
+{'A1':(6,6),'E1x':(3,2),'E1y':(2,2),'E2x':(1,1),'E2y':(1,1)}, #(2*pi -> 2*s)
 '''
-
-#Mirrored states
-symm_dict=[
-#3d10 sector
-#2pz2
-{'A1':(5,5),'E1x':(3,2),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #GS **
-{'A1':(6,5),'E1x':(2,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #(pi -> s) -- Spin pairs **
-{'A1':(6,6),'E1x':(2,2),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #(2*pi -> 2*s)
-#2pz1
-{'A1':(6,4),'E1x':(2,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(z -> s) **
-
-#3d9 sector
-#2pz2
-{'A1':(6,5),'E1x':(2,3),'E1y':(3,3),'E2x':(1,0),'E2y':(1,1)}, #(dd -> s) -- Spin pairs **
-{'A1':(6,5),'E1x':(3,2),'E1y':(3,3),'E2x':(0,1),'E2y':(1,1)}, #(dd -> s) -- **
-{'A1':(5,6),'E1x':(3,1),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(dpi -> s)
-{'A1':(6,6),'E1x':(3,3),'E1y':(2,2),'E2x':(1,0),'E2y':(1,1)}, #(dd,pi -> s,s)
-{'A1':(6,6),'E1x':(2,1),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(dpi,pi -> s,s)
-{'A1':(6,6),'E1x':(2,3),'E1y':(3,2),'E2x':(1,0),'E2y':(1,1)}, #(dd,pi -> s,s)
-{'A1':(6,6),'E1x':(2,3),'E1y':(3,1),'E2x':(1,1),'E2y':(1,1)}, #(dpi,pi-> s,s)
-#2pz1
-{'A1':(6,4),'E1x':(3,3),'E1y':(3,3),'E2x':(0,1),'E2y':(1,1)}, #(dd,z -> pi,s)
-]
-#12 mirror states
-
 datacsv={}
 
 for nm in['run','method','basis','pseudopotential','bond-length','S','E','conv']:
   datacsv[nm]=[]
 
-for run in range(9,len(symm_dict)):
+for run in range(len(symm_dict)):
   for r in [1.725]:
     for method in ['UB3LYP']:
       for basis in ['vdz','vtz']:
@@ -99,7 +73,7 @@ for run in range(9,len(symm_dict)):
 
           if basis=='vdz':
             #m=m.newton()
-            m.chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+"mirror.chk"
+            m.chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+".chk"
             m.irrep_nelec = symm_dict[run]
             m.max_cycle=100
             m = addons.remove_linear_dep_(m)
@@ -114,8 +88,8 @@ for run in range(9,len(symm_dict)):
           
           #Once we get past the vdz basis, just read-in the existingmirror.chk file...
           else:
-            dm=m.from_chk(el+'vdz'+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+"mirror.chk")
-            m.chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+"mirror.chk"
+            dm=m.from_chk(el+'vdz'+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+".chk")
+            m.chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+".chk"
             m.irrep_nelec = symm_dict[run]
             m.max_cycle=100
             m = addons.remove_linear_dep_(m)
@@ -135,4 +109,4 @@ for run in range(9,len(symm_dict)):
           datacsv['pseudopotential'].append('trail')
           datacsv['E'].append(total_energy)
           datacsv['conv'].append(m.converged)
-          pd.DataFrame(datacsv).to_csv("cuo_u_mirror.csv",index=False)
+          pd.DataFrame(datacsv).to_csv("cuo_u.csv",index=False)
