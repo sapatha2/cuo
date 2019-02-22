@@ -52,7 +52,7 @@ def genpbs(N,basename,fout):
   elif(N!=10): print("Cannot run"); exit(0)
   for i in range(2):
     #CC input
-    fname=fout+'_'+str(i)
+    fname=fout+'_'+str(i+1)
     string='#!/bin/bash\n'+\
     '#PBS -q secondary\n'+\
     '#PBS -l nodes=1,flags=allprocs\n'+\
