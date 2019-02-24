@@ -2,8 +2,8 @@ SLATER
   ORBITALS  { 
   MAGNIFY 1.0 
   NMO 13 
-  ORBFILE new_gs/new_gs.orb
-  INCLUDE new_gs/new_gs.basis
+  ORBFILE new_gs.orb
+  INCLUDE new_gs.basis
   CENTERS { USEGLOBAL }
   }
 
