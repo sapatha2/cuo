@@ -8,6 +8,7 @@ from sklearn import linear_model
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error, r2_score
 from diagonalize import diagonalize, new_gs
+from statsmodels.sandbox.regression.predstd import wls_prediction_std
 
 def collectdf():
   df=None
@@ -46,7 +47,7 @@ def analyze(df):
   #exit(0)
 
   #R2, RMSE AND MODEL PLOTS ----------------------------------------------------------
-  zz=0
+  '''zz=0
   ncv=5
   model_list=[
     ['n_3d','n_2ppi','n_2pz'],
@@ -78,7 +79,7 @@ def analyze(df):
       else: parms.append(0)
     
     evals=diagonalize(parms)
-    if(zz==3): new_gs(parms) 
+    #if(zz==3): new_gs(parms) 
     
     plt.plot(np.ones(ncv)*zz,cv_r2,'go-')
     plt.plot(np.ones(ncv)*zz+0.15,cv_rmse,'bo-')
@@ -97,17 +98,24 @@ def analyze(df):
   #plt.xlabel('Model')
   #plt.savefig('model_valid.pdf',bbox_inches='tight')
   #exit(0)
+  '''
 
   #PREDICTION PLOTS ---------------------------------------------------------------
-  '''
+  X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_ds']]
+  X=sm.add_constant(X)
+  y=df['energy']
+  ols=sm.OLS(y,X).fit() 
+  __,l_ols,u_ols=wls_prediction_std(ols,alpha=0.05) #Confidence level for two-sided hypothesis, 95 right now
+
+  df['pred_err']=(u_ols-l_ols)/2
   df['pred']=ols.predict(X)
+
+  df=df[df['basestate']==-1]
   g = sns.FacetGrid(df,hue='basestate',hue_kws=dict(marker=['o']+['.']*10))
-  g.map(plt.errorbar, "pred", "energy", "energy_err",fmt='o').add_legend()
+  g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
   plt.plot(df['energy'],df['energy'],'k--')
   plt.show()
   exit(0)
-  '''
-
 if __name__=='__main__':
   df=collectdf()
   analyze(df)
