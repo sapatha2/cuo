@@ -7,8 +7,9 @@ import pandas as pd
 
 df=json.load(open("trail.json"))
 charge=0
+######################################################################
+'''
 S=1
-
 symm_dict=[
 #3d10 sector
 #2pz2
@@ -29,6 +30,7 @@ symm_dict=[
 {'A1':(6,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(0,1)}, #(dd,z -> pi,s)
 ]
 '''
+'''
 #4s2 states
 {'A1':(6,6),'E1x':(3,3),'E1y':(2,2),'E2x':(1,1),'E2y':(1,0)}, #(dd,pi -> s,s)
 {'A1':(6,6),'E1x':(3,3),'E1y':(2,1),'E2x':(1,1),'E2y':(1,1)}, #(dpi,pi -> s,s)
@@ -36,6 +38,19 @@ symm_dict=[
 {'A1':(6,6),'E1x':(3,1),'E1y':(2,3),'E2x':(1,1),'E2y':(1,1)}, #(dpi,pi-> s,s)
 {'A1':(6,6),'E1x':(3,2),'E1y':(2,2),'E2x':(1,1),'E2y':(1,1)}, #(2*pi -> 2*s)
 '''
+######################################################################
+S=3
+symm_dict=[
+#3d10 sector
+{'A1':(6,5),'E1x':(3,2),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #dn - 2pz occupied
+{'A1':(6,4),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #dn - 2ppi occupied
+#3d9 sector
+{'A1':(6,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,0)}, #delta, dn - pz, px
+{'A1':(6,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,0)}, #delta, dn - px, py
+{'A1':(6,5),'E1x':(3,3),'E1y':(3,1),'E2x':(1,1),'E2y':(1,1)}, #pi, dn - pz, px
+{'A1':(6,3),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #dz2, dn - px, py
+]
+
 datacsv={}
 
 for nm in['run','method','basis','pseudopotential','bond-length','S','E','conv']:
@@ -109,4 +124,4 @@ for run in range(len(symm_dict)):
           datacsv['pseudopotential'].append('trail')
           datacsv['E'].append(total_energy)
           datacsv['conv'].append(m.converged)
-          pd.DataFrame(datacsv).to_csv("cuo_u.csv",index=False)
+          pd.DataFrame(datacsv).to_csv("cuo_u_hispin.csv",index=False)
