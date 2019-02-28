@@ -8,18 +8,30 @@ from sklearn import linear_model
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error, r2_score
 from diagonalize import diagonalize, new_gs
+from statsmodels.sandbox.regression.predstd import wls_prediction_std
 
 def collectdf():
   df=None
   for basestate in range(10):
     for gsw in np.arange(0.1,1.01,0.1):
-      f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/gosling.pickle' 
+      f='../ub3lyp_mo3/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/gosling.pickle' 
       small_df=pd.read_pickle(f)
-      
+     
+      small_df['Sz']=0.5
       small_df['basestate']=basestate
       if(np.around(gsw,2)==1.0): small_df['basestate']=-1
       if(df is None): df = small_df
       else: df = pd.concat((df,small_df),axis=0)
+  
+  for basestate in range(6):
+    for gsw in np.arange(0.1,1.01,0.1):
+      f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/gosling.pickle' 
+      small_df=pd.read_pickle(f)
+     
+      small_df['Sz']=1.5
+      small_df['basestate']=basestate+10
+      if(np.around(gsw,2)==1.0): small_df['basestate']=-1
+      df = pd.concat((df,small_df),axis=0)
   return df
 
 def analyze(df):
@@ -78,7 +90,6 @@ def analyze(df):
       else: parms.append(0)
     
     evals=diagonalize(parms)
-    if(zz==3): new_gs(parms) 
     
     plt.plot(np.ones(ncv)*zz,cv_r2,'go-')
     plt.plot(np.ones(ncv)*zz+0.15,cv_rmse,'bo-')
@@ -93,20 +104,33 @@ def analyze(df):
       plt.plot(np.ones(len(evals))*zz+0.30,evals/10,'ro-')
 
     zz+=1
-  #plt.legend(loc='best')
-  #plt.xlabel('Model')
-  #plt.savefig('model_valid.pdf',bbox_inches='tight')
-  #exit(0)
-
+  plt.legend(loc='best')
+  plt.xlabel('Model')
+  plt.savefig('model_valid.pdf',bbox_inches='tight')
+  plt.close()
+  
   #PREDICTION PLOTS ---------------------------------------------------------------
-  '''
+  X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_ds']]
+  X=sm.add_constant(X)
+  y=df['energy']
+  ols=sm.OLS(y,X).fit() 
+  __,l_ols,u_ols=wls_prediction_std(ols,alpha=0.05) #Confidence level for two-sided hypothesis, 95 right now
+  print(ols.summary())
+
+  df['pred_err']=(u_ols-l_ols)/2
   df['pred']=ols.predict(X)
-  g = sns.FacetGrid(df,hue='basestate',hue_kws=dict(marker=['o']+['.']*10))
-  g.map(plt.errorbar, "pred", "energy", "energy_err",fmt='o').add_legend()
+
+  g = sns.FacetGrid(df,hue='Sz',hue_kws=dict(marker=['.']*2))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))
+  g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
   plt.plot(df['energy'],df['energy'],'k--')
-  plt.show()
-  exit(0)
-  '''
+  plt.savefig('fit.pdf')
+  plt.close()
+
+  df=df[df['basestate']==-1]
+  g = sns.FacetGrid(df,hue='Sz',hue_kws=dict(marker=['.']*2))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))
+  g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
+  plt.plot(df['energy'],df['energy'],'k--')
+  plt.savefig('fit_baseonly.pdf')
 
 if __name__=='__main__':
   df=collectdf()
