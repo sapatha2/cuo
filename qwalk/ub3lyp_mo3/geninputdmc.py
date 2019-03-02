@@ -34,7 +34,7 @@ def genpbs(N,basename,fout):
     string='#!/bin/bash\n'+\
     '#PBS -q secondary\n'+\
     '#PBS -l nodes=1,flags=allprocs\n'+\
-    '#PBS -l walltime=04:00:00\n'+\
+    '#PBS -l walltime=03:00:00\n'+\
     '#PBS -N '+fname+str(j)+'\n'\
     '#PBS -e '+fname+str(j)+'.perr\n'+\
     '#PBS -o '+fname+str(j)+'.pout\n'+\
@@ -87,5 +87,5 @@ if __name__=='__main__':
   for gsw in np.arange(0.1,1.1,0.1):
     if(gsw==1.0): N=1
     else: N=10
-    for basestate in np.arange(8):
+    for basestate in np.arange(10):
       geninput(N,gsw,basestate,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))

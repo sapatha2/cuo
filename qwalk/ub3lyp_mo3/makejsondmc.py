@@ -9,7 +9,7 @@ def makejson(N,gsw,basename):
   return 1
 
 if __name__=='__main__':
-  for basestate in np.arange(7,8):
+  for basestate in np.arange(10):
     for gsw in np.arange(0.1,1.1,0.1):
     #for gsw in [1.0]:
       if(gsw==1.0): N=1

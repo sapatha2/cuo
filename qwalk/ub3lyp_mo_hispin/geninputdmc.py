@@ -50,7 +50,7 @@ def genpbs(N,basename,fout):
 
 def gendmc(N,basename,fout):
   for j in range(1,N+1):
-    sysstring='s12.sys'
+    sysstring='s32.sys'
     fname=fout+'_'+str(j)
     
     string='method {\n'+\
@@ -87,5 +87,5 @@ if __name__=='__main__':
   for gsw in np.arange(0.1,1.1,0.1):
     if(gsw==1.0): N=1
     else: N=10
-    for basestate in np.arange(10):
+    for basestate in np.arange(6):
       geninput(N,gsw,basestate,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))
