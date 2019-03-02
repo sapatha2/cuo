@@ -27,8 +27,11 @@ def gather_all(N,gsw,basename):
       one_body=sum_onebody(obdm,orb1,orb2)
       one_labels=['t_'+str(orb1[i])+'_'+str(orb2[i]) for i in range(len(orb1))]
 
-      dat=np.array([energy,energy_err]+list(one_body))
-      d=pd.DataFrame(dat[:,np.newaxis].T,columns=['energy','energy_err']+one_labels)
+      #U4s for the base states, single determinants are easy!
+      u4s=obdm[0][13,13]*obdm[1][13,13]
+
+      dat=np.array([energy,energy_err]+list(one_body)+[u4s])
+      d=pd.DataFrame(dat[:,np.newaxis].T,columns=['energy','energy_err']+one_labels+['U4s'])
       d=d.astype('double')
       d['gsw']=gsw
       if(j>N): d['gsw']=0
