@@ -38,7 +38,7 @@ def genpbs(N,basename,fout):
     string='#!/bin/bash\n'+\
     '#PBS -q secondary\n'+\
     '#PBS -l nodes=1,flags=allprocs\n'+\
-    '#PBS -l walltime=01:00:00\n'+\
+    '#PBS -l walltime=00:30:00\n'+\
     '#PBS -N '+fname+'\n'\
     '#PBS -e '+fname+'.perr\n'+\
     '#PBS -o '+fname+'.pout\n'+\
@@ -56,7 +56,7 @@ def genpbs(N,basename,fout):
     string='#!/bin/bash\n'+\
     '#PBS -q secondary\n'+\
     '#PBS -l nodes=1,flags=allprocs\n'+\
-    '#PBS -l walltime=01:00:00\n'+\
+    '#PBS -l walltime=03:00:00\n'+\
     '#PBS -N '+fname+'\n'\
     '#PBS -e '+fname+'.perr\n'+\
     '#PBS -o '+fname+'.pout\n'+\
@@ -91,6 +91,7 @@ def genvmc(N,basename,fout):
     '    states { 1 2 3 4 5 6 7 8 9 10 11 12 13 14 }\n'+\
     '  }\n'+\
     '  average { tbdm_basis\n'+\
+    '    mode tbdm_diagonal\n'+\
     '    orbitals {\n'+\
     '      magnify 1\n'+\
     '      nmo 14\n'+\
@@ -120,7 +121,7 @@ def genslater(N,gsw,basestate,basename,fout):
     #Generate input file, based on following state order
     #(see collect_mos.py for ordering): gs0, gs1, gs2, gs3, gs4, gs5
     string=None
-    Ndet=10
+    Ndet=6
 
     #Generate weight vector 
     gauss=np.random.normal(size=Ndet-1)
