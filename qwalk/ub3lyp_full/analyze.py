@@ -27,6 +27,7 @@ def analyze(df):
   
   sns.pairplot(df,vars=['energy','n_3d','n_2pz','n_2ppi'],hue='gsw',markers=['.']*9+['o'])
   plt.show()
+  exit(0)
 
   #FITS --------------------------------------------------------------------------
   y=df['energy']

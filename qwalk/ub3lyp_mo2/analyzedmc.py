@@ -38,10 +38,12 @@ def analyze(df):
   df['t_pi']=2*(df['t_1_6']+df['t_2_7'])
   df['t_dz']=2*df['t_3_8']
   df['t_sz']=2*df['t_8_9']
+  df['t_ds']=2*df['t_3_9']
+  df['n']=df['n_3d']+df['n_4s']+df['n_2p']
 
   #PAIRPLOTS --------------------------------------------------------------------------
-  #sns.pairplot(df,vars=['energy','n_3dd','n_3dpi','n_3dz2','n_3d'],hue='basestate',markers=['o']+['.']*8)
-  #sns.pairplot(df,vars=['energy','n_2ppi','n_2pz','n_2p','n_4s'],hue='basestate',markers=['o']+['.']*8)
+  #sns.pairplot(df,vars=['energy','n'],hue='basestate',markers=['o']+['.']*8)
+  #sns.pairplot(df,vars=['energy','n_2ppi','n_2pz','n_3d'],hue='basestate',markers=['o']+['.']*8)
   #sns.pairplot(df,vars=['energy','t_pi','t_dz','t_ds','t_sz'],hue='basestate',markers=['o']+['.']*8)
   #plt.show()
   #exit(0)
@@ -55,24 +57,37 @@ def analyze(df):
   #X=df[['n_3d','n_2ppi','n_2pz']]
   #SEQUENTIALLY BETTER
   #X=df[['n_3d','n_2ppi','n_2pz','t_pi']]
-  #X=df[['n_3d','n_2ppi','n_2pz','t_ds']]
-  X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz']]
+  #X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_sz']]
+  #X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_dz']]
+  #X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz']]
+
+  #X=df[['n_3d','n_2ppi','n_2pz','t_dz']]
+  #X=df[['n_3d','n_2ppi','n_2pz','t_sz']]
+  
+  X=df[['n_3d','n_2ppi','n_2pz','t_ds','t_pi']]
+  #X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_ds']]
+  #X=df[['n_3d','n_2ppi','n_2pz','t_dz','t_ds']]
+  #X=df[['n_3d','n_2ppi','n_2pz','t_sz','t_ds']]
+  #X=df[['n_3d','n_2ppi','n_2pz','t_dz','t_sz','t_ds']]
 
   X=sm.add_constant(X)
-  ols=sm.OLS(y,X).fit()
-  print(ols.params)
-  print(ols.summary())
-  
-  df['pred']=ols.predict(X)
+  beta=0.0
+  wls=sm.WLS(y,X,weights=np.exp(-beta*(y-min(y)))).fit()
+  print(wls.summary())
+ 
+  df['pred']=wls.predict(X)
+  df['resid']=df['energy']-df['pred'] 
+  sns.pairplot(df,vars=['resid','t_pi','t_dz','t_sz'],hue='basestate',markers=['o']+['.']*8)
+  '''
   g = sns.FacetGrid(df,hue='basestate',hue_kws=dict(marker=['o']+['.']*8),palette=sns.color_palette('husl',9))
   g.map(plt.errorbar, "pred", "energy", "energy_err",fmt='o').add_legend()
   plt.plot(df['energy'],df['energy'],'k--')
+  '''
   plt.show()
   exit(0)
 
   #ROTATE TO IAOS --------------------------------------------------------------------------
   #Gather IAOs
-  '''
   f='../../pyscf/analyze/b3lyp_iao_b.pickle' #IAOs which span the MOs
   a=np.load(f)
 
@@ -82,27 +97,34 @@ def analyze(df):
   m.__dict__.update(lib.chkfile.load(chkfile, 'scf'))
 
   s=m.get_ovlp()
-  H1=np.diag([-3.1957,-3.1957,-3.1957,-3.1957,-3.1957,-1.6972,-1.6972,-2.5474,0])
-  H1[0,5]=0.7858
-  H1[5,0]=0.7858
-  H1[1,6]=0.7858
-  H1[6,1]=0.7858
-  H1[2,7]=-0.8329
-  H1[7,2]=-0.8329
-  H1[7,8]=1.6742
-  H1[8,7]=1.6742
+ 
+  #dpi,dpi,dz2,dd,dd,ppi,ppi,pz,4s
+  #e3d,e2pz,e2ppi,tpi,tdz,tsz=(-3.2487,-2.5759,-1.6910,0.3782,-0.7785,1.1160) #DMC
+  e3d,e2pz,e2ppi,tpi,tdz,tsz=(-3.3324,-1.8762,-0.9182,0.8266,0,0) #DMC
 
-  mo_coeff=m.mo_coeff[:,5:14]
-  e1=reduce(np.dot,(a.T,s,mo_coeff,H1,mo_coeff.T,s.T,a))
+  H=np.diag([e3d,e3d,e3d,e3d,e3d,e2ppi,e2ppi,e2pz,0])
+  H[0,5]=tpi
+  H[5,0]=tpi
+  H[1,6]=tpi
+  H[6,1]=tpi
+  H[2,7]=tdz
+  H[7,2]=tdz
+  H[7,8]=tsz
+  H[8,7]=tsz
+
+  mo_coeff=m.mo_coeff[:,5:14] #Only include active MOs
+  a=a[:,[1,5,6,7,8,9,11,12,13]]                 #Only include active IAOs
+  e1=reduce(np.dot,(a.T,s,mo_coeff,H,mo_coeff.T,s.T,a))
   e1=(e1+e1.T)/2. 
   
   plt.matshow(e1,vmax=5,vmin=-5,cmap=plt.cm.bwr)
   plt.colorbar()
-  labels=['3s','4s','3px','3py','3pz','3dxy','3dyz','3dz2','3dxz','3dx2-y2','2s','2px','2py','2pz']
-  plt.xticks(np.arange(14),labels,rotation=90)
-  plt.yticks(np.arange(14),labels)
+  #labels=['3s','4s','3px','3py','3pz','3dxy','3dyz','3dz2','3dxz','3dx2-y2','2s','2px','2py','2pz']
+  labels=['4s','3dxy','3dyz','3dz2','3dxz','3dx2-y2','2px','2py','2pz']
+  plt.xticks(np.arange(len(labels)),labels,rotation=90)
+  plt.yticks(np.arange(len(labels)),labels)
   plt.show()
-  '''
+
 if __name__=='__main__':
   df=collectdf()
   analyze(df)

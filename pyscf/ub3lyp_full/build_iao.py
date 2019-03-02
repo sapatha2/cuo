@@ -16,9 +16,25 @@ el='Cu'
 
 occ=np.arange(6,15)-1
 mo_coeff=None
-for run in range(10):
+for run in range(16*2):
   chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+".chk"
   if(run>=16): chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run-16)+"mirror.chk"
+  print(chkfile)
+  mol=lib.chkfile.load_mol(chkfile)
+  m=ROKS(mol)
+  m.__dict__.update(lib.chkfile.load(chkfile, 'scf'))
+
+  if(mo_coeff is None): 
+    mo_coeff=m.mo_coeff[0][:,occ]
+    mo_coeff=np.concatenate((mo_coeff,m.mo_coeff[1][:,occ]),axis=1)
+  else: 
+    mo_coeff=np.concatenate((mo_coeff,m.mo_coeff[0][:,occ]),axis=1)
+    mo_coeff=np.concatenate((mo_coeff,m.mo_coeff[1][:,occ]),axis=1)
+
+S=3
+for run in range(6*2):
+  chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+".chk"
+  if(run>=6): chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run-6)+"mirror.chk"
   print(chkfile)
   mol=lib.chkfile.load_mol(chkfile)
   m=ROKS(mol)
@@ -52,7 +68,6 @@ for i in (mol.basis["O"]):
     pass
 minbasis={'Cu':cu_basis,'O':o_basis}
 
-'''
 #Build IAOs
 s=m.get_ovlp()
 a=lo.iao.iao(mol, mo_coeff, minao=minbasis)
@@ -62,4 +77,3 @@ a.dump('b3lyp_iao_b.pickle')
 #Write orbs
 m.mo_coeff[0][:,:a.shape[1]]=a
 print_qwalk_mol(mol,m,'scf',basename='b3lyp_iao_b')
-'''

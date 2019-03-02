@@ -106,15 +106,16 @@ def analyze(df):
   y=df['energy']
   ols=sm.OLS(y,X).fit() 
   __,l_ols,u_ols=wls_prediction_std(ols,alpha=0.05) #Confidence level for two-sided hypothesis, 95 right now
+  print(ols.summary())
 
   df['pred_err']=(u_ols-l_ols)/2
   df['pred']=ols.predict(X)
 
-  df=df[df['basestate']==-1]
+  #df=df[df['basestate']==-1]
   g = sns.FacetGrid(df,hue='basestate',hue_kws=dict(marker=['o']+['.']*10))
   g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
   plt.plot(df['energy'],df['energy'],'k--')
-  plt.show()
+  plt.savefig('fit.pdf')
   exit(0)
 if __name__=='__main__':
   df=collectdf()

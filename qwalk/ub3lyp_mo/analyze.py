@@ -23,7 +23,9 @@ def collectdf():
 def analyze(df):
   df['gsw']=np.round(df['gsw'],2)
   df['n_3d']=df['n_5']+df['n_6']+df['n_7']+df['n_8']+df['n_9']
-  df['n_3dd']=df['n_8']+df['n_5']
+  df['n_3dd']=df['n_8']+df['n_9']
+  df['n_3dpi']=df['n_6']+df['n_7']
+  df['n_3dz2']=df['n_5']
   df['n_2ppi']=df['n_11']+df['n_12']
   df['n_2pz']=df['n_10']
   df['n_4s']=df['n_13']
@@ -39,14 +41,14 @@ def analyze(df):
   #sns.pairplot(df,vars=['energy','n_8','n_10','n_11','n_12','n_13'],hue='basestate',markers=['o']+['.']*8) 
   #plt.show()
 
-  sns.pairplot(df,vars=['energy','n_3d','n_2pz','n_2ppi'],hue='basestate',markers=['o']+['.']*8)
-  plt.show()
+  #sns.pairplot(df,vars=['energy','n_3d','n_2pz','n_2ppi'],hue='basestate',markers=['o']+['.']*8)
+  #plt.show()
 
   #FITS --------------------------------------------------------------------------
   y=df['energy']
   yerr=df['energy_err']
   #X=df[['n_3d','n_2pz','3dz2-2pz','4s-2pz','U_4s']]
-  X=df[['n_3d','n_2ppi','n_2pz']]
+  X=df[['n_8','n_10','n_11','n_12']]
   X=sm.add_constant(X)
   #beta=2
   #for beta in np.arange(0,5,0.5):
