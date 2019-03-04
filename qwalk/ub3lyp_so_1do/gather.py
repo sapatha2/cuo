@@ -48,7 +48,7 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 import seaborn as sns 
 if __name__=='__main__':
-  for basestate in np.arange(10):
+  for basestate in np.arange(11):
     for gsw in np.arange(0.1,1.1,0.1): 
       if(gsw==1.0): N=1
       else: N=10
