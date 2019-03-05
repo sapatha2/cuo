@@ -30,8 +30,8 @@ def gather_all(detgen,N,Ndet,gsw,basename):
       orb=np.arange(9)
       U=sum_U(tbdm,orb)
 
-      orb1=[0,0,0,0,0,1,1,1,1,2,2,2,3,3,4,0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5]
-      orb2=[1,2,3,4,5,2,3,4,5,3,4,5,4,5,5,6,7,8,6,7,8,6,7,8,6,7,8,6,7,8,6,7,8]
+      orb1=[0,0,0,0,0,1,1,1,1,2,2,2,3,3,4,0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,7]
+      orb2=[1,2,3,4,5,2,3,4,5,3,4,5,4,5,5,6,7,8,6,7,8,6,7,8,6,7,8,6,7,8,6,7,8,7,8,8]
       V_labels=['V_'+full_labels[orb1[i]]+'_'+full_labels[orb2[i]] for i in range(len(orb1))]
       V=sum_V(tbdm,orb1,orb2) 
 
@@ -104,6 +104,11 @@ def gather_all(detgen,N,Ndet,gsw,basename):
   'J_4s_3dxy','J_4s_3dx2y2','J_4s_3dxz','J_4s_3dyz','J_4s_2px','J_4s_2py',
   'J_3dxz_2pz','J_3dyz_2pz','J_3dxy_2pz','J_3dx2y2_2pz','J_3dxz_2px','J_3dxz_2py','J_3dyz_2px','J_3dyz_2pz',
   'J_3dxy_2px','J_3dxy_2py','J_3dx2y2_2px','J_3dx2y2_2py','J_3dz2_2px','J_3dz2_2py'])
+
+  df['J_2ppi_2pz']=df['J_2px_2pz']+df['J_2py_2pz']
+  df['J_2ppi']=df['J_2px_2py']
+  df['J_2p']=df['J_2ppi']+df['J_2ppi_2pz']
+  df=df.drop(columns=['J_2px_2pz','J_2py_2pz','J_2px_2py'])
 
   fout=basename+'/ex_'+detgen+'_Ndet'+str(Ndet)+'_gsw'+str(gsw)+'_gosling.pickle'
   df.to_pickle(fout)

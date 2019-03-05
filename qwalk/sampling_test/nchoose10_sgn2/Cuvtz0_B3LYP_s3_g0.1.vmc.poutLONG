@@ -1,0 +1,16 @@
+----------------------------------------
+Begin Torque Prologue on nid27559
+at Wed Sep  5 17:17:33 CDT 2018
+Job Id:			8979373.bw
+Username:		sapatha2
+Group:			ILL_batr
+Job name:		Cuvtz0_B3LYP_s3_g0.1.vmcLONG
+Requested resources:	neednodes=40:ppn=32:xe,nodes=40:ppn=32:xe,walltime=01:00:00
+Queue:			low
+Account:		batr
+End Torque Prologue:  0.125 elapsed
+----------------------------------------
+
+
+
+

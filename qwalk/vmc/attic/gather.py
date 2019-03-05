@@ -117,5 +117,5 @@ if __name__=='__main__':
   N=50
   Ndet=10
   gsw=0.7
-  basename='run1s'
+  basename='run1s_1body'
   df=gather_all(detgen,N,Ndet,gsw,basename)
