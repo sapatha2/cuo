@@ -20,23 +20,39 @@ def gather_all(N,gsw,basename):
       print(f)
       data=json.load(open(f,'r'))
       obdm,__=get_qwalk_dm(data['properties']['tbdm_basis1'])
-      __,__,tbdm,__=get_qwalk_dm(data['properties']['tbdm_basis2'])
+      obdm2,__,tbdm,__=get_qwalk_dm(data['properties']['tbdm_basis2'])
       energy=data['properties']['total_energy']['value'][0]*27.2114
       energy_err=data['properties']['total_energy']['error'][0]*27.2114
 
+      print(obdm.shape,obdm2.shape,tbdm.shape)
+
+      #MO ordering
+      #1-body
       orb1=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,5, 6 ,7 ,7 ,12]
       orb2=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,10,11,12,13,13]
-      one_body=sum_onebody(obdm,orb1,orb2)
-      one_labels=['t_'+str(orb1[i])+'_'+str(orb2[i]) for i in range(len(orb1))]
+      mo=sum_onebody(obdm,orb1,orb2)
+      mo_labels=['mo_'+str(orb1[i])+'_'+str(orb2[i]) for i in range(len(orb1))]
 
-      sigU=0.5*(data['properties']['tbdm_basis2']['tbdm']['updown'][0]+\
-      data['properties']['tbdm_basis2']['tbdm']['downup'][0])
+      #IAO ordering (4s, dxy, dyz, dz2, dxz, dx2-y2, px, py, pz)
+      #1-body
+      orb1=[0,1,2,3,4,5,6,7,8,0,0,3,2,4]
+      orb2=[0,1,2,3,4,5,6,7,8,3,8,8,7,6]
+      iao=sum_onebody(obdm2,orb1,orb2)
+      iao_labels=['iao_'+str(orb1[i])+'_'+str(orb2[i]) for i in range(len(orb1))]
+    
+      #2-body
+      orb1=[0,1,2,3,4,5]
+      u=sum_U(tbdm,orb1)
+      u_labels=['u'+str(orb1[i]) for i in range(len(orb1))]
 
-      dat=np.array([energy,energy_err,sigU]+list(one_body))
-      d=pd.DataFrame(dat[:,np.newaxis].T,columns=['energy','energy_err','sigU']+one_labels)
+      orb1=[0,0,0,0,0,1,1,1,1,2,2,2,3,3,4]
+      orb2=[1,2,3,4,5,2,3,4,5,3,4,5,4,5,5]
+      j=sum_J(tbdm,orb1,orb2)
+      j_labels=['j_'+str(orb1[i])+'_'+str(orb2[i]) for i in range(len(orb1))]
+
+      dat=np.array([energy,energy_err]+list(mo)+list(iao)+list(u)+list(j))
+      d=pd.DataFrame(dat[:,np.newaxis].T,columns=['energy','energy_err']+mo_labels+iao_labels+u_labels+j_labels)
       d=d.astype('double')
-      d['gsw']=gsw
-      if(j>N): d['gsw']=0
       if(df is None): df=d
       else: df=pd.concat((df,d),axis=0)      
     else: print(f+' does not exist')
@@ -49,7 +65,5 @@ import statsmodels.api as sm
 import seaborn as sns 
 if __name__=='__main__':
   for basestate in np.arange(6):
-    for gsw in np.arange(0.1,1.1,0.1): 
-      if(gsw==1.0): N=1
-      else: N=10
-      gather_all(N,gsw,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))
+    for gsw  in [1.0]:
+      gather_all(1,gsw,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))

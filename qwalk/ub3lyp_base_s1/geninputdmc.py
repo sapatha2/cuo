@@ -34,12 +34,14 @@ def genpbs(N,basename,fout):
     string='#!/bin/bash\n'+\
     '#PBS -q low\n'+\
     '#PBS -l nodes=8:ppn=32:xe\n'+\
-    '#PBS -l walltime=04:00:00\n'+\
+    '#PBS -l walltime=08:00:00\n'+\
     '#PBS -N '+fname+'\n'\
     '#PBS -e '+fname+'.perr\n'+\
     '#PBS -o '+fname+'.pout\n'+\
-    'cd ${PBS_O_WORKDIR}/'+basename+'/ \n'+\
-    'aprun -n 256 /u/sciteam/$USER/fork/bin/qwalk '+fname+'.dmc &> '+fname+'.dmc.out\n'
+    'mkdir -p /scratch/sciteam/$USER/cuo/qwalk/ub3lyp_base_s1/'+basename+'/\n'+\
+    'cd /scratch/sciteam/$USER/cuo/qwalk/ub3lyp_base_s1/'+basename+'/\n'+\
+    'cp -u /u/sciteam/$USER/cuo/qwalk/ub3lyp_base_s1/'+basename+'/* .\n'+\
+    'aprun -n 256 /u/sciteam/$USER/fork/bin/qwalk '+fname+'.dmc &> '+fname+'.dmc.out\n'     
     f=open(basename+'/'+fname+'.dmc.pbs','w')
     f.write(string)
     f.close()
@@ -68,7 +70,6 @@ def gendmc(N,basename,fout):
     '    states { 5 6 7 8 9 10 11 12 13 14 }\n'+\
     '  }\n'+\
     '  average { tbdm_basis\n'+\
-    '    mode tbdm_diagonal\n'+\
     '    orbitals {\n'+\
     '      magnify 1\n'+\
     '      nmo 14\n'+\
