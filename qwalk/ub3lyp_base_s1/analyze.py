@@ -14,67 +14,111 @@ from sklearn.model_selection import KFold
 def collectdf():
   df=None
   for basestate in range(10):
-    for gsw in np.arange(0.1,1.1,0.1):
+    for gsw in [1.0]:
       f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/gosling.pickle' 
       small_df=pd.read_pickle(f)
 
-      small_df['Sz']='0.5_s'
-      small_df['basestate']=basestate
-      if(np.around(gsw,2)==1.0): small_df['basestate']=-1
+      small_df['Sz']=0.5
       if(df is None): df = small_df
-      else: df = pd.concat((df,small_df),axis=0)
-  
-  for basestate in range(6):
-    for gsw in np.arange(0.1,1.1,0.1):
-      f='../ub3lyp_do_s1/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/gosling.pickle' 
-      small_df=pd.read_pickle(f)
-     
-      small_df['Sz']='0.5_d'
-      small_df['basestate']=basestate+10
-      if(np.around(gsw,2)==1.0): small_df['basestate']=-1
-      df = pd.concat((df,small_df),axis=0)
+      else: df = pd.concat((df,small_df),axis=0,sort=True)
 
   for basestate in range(6):
-    for gsw in np.arange(0.1,1.1,0.1):
-      f='../ub3lyp_so_s3/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/gosling.pickle' 
+    for gsw in [1.0]:
+      f='../ub3lyp_base_s3/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/gosling.pickle' 
       small_df=pd.read_pickle(f)
      
-      small_df['Sz']='1.5_s'
-      small_df['basestate']=basestate+16
-      if(np.around(gsw,2)==1.0): small_df['basestate']=-1
-      df = pd.concat((df,small_df),axis=0)
+      small_df['Sz']=1.5
+      df = pd.concat((df,small_df),axis=0,sort=True)
   return df
 
 def analyze(df):
   #Formatting
-  df['gsw']=np.round(df['gsw'],2)
+  df['mo_n_3s']=df['mo_0_0']
+  df['mo_n_3p']=df['mo_1_1']+df['mo_2_2']+df['mo_3_3']
+  df['mo_n_2s']=df['mo_4_4']
+  df['mo_n_3dd']=df['mo_8_8']+df['mo_9_9']
+  df['mo_n_3dpi']=df['mo_5_5']+df['mo_6_6']
+  df['mo_n_3dz2']=df['mo_7_7']
+  df['mo_n_3d']=df['mo_n_3dd']+df['mo_n_3dpi']+df['mo_n_3dz2']
+  df['mo_n_2ppi']=df['mo_10_10']+df['mo_11_11']
+  df['mo_n_2pz']=df['mo_12_12']
+  df['mo_n_2p']=df['mo_n_2ppi']+df['mo_n_2pz']
+  df['mo_n_4s']=df['mo_13_13']
+  df['mo_t_pi']=2*(df['mo_5_10']+df['mo_6_11'])
+  df['mo_t_dz']=2*df['mo_7_12']
+  df['mo_t_ds']=2*df['mo_7_13']
+  df['mo_t_sz']=2*df['mo_12_13']
   
-  df['n_3s']=df['t_0_0']
-  df['n_3p']=df['t_1_1']+df['t_2_2']+df['t_3_3']
-  df['n_2s']=df['t_4_4']
-  df['n_3dd']=df['t_8_8']+df['t_9_9']
-  df['n_3dpi']=df['t_5_5']+df['t_6_6']
-  df['n_3dz2']=df['t_7_7']
-  df['n_3d']=df['n_3dd']+df['n_3dpi']+df['n_3dz2']
-  df['n_2ppi']=df['t_10_10']+df['t_11_11']
-  df['n_2pz']=df['t_12_12']
-  df['n_2p']=df['n_2ppi']+df['n_2pz']
-  df['n_4s']=df['t_13_13']
-  df['t_pi']=2*(df['t_5_10']+df['t_6_11'])
-  df['t_dz']=2*df['t_7_12']
-  df['t_ds']=2*df['t_7_13']
-  df['t_sz']=2*df['t_12_13']
-  df['n']=df['n_3d']+df['n_2p']+df['n_4s']#+df['n_3s']+df['n_3p']+df['n_2s']
+  #4s, dxy, dyz, dz2, dxz, dx2-y2, px, py, pz
+  df['iao_n_3dd']=df['iao_1_1']+df['iao_5_5']
+  df['iao_n_3dz2']=df['iao_3_3']
+  df['iao_n_3dpi']=df['iao_2_2']+df['iao_4_4']
+  df['iao_n_3d']=df['iao_n_3dd']+df['iao_n_3dz2']+df['iao_n_3dpi']
+  df['iao_n_2ppi']=df['iao_6_6']+df['iao_7_7']
+  df['iao_n_2pz']=df['iao_8_8']
+  df['iao_n_4s']=df['iao_0_0']
+  df['iao_t_pi']=2*(df['iao_2_7']+df['iao_4_6'])
+  df['iao_t_dz']=2*df['iao_3_8']
+  df['iao_t_ds']=2*df['iao_0_3']
+  df['iao_t_sz']=2*df['iao_0_8']
+
+  df['Us']=df['u0']
+  df['Ud']=df['u1']+df['u2']+df['u3']+df['u4']+df['u5']
+  df['Up']=df['u6']+df['u7']+df['u8']
+
+  df['Jd']=np.zeros(df.shape[0])
+  orb1=[1,1,1,1,2,2,2,3,3,4]
+  orb2=[2,3,4,5,3,4,5,4,5,5]
+  for i in range(len(orb1)):
+    df['Jd']+=df['j_'+str(orb1[i])+'_'+str(orb2[i])]
+  df['Jsd']=df['j_0_1']+df['j_0_2']+df['j_0_3']+df['j_0_4']+df['j_0_5']
+  df['Jcu']=df['Jsd']+df['Jd']
+  df['Jsp']=df['j_0_6']+df['j_0_7']+df['j_0_8']
+
+  #VMC ordering of base states
+  '''
+  df['energy']-=min(df['energy'])
+  df=df.sort_values(by=['energy'])
+  df['order']=np.arange(df.shape[0])
+  #df=df.iloc[6:]
+  sns.pairplot(df,vars=['energy','order','n_3dz2','n_3dpi','n_3dd','n_2ppi','n_2pz','mo_pi','mo_dz','mo_sz','mo_ds'],hue='Sz')
+  plt.savefig('VMC_order.pdf')
+  exit(0)
+  '''
 
   #PAIRPLOTS --------------------------------------------------------------------------
-  #sns.pairplot(df,vars=['energy','n_3dd','n_3dpi','n_3dz2','n_3d'],hue='basestate',markers=['o']+['.']*10)
-  #sns.pairplot(df,vars=['energy','n_2ppi','n_2pz','n_2p','n_4s'],hue='basestate',markers=['o']+['.']*10)
-  #sns.pairplot(df,vars=['energy','t_pi','t_dz','t_ds','t_sz'],hue='basestate',markers=['o']+['.']*10)
-  #sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_4s'],hue='Sz',markers=['o','o'])
-  #sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_2pz','t_pi','t_ds','t_dz','t_sz'],hue='Sz')
-  #df=df[df['basestate']==-1]
-  #sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_2pz'],hue='Sz')
+  '''
+  ind=np.argsort(df['energy'])
+  df=df.iloc[ind[:6]]
+  sns.pairplot(df,vars=['energy','mo_n_3d','mo_n_2ppi','mo_n_2pz','Jsd','Jsp'],hue='Sz')
+  plt.savefig('VMC.pdf',bbox_inches='tight')
+  #sns.pairplot(df,vars=['energy','iao_n_3d','iao_n_2ppi','iao_n_2pz','Jsd','Jsp'],hue='Sz')
   #plt.show()
+  #plt.close()
+  exit(0)
+  '''
+
+  '''
+  y=df['energy']
+  X=df['mo_n_3d']
+  X=sm.add_constant(X)
+  ols=sm.OLS(y,X).fit()
+  print(ols.summary())
+  df['mo_resid']=df['energy']-ols.predict(X)
+  sns.pairplot(df,vars=['energy','mo_resid','Jsd','Jsp'],hue='Sz')
+  plt.show()
+  plt.close()
+
+  y=df['energy']
+  X=df['iao_n_3d']
+  X=sm.add_constant(X)
+  ols=sm.OLS(y,X).fit()
+  print(ols.summary())
+  df['iao_resid']=df['energy']-ols.predict(X)
+  sns.pairplot(df,vars=['energy','iao_resid','Jsd','Jsp'],hue='Sz')
+  plt.show()
+  exit(0)
+  '''
 
   #R2, RMSE AND MODEL PLOTS ----------------------------------------------------------
   '''
@@ -134,24 +178,18 @@ def analyze(df):
   '''
 
   #PREDICTION PLOTS ---------------------------------------------------------------
-  
-  #X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_dz']]
-  #X=df[['n_3dz2','n_3dpi','n_3dd','n_2ppi','n_2pz','t_pi','t_ds']]
-  #X=df[['n_3d']]
-  #X=df[['n_3d','n_2ppi','n_2pz','t_pi']]
-  #df=df.iloc[np.arange(10)]
-  df=df[(df['Sz']=='0.5_s')+(df['Sz']=='1.5_s')]
-  #df=df[df['basestate']==-1]
-  #df=df.iloc[[0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21]]
-  X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_ds','sigU']]
+
+  X=df[['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jsd']]
+  #X=df[['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi']]
   X=sm.add_constant(X)
   y=df['energy']
   ols=sm.OLS(y,X).fit() 
-  __,l_ols,u_ols=wls_prediction_std(ols,alpha=0.05) #Confidence level for two-sided hypothesis, 95 right now
+  __,l_ols,u_ols=wls_prediction_std(ols,alpha=1.0) #Confidence level for two-sided hypothesis, 95 right now
   print(ols.summary())
 
   df['pred_err']=(u_ols-l_ols)/2
   df['pred']=ols.predict(X)
+  df['resid']=df['energy']-df['pred']
 
   g = sns.FacetGrid(df,hue='Sz',hue_kws=dict(marker=['.']*3))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))
   g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()

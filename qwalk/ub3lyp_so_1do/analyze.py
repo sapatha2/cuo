@@ -13,12 +13,12 @@ from sklearn.model_selection import KFold
 
 def collectdf():
   df=None
-  for basestate in range(10):
+  for basestate in range(11):
     for gsw in np.arange(0.1,1.1,0.1):
       f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/gosling.pickle' 
       small_df=pd.read_pickle(f)
 
-      small_df['Sz']='0.5_s'
+      small_df['Sz']=0.5
       small_df['basestate']=basestate
       if(np.around(gsw,2)==1.0): small_df['basestate']=-1
       if(df is None): df = small_df
@@ -26,23 +26,14 @@ def collectdf():
   
   for basestate in range(6):
     for gsw in np.arange(0.1,1.1,0.1):
-      f='../ub3lyp_do_s1/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/gosling.pickle' 
-      small_df=pd.read_pickle(f)
-     
-      small_df['Sz']='0.5_d'
-      small_df['basestate']=basestate+10
-      if(np.around(gsw,2)==1.0): small_df['basestate']=-1
-      df = pd.concat((df,small_df),axis=0)
-
-  for basestate in range(6):
-    for gsw in np.arange(0.1,1.1,0.1):
       f='../ub3lyp_so_s3/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/gosling.pickle' 
       small_df=pd.read_pickle(f)
-     
-      small_df['Sz']='1.5_s'
-      small_df['basestate']=basestate+16
+
+      small_df['Sz']=1.5
+      small_df['basestate']=basestate
       if(np.around(gsw,2)==1.0): small_df['basestate']=-1
       df = pd.concat((df,small_df),axis=0)
+  
   return df
 
 def analyze(df):
@@ -73,22 +64,41 @@ def analyze(df):
   #sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_4s'],hue='Sz',markers=['o','o'])
   #sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_2pz','t_pi','t_ds','t_dz','t_sz'],hue='Sz')
   #df=df[df['basestate']==-1]
-  #sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_2pz'],hue='Sz')
+  #sns.pairplot(df,vars=['energy','n_3d','n_2ppi','n_2pz','sigU','t_ds','t_pi'],hue='Sz')
   #plt.show()
+  #exit(0)
 
   #R2, RMSE AND MODEL PLOTS ----------------------------------------------------------
-  '''
   zz=0
   ncv=5
   kf=KFold(n_splits=ncv,shuffle=True)
   model_list=[
+    #1 body
     ['n_3d','n_2ppi','n_2pz'],
     ['n_3d','n_2ppi','n_2pz','t_pi'],
+    ['n_3d','n_2ppi','n_2pz','t_dz'],
+    ['n_3d','n_2ppi','n_2pz','t_sz'],
     ['n_3d','n_2ppi','n_2pz','t_ds'],
+    ['n_3d','n_2ppi','n_2pz','t_pi','t_dz'],
+    ['n_3d','n_2ppi','n_2pz','t_pi','t_sz'],
     ['n_3d','n_2ppi','n_2pz','t_pi','t_ds'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_ds','t_dz'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_ds','t_sz'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_ds','t_dz','t_sz']
+    ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz'],
+    ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_ds'],
+    ['n_3d','n_2ppi','n_2pz','t_pi','t_sz','t_ds'],
+    ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz','t_ds'],
+    #2 body
+    ['n_3d','n_2ppi','n_2pz','sigU'],
+    ['n_3d','n_2ppi','n_2pz','t_pi','sigU'],
+    ['n_3d','n_2ppi','n_2pz','t_dz','sigU'],
+    ['n_3d','n_2ppi','n_2pz','t_sz','sigU'],
+    ['n_3d','n_2ppi','n_2pz','t_ds','sigU'],
+    ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','sigU'],
+    ['n_3d','n_2ppi','n_2pz','t_pi','t_sz','sigU'],
+    ['n_3d','n_2ppi','n_2pz','t_pi','t_ds','sigU'],
+    ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz','sigU'],
+    ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_ds','sigU'],
+    ['n_3d','n_2ppi','n_2pz','t_pi','t_sz','t_ds','sigU'],
+    ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz','t_ds','sigU'],
   ]
   for model in model_list:
     y=df['energy']
@@ -116,34 +126,23 @@ def analyze(df):
           parms.append(coefs[zzz])
           zzz+=1
         else: parms.append(0)
-      evals.append(diagonalize(parms))
+      #evals.append(diagonalize(parms))
     
     print(coefs)
     plt.plot(np.ones(ncv)*zz,r2_test,'gs-')
     plt.plot(np.ones(ncv)*zz+0.10,r2_train,'bo-')
     plt.plot(np.ones(ncv)*zz+0.20,r2,'r*-')
-    for pp in range(len(evals)):
-      plt.plot(np.ones(len(evals[pp]))*zz+0.30+pp*0.10,evals[pp]/100+0.94,'ko-')
+    #for pp in range(len(evals)):
+    #  plt.plot(np.ones(len(evals[pp]))*zz+0.30+pp*0.10,evals[pp]/100+0.94,'ko-')
     zz+=1
   plt.legend(loc='best')
   plt.xlabel('Model')
   plt.savefig('model_valid.pdf',bbox_inches='tight')
-  #plt.close()
-  #plt.show()
-  exit(0)
-  '''
+  plt.close()
 
   #PREDICTION PLOTS ---------------------------------------------------------------
   
-  #X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_dz']]
-  #X=df[['n_3dz2','n_3dpi','n_3dd','n_2ppi','n_2pz','t_pi','t_ds']]
-  #X=df[['n_3d']]
-  #X=df[['n_3d','n_2ppi','n_2pz','t_pi']]
-  #df=df.iloc[np.arange(10)]
-  df=df[(df['Sz']=='0.5_s')+(df['Sz']=='1.5_s')]
-  #df=df[df['basestate']==-1]
-  #df=df.iloc[[0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21]]
-  X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_ds','sigU']]
+  X=df[['n_3d','n_2ppi','n_2pz','t_pi','sigU']]
   X=sm.add_constant(X)
   y=df['energy']
   ols=sm.OLS(y,X).fit() 
@@ -156,17 +155,14 @@ def analyze(df):
   g = sns.FacetGrid(df,hue='Sz',hue_kws=dict(marker=['.']*3))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))
   g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
   plt.plot(df['energy'],df['energy'],'k--')
-  plt.show()
-  exit(0)
-  #plt.savefig('fit.pdf')
+  plt.savefig('fit.pdf')
   plt.close()
 
   df=df[df['basestate']==-1]
   g = sns.FacetGrid(df,hue='Sz',hue_kws=dict(marker=['.']*3))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))
   g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
   plt.plot(df['energy'],df['energy'],'k--')
-  #plt.savefig('fit_baseonly.pdf')
-  plt.show()
+  plt.savefig('fit_baseonly.pdf')
 
 if __name__=='__main__':
   df=collectdf()

@@ -38,7 +38,6 @@ symm_dict=[
 {'A1':(6,6),'E1x':(3,2),'E1y':(3,2),'E2x':(1,1),'E2y':(0,1)}, #(dd,pi -> s,s)
 ]
 '''
-'''
 #MIRROR (FOR IAOS)
 S=1
 symm_dict=[
@@ -68,7 +67,6 @@ symm_dict=[
 {'A1':(6,6),'E1x':(2,3),'E1y':(3,1),'E2x':(1,1),'E2y':(1,1)}, #(dpi,pi-> s,s)
 {'A1':(6,6),'E1x':(3,2),'E1y':(3,2),'E2x':(0,1),'E2y':(1,1)}, #(dd,pi -> s,s)
 ]
-'''
 ######################################################################
 '''
 S=3
@@ -89,6 +87,7 @@ symm_dict=[
 #{'A1':(6,6),'E1x':(3,2),'E1y':(3,1),'E2x':(1,1),'E2y':(1,1)}, 
 ]
 '''
+'''
 #MIRROR (FOR IAOS)
 S=3
 symm_dict=[
@@ -102,6 +101,7 @@ symm_dict=[
 {'A1':(6,5),'E1x':(3,1),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #pi, dn - pz, px
 {'A1':(6,3),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #dz2, dn - px, py
 ]
+'''
 ######################################################################
 
 datacsv={}
@@ -109,7 +109,7 @@ datacsv={}
 for nm in['run','method','basis','pseudopotential','bond-length','S','E','conv']:
   datacsv[nm]=[]
 
-for run in range(len(symm_dict)):
+for run in np.arange(10,16):
   for r in [1.725]:
     for method in ['UB3LYP']:
       for basis in ['vdz','vtz']:
@@ -177,4 +177,4 @@ for run in range(len(symm_dict)):
           datacsv['pseudopotential'].append('trail')
           datacsv['E'].append(total_energy)
           datacsv['conv'].append(m.converged)
-          #pd.DataFrame(datacsv).to_csv("cuo_u_mirror.csv",index=False)
+          pd.DataFrame(datacsv).to_csv("cuo_do.csv",index=False)

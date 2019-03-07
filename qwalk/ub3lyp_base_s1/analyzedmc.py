@@ -14,58 +14,121 @@ from sklearn.model_selection import KFold
 def collectdf():
   df=None
   for basestate in range(10):
-    for gsw in np.arange(0.1,1.01,0.1):
-      f='../ub3lyp_mo3/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
-      small_df=pd.read_pickle(f)
-     
-      small_df['Sz']=0.5
-      small_df['basestate']=basestate
-      if(np.around(gsw,2)==1.0): small_df['basestate']=-1
-      if(df is None): df = small_df
-      else: df = pd.concat((df,small_df),axis=0)
-  
-  for basestate in range(6):
-    for gsw in np.arange(0.1,1.01,0.1):
+    for gsw in [1.0]:
       f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
+      small_df=pd.read_pickle(f)
+
+      small_df['Sz']=0.5
+      if(df is None): df = small_df
+      else: df = pd.concat((df,small_df),axis=0,sort=True)
+
+  for basestate in range(6):
+    for gsw in [1.0]:
+      f='../ub3lyp_base_s3/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
       small_df=pd.read_pickle(f)
      
       small_df['Sz']=1.5
-      small_df['basestate']=basestate+10
-      if(np.around(gsw,2)==1.0): small_df['basestate']=-1
-      df = pd.concat((df,small_df),axis=0)
+      df = pd.concat((df,small_df),axis=0,sort=True)
   return df
 
 def analyze(df):
   #Formatting
-  df['gsw']=np.round(df['gsw'],2)
-  df['n_3dd']=df['t_4_4']+df['t_5_5']
-  df['n_3dpi']=df['t_1_1']+df['t_2_2']
-  df['n_3dz2']=df['t_3_3']
-  df['n_3d']=df['n_3dd']+df['n_3dpi']+df['n_3dz2']
-  df['n_2ppi']=df['t_6_6']+df['t_7_7']
-  df['n_2pz']=df['t_8_8']
-  df['n_2p']=df['n_2ppi']+df['n_2pz']
-  df['n_4s']=df['t_9_9']
-  df['t_pi']=2*(df['t_1_6']+df['t_2_7'])
-  df['t_dz']=2*df['t_3_8']
-  df['t_sz']=2*df['t_8_9']
-  df['t_ds']=2*df['t_3_9']
-  df['n']=df['n_3d']+df['n_4s']+df['n_2p']
+  df['mo_n_3dd']=df['mo_4_4']+df['mo_5_5']
+  df['mo_n_3dpi']=df['mo_1_1']+df['mo_2_2']
+  df['mo_n_3dz2']=df['mo_3_3']
+  df['mo_n_3d']=df['mo_n_3dd']+df['mo_n_3dpi']+df['mo_n_3dz2']
+  df['mo_n_2ppi']=df['mo_6_6']+df['mo_7_7']
+  df['mo_n_2pz']=df['mo_8_8']
+  df['mo_n_2p']=df['mo_n_2ppi']+df['mo_n_2pz']
+  df['mo_n_4s']=df['mo_9_9']
+  df['mo_t_pi']=2*(df['mo_1_6']+df['mo_2_7'])
+  df['mo_t_dz']=2*df['mo_3_8']
+  df['mo_t_sz']=2*df['mo_8_9']
+  df['mo_t_ds']=2*df['mo_3_9']
 
-  #df=df[df['basestate']==-1]
-  #print(df.iloc[[2,10,4,11]][['energy','n_2pz','n_2ppi','n_4s','t_pi','t_ds','t_dz','t_sz']])
-  #print(df.var())
-  #exit(0)
+  #4s, dxy, dyz, dz2, dxz, dx2-y2, px, py, pz
+  df['iao_n_3dd']=df['iao_1_1']+df['iao_5_5']
+  df['iao_n_3dz2']=df['iao_3_3']
+  df['iao_n_3dpi']=df['iao_2_2']+df['iao_4_4']
+  df['iao_n_3d']=df['iao_n_3dd']+df['iao_n_3dz2']+df['iao_n_3dpi']
+  df['iao_n_2ppi']=df['iao_6_6']+df['iao_7_7']
+  df['iao_n_2pz']=df['iao_8_8']
+  df['iao_n_4s']=df['iao_0_0']
+  df['iao_t_pi']=2*(df['iao_2_7']+df['iao_4_6'])
+  df['iao_t_dz']=2*df['iao_3_8']
+  df['iao_t_ds']=2*df['iao_0_3']
+  df['iao_t_sz']=2*df['iao_0_8']
 
-  #PAIRPLOTS --------------------------------------------------------------------------
-  #sns.pairplot(df,vars=['energy','n_3dd','n_3dpi','n_3dz2','n_3d'],hue='basestate',markers=['o']+['.']*10)
-  #sns.pairplot(df,vars=['energy','n_2ppi','n_2pz','n_2p','n_4s'],hue='basestate',markers=['o']+['.']*10)
-  #sns.pairplot(df,vars=['energy','t_pi','t_dz','t_ds','t_sz'],hue='basestate',markers=['o']+['.']*10)
-  #sns.pairplot(df,vars=['energy','n'],hue='Sz',markers=['o','o']) 
+  df['Us']=df['u0']
+  df['Ud']=df['u1']+df['u2']+df['u3']+df['u4']+df['u5']
+  df['Up']=df['u6']+df['u7']+df['u8']
+
+  df['Jd']=np.zeros(df.shape[0])
+  orb1=[1,1,1,1,2,2,2,3,3,4]
+  orb2=[2,3,4,5,3,4,5,4,5,5]
+  for i in range(len(orb1)):
+    df['Jd']+=df['j_'+str(orb1[i])+'_'+str(orb2[i])]
+  df['Jsd']=df['j_0_1']+df['j_0_2']+df['j_0_3']+df['j_0_4']+df['j_0_5']
+  df['Jcu']=df['Jsd']+df['Jd']
+  df['Jsp']=df['j_0_6']+df['j_0_7']+df['j_0_8']
+
+  #plt.errorbar(np.ones(df.shape[0]),df['energy'],yerr=df['energy_err'],fmt='o')
   #plt.show()
   #exit(0)
 
+  #sns.pairplot(df,vars=['energy','mo_n_2ppi','mo_n_2pz','mo_n_3d','Jsd'],hue='Sz')
+  #plt.show()
+  #exit(0)
+  #print(df[['energy','Jsd','Sz']])
+  #exit(0)
+
+  #VMC ordering of base states
+  '''
+  df['energy']-=min(df['energy'])
+  df=df.sort_values(by=['energy'])
+  df['order']=np.arange(df.shape[0])
+  #df=df.iloc[6:]
+  sns.pairplot(df,vars=['energy','order','n_3dz2','n_3dpi','n_3dd','n_2ppi','n_2pz','mo_pi','mo_dz','mo_sz','mo_ds'],hue='Sz')
+  plt.savefig('VMC_order.pdf')
+  exit(0)
+  '''
+
+  #PAIRPLOTS --------------------------------------------------------------------------
+  '''
+  ind=np.argsort(df['energy'])
+  df=df.iloc[ind[:6]]
+  #sns.pairplot(df,vars=['energy','mo_n_3d','mo_n_2ppi','mo_n_2pz','Jsd','Jsp'],hue='Sz')
+  #plt.savefig('DMC.pdf',bbox_inches='tight')
+  #sns.pairplot(df,vars=['energy','iao_n_3d','iao_n_2ppi','iao_n_2pz','Jsd','Jsp'],hue='Sz')
+  #plt.show()
+  #plt.close()
+  #exit(0)
+  '''
+
+  '''
+  y=df['energy']
+  X=df['mo_n_3d']
+  X=sm.add_constant(X)
+  ols=sm.OLS(y,X).fit()
+  print(ols.summary())
+  df['mo_resid']=df['energy']-ols.predict(X)
+  sns.pairplot(df,vars=['energy','mo_resid','Jsd','Jsp'],hue='Sz')
+  plt.show()
+  plt.close()
+
+  y=df['energy']
+  X=df['iao_n_3d']
+  X=sm.add_constant(X)
+  ols=sm.OLS(y,X).fit()
+  print(ols.summary())
+  df['iao_resid']=df['energy']-ols.predict(X)
+  sns.pairplot(df,vars=['energy','iao_resid','Jsd','Jsp'],hue='Sz')
+  plt.show()
+  exit(0)
+  '''
+
   #R2, RMSE AND MODEL PLOTS ----------------------------------------------------------
+  '''
   zz=0
   ncv=5
   kf=KFold(n_splits=ncv,shuffle=True)
@@ -98,7 +161,7 @@ def analyze(df):
 
       coefs=ols.coef_[1:]
       parms=[0]
-      zzz=0
+      zzz=0 
       for i in range(len(model_list[-1])):
         if(model_list[-1][i] in model):
           parms.append(coefs[zzz])
@@ -106,7 +169,7 @@ def analyze(df):
         else: parms.append(0)
       evals.append(diagonalize(parms))
     
-    print(coefs)    
+    print(coefs)
     plt.plot(np.ones(ncv)*zz,r2_test,'gs-')
     plt.plot(np.ones(ncv)*zz+0.10,r2_train,'bo-')
     plt.plot(np.ones(ncv)*zz+0.20,r2,'r*-')
@@ -115,36 +178,48 @@ def analyze(df):
     zz+=1
   plt.legend(loc='best')
   plt.xlabel('Model')
-  plt.savefig('dmc_model_valid.pdf',bbox_inches='tight')
+  plt.savefig('model_valid.pdf',bbox_inches='tight')
   #plt.close()
   #plt.show()
   exit(0)
+  '''
 
   #PREDICTION PLOTS ---------------------------------------------------------------
-  X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_dz']]
-  #X=df[['n_3dz2','n_3dpi','n_3dd','n_2ppi','n_2pz','t_pi','t_ds']] 
-  #X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_ds']]
-  #X=df[['n_3d','n_2ppi','n_2pz','t_pi']]
+  ind=[0,1,2,3]#,3,8,10]
+  model=['mo_n_2ppi','mo_n_2pz']
+  X=df.sort_values(by=['energy']).iloc[ind]
+  #exit(0)
+  #df=df.iloc[[0,1,2,9,12]]
+  
+  sns.pairplot(X,vars=['energy','mo_n_2ppi','mo_n_2pz','mo_n_4s'],hue='Sz')
+  plt.show()
+
+  y=X['energy']
+  X=X[model]#,'mo_n_3d','mo_t_pi','Jsd']]
   X=sm.add_constant(X)
-  y=df['energy']
   ols=sm.OLS(y,X).fit() 
-  __,l_ols,u_ols=wls_prediction_std(ols,alpha=0.05) #Confidence level for two-sided hypothesis, 95 right now
+  
+  #__,l_ols,u_ols=wls_prediction_std(ols,alpha=1.0) #Confidence level for two-sided hypothesis, 95 right now
   print(ols.summary())
 
-  df['pred_err']=(u_ols-l_ols)/2
-  df['pred']=ols.predict(X)
-
-  g = sns.FacetGrid(df,hue='Sz',hue_kws=dict(marker=['.']*2))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))
-  g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
-  plt.plot(df['energy'],df['energy'],'k--')
-  plt.savefig('dmc_fit.pdf')
-  plt.close()
+  X['energy']=y
+  X['pred']=ols.predict(X)
+  X['resid']=X['energy']-X['pred']
+  
+  g = sns.FacetGrid(X,hue='Sz',hue_kws=dict(marker=['.']*3))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))
+  g.map(plt.errorbar, "pred", "energy", "energy_err","energy_err",fmt='o').add_legend()
+  plt.plot(X['energy'],X['energy'],'k--')
+  plt.show()
+  exit(0)
+  #plt.savefig('fit_Jsd.pdf')
+  #plt.close()
 
   df=df[df['basestate']==-1]
-  g = sns.FacetGrid(df,hue='Sz',hue_kws=dict(marker=['.']*2))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))
+  g = sns.FacetGrid(df,hue='Sz',hue_kws=dict(marker=['.']*3))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))
   g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
   plt.plot(df['energy'],df['energy'],'k--')
-  plt.savefig('dmc_fit_baseonly.pdf')
+  #plt.savefig('fit_baseonly.pdf')
+  plt.show()
 
 if __name__=='__main__':
   df=collectdf()

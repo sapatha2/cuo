@@ -48,8 +48,11 @@ for run in range(6*2):
     mo_coeff=np.concatenate((mo_coeff,m.mo_coeff[1][:,occ]),axis=1)
 
 #build minimum basis b3lyp_iao_b.pickle (cu: 2s, 1p, 1d; o: 1s, 1p)
+cu_basis=mol.basis["Cu"] #Full basis set IAOs for Cu
+'''
 cu_basis=[]
 for i in (mol.basis["Cu"]):
+  print(i)
   if(len(cu_basis)<2): 
     if(i[0]==0): cu_basis.append(i)
   elif(len(cu_basis)==2):
@@ -58,6 +61,9 @@ for i in (mol.basis["Cu"]):
     if(i[0]==2): cu_basis.append(i)
   else:
     pass
+'''
+o_basis=mol.basis["O"]
+'''
 o_basis=[]
 for i in (mol.basis["O"]):
   if(len(o_basis)==0): 
@@ -66,14 +72,15 @@ for i in (mol.basis["O"]):
     if(i[0]==1): o_basis.append(i)
   else:
     pass
+'''
 minbasis={'Cu':cu_basis,'O':o_basis}
 
 #Build IAOs
 s=m.get_ovlp()
 a=lo.iao.iao(mol, mo_coeff, minao=minbasis)
 a=lo.vec_lowdin(a,s)
-a.dump('b3lyp_iao_b.pickle')
+a.dump('b3lyp_iao_b_overshoot.pickle')
 
 #Write orbs
 m.mo_coeff[0][:,:a.shape[1]]=a
-print_qwalk_mol(mol,m,'scf',basename='b3lyp_iao_b')
+print_qwalk_mol(mol,m,'scf',basename='b3lyp_iao_b_overshoot')
