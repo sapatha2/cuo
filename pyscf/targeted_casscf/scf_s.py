@@ -40,9 +40,9 @@ for nm in['run','method','basis','pseudopotential','bond-length','S','E','conv']
   datacsv[nm]=[]
 
 #for run in range(len(S)):
-for run in [4]:
+for run in [0]:
   for r in [1.725]:
-    for method in ['ROHF']:
+    for method in ['B3LYP']:
       for basis in ['vdz','vtz']:
         for el in ['Cu']:
           if(S[run]>0):          

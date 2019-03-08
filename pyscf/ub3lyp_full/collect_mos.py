@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from pyscf2qwalk import print_qwalk_mol
 
 charge=0
-S=1
+S=3
 r=1.725
 method='UB3LYP'
 basis='vtz'
@@ -16,7 +16,7 @@ el='Cu'
 
 occ=np.arange(14) 
 mo_coeff=None
-for run in [10,11,12]:
+for run in [0,1,2]:
   chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+".chk"
   mol=lib.chkfile.load_mol(chkfile)
   m=ROKS(mol)
