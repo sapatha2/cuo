@@ -37,7 +37,7 @@ def genpbs(N,basename,fout):
     string='#!/bin/bash\n'+\
     '#PBS -q low\n'+\
     '#PBS -l nodes=1:ppn=32:xe\n'+\
-    '#PBS -l walltime=04:00:00\n'+\
+    '#PBS -l walltime=01:00:00\n'+\
     '#PBS -N '+fname+'\n'\
     '#PBS -e '+fname+'.perr\n'+\
     '#PBS -o '+fname+'.pout\n'+\
@@ -142,6 +142,7 @@ def genslater(N,gsw,basestate,basename,fout):
     '  CENTERS { USEGLOBAL }\n'+\
     '}\n'+\
     '\n'+\
+    'SHERMAN_MORRISON_UPDATES \n'+\
     'DETWT { \n' + '\n'.join(['  '+str(x) for x in w])+' \n}\n'+\
     'STATES {\n'+\
     ''.join(states)+\
@@ -153,7 +154,7 @@ def genslater(N,gsw,basestate,basename,fout):
 
 if __name__=='__main__':
   for gsw in np.arange(0.2,1.2,0.2):
-    for basestate in np.arange(3):
+    for basestate in np.arange(1,3):
       if(gsw==1.0): N=1
       else: N=5
       geninput(N,gsw,basestate,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))
