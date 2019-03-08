@@ -21,5 +21,6 @@ def makejson(N,gsw,basename):
 if __name__=='__main__':
   for basestate in np.arange(3):
     for gsw in [0.2,0.4,0.6,0.8,1.0]:
-      N=1  
+      N=5
+      if(gsw==1.0): N=1
       makejson(N,gsw,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))

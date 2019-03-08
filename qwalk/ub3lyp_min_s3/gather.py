@@ -59,4 +59,6 @@ import seaborn as sns
 if __name__=='__main__':
   for basestate in np.arange(3):
     for gsw  in [0.2,0.4,0.6,0.8,1.0]:
-      gather_all(1,gsw,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))
+      N=5
+      if(gsw==1.0): N=1
+      gather_all(N,gsw,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))
