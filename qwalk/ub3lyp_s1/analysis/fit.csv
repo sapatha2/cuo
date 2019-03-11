@@ -1,0 +1,21 @@
+                      OLS Regression Results                      
+Dep. Variable:   ,energy          ,  R-squared:         ,   0.980 
+Model:           ,OLS             ,  Adj. R-squared:    ,   0.979 
+Method:          ,Least Squares   ,  F-statistic:       ,   3193. 
+Date:            ,Mon, 11 Mar 2019,  Prob (F-statistic):,5.70e-277
+Time:            ,10:24:19        ,  Log-Likelihood:    ,  303.58 
+No. Observations:,   336          ,  AIC:               ,  -595.2 
+Df Residuals:    ,   330          ,  BIC:               ,  -572.3 
+Df Model:        ,     5          ,                     ,         
+Covariance Type: ,nonrobust       ,                     ,         
+         ,   coef   , std err ,    t    ,P>|t| ,  [0.025 ,  0.975] 
+const    ,-5772.9974,    0.342,-1.69e+04, 0.000,-5773.671,-5772.324
+mo_n_3d  ,   -3.0934,    0.027, -115.071, 0.000,   -3.146,   -3.041
+mo_n_2ppi,   -0.7535,    0.028,  -27.015, 0.000,   -0.808,   -0.699
+mo_n_2pz ,   -1.6460,    0.035,  -47.510, 0.000,   -1.714,   -1.578
+mo_t_pi  ,    0.6950,    0.030,   23.312, 0.000,    0.636,    0.754
+Jcu      ,   -0.4209,    0.050,   -8.460, 0.000,   -0.519,   -0.323
+Omnibus:      , 4.508,  Durbin-Watson:     ,   1.402
+Prob(Omnibus):, 0.105,  Jarque-Bera (JB):  ,   4.436
+Skew:         ,-0.243,  Prob(JB):          ,   0.109
+Kurtosis:     , 2.717,  Cond. No.          ,    634.

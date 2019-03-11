@@ -10,8 +10,13 @@ from sklearn.metrics import mean_squared_error, r2_score
 #from diagonalize import diagonalize, new_gs
 from statsmodels.sandbox.regression.predstd import wls_prediction_std
 from sklearn.model_selection import KFold
+from scipy import stats
 
-def collectdf():
+######################################################################################
+#FROZEN METHODS
+
+#Collect df
+def collect_df():
   df=None
   for basestate in range(10):
     for gsw in [0.2,0.4,0.6,0.8,1.0]:
@@ -35,8 +40,8 @@ def collectdf():
       df = pd.concat((df,small_df),axis=0,sort=True)
   return df
 
-def analyze(df):
-  #Formatting
+#Formatting
+def format_df(df):
   df['mo_n_3dd']=df['mo_4_4']+df['mo_5_5']
   df['mo_n_3dpi']=df['mo_1_1']+df['mo_2_2']
   df['mo_n_3dz2']=df['mo_3_3']
@@ -61,76 +66,12 @@ def analyze(df):
     df['Jd']+=df['j_'+str(orb1[i])+'_'+str(orb2[i])]
   df['Jsd']=df['j_0_1']+df['j_0_2']+df['j_0_3']+df['j_0_4']+df['j_0_5']
   df['Jcu']=df['Jsd']+df['Jd']
+  return df
 
-  #plt.errorbar(np.ones(df.shape[0]),df['energy'],yerr=df['energy_err'],fmt='o')
-  #plt.show()
-  #exit(0)
-
-  #sns.pairplot(df,vars=['energy','mo_n','Jsd'],hue='Sz')
-  #plt.show()
-  #exit(0)
-  #print(df[['energy','Jsd','Sz']])
-  #exit(0)
-
-  #VMC ordering of base states
-  '''
-  df['energy']-=min(df['energy'])
-  df=df.sort_values(by=['energy'])
-  df['order']=np.arange(df.shape[0])
-  #df=df.iloc[6:]
-  sns.pairplot(df,vars=['energy','order','n_3dz2','n_3dpi','n_3dd','n_2ppi','n_2pz','mo_pi','mo_dz','mo_sz','mo_ds'],hue='Sz')
-  plt.savefig('VMC_order.pdf')
-  exit(0)
-  '''
-
-  #PAIRPLOTS --------------------------------------------------------------------------
-  '''
-  ind=np.argsort(df['energy'])
-  df=df.iloc[ind[:6]]
-  #sns.pairplot(df,vars=['energy','mo_n_3d','mo_n_2ppi','mo_n_2pz','Jsd','Jsp'],hue='Sz')
-  #plt.savefig('DMC.pdf',bbox_inches='tight')
-  #sns.pairplot(df,vars=['energy','iao_n_3d','iao_n_2ppi','iao_n_2pz','Jsd','Jsp'],hue='Sz')
-  #plt.show()
-  #plt.close()
-  #exit(0)
-  '''
-
-  '''
-  y=df['energy']
-  X=df['mo_n_3d']
-  X=sm.add_constant(X)
-  ols=sm.OLS(y,X).fit()
-  print(ols.summary())
-  df['mo_resid']=df['energy']-ols.predict(X)
-  sns.pairplot(df,vars=['energy','mo_resid','Jsd','Jsp'],hue='Sz')
-  plt.show()
-  plt.close()
-
-  y=df['energy']
-  X=df['iao_n_3d']
-  X=sm.add_constant(X)
-  ols=sm.OLS(y,X).fit()
-  print(ols.summary())
-  df['iao_resid']=df['energy']-ols.predict(X)
-  sns.pairplot(df,vars=['energy','iao_resid','Jsd','Jsp'],hue='Sz')
-  plt.show()
-  exit(0)
-  '''
-
-  #R2, RMSE AND MODEL PLOTS ----------------------------------------------------------
-  '''
+#Single parameter goodness of fit validation
+def oneparm_valid(df,ncv,model_list,save=False):
   zz=0
-  ncv=5
   kf=KFold(n_splits=ncv,shuffle=True)
-  model_list=[
-    ['n_3d','n_2ppi','n_2pz'],
-    ['n_3d','n_2ppi','n_2pz','t_pi'],
-    ['n_3d','n_2ppi','n_2pz','t_ds'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_ds'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_ds','t_dz'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_ds','t_sz'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_ds','t_dz','t_sz']
-  ]
   for model in model_list:
     y=df['energy']
     X=df[model]
@@ -148,42 +89,83 @@ def analyze(df):
       r2_train.append(r2_score(y_train,ols.predict(X_train)))
       r2_test.append(r2_score(y_test,ols.predict(X_test)))
       r2.append(r2_score(y,ols.predict(X)))
-
-      coefs=ols.coef_[1:]
-      parms=[0]
-      zzz=0 
-      for i in range(len(model_list[-1])):
-        if(model_list[-1][i] in model):
-          parms.append(coefs[zzz])
-          zzz+=1
-        else: parms.append(0)
-      evals.append(diagonalize(parms))
     
-    print(coefs)
-    plt.plot(np.ones(ncv)*zz,r2_test,'gs-')
-    plt.plot(np.ones(ncv)*zz+0.10,r2_train,'bo-')
-    plt.plot(np.ones(ncv)*zz+0.20,r2,'r*-')
-    for pp in range(len(evals)):
-      plt.plot(np.ones(len(evals[pp]))*zz+0.30+pp*0.10,evals[pp]/100+0.94,'ko-')
+    if(zz==0):
+      plt.plot(np.ones(ncv)*zz,r2_test,'gs-',label='r2 test')
+      plt.plot(np.ones(ncv)*zz+0.10,r2_train,'bo-',label='r2 train')
+      plt.plot(np.ones(ncv)*zz+0.20,r2,'r*-',label='full r2')
+    else:
+      plt.plot(np.ones(ncv)*zz,r2_test,'gs-')
+      plt.plot(np.ones(ncv)*zz+0.10,r2_train,'bo-')
+      plt.plot(np.ones(ncv)*zz+0.20,r2,'r*-')
     zz+=1
   plt.legend(loc='best')
+  plt.title('R2 CV DMC')
   plt.xlabel('Model')
-  plt.savefig('model_valid.pdf',bbox_inches='tight')
-  #plt.close()
-  #plt.show()
-  exit(0)
-  '''
 
-  #PREDICTION PLOTS ---------------------------------------------------------------
-  model=['mo_n_3dd','mo_n_3dpi','mo_n_3dz2','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jcu']
-  #model=['mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_n_3d']
+  if(save):
+    plt.savefig('analysis/cv_valid.pdf',bbox_inches='tight')
+  else:
+    plt.show()
+  plt.close()
+  return 1
+
+#Residual analysis, KDE and histogram
+def resid_valid(df,model_list,save=False):
+  zz=0
+  for model in model_list:
+    y=df['energy']
+    X=df[model]
+    X=sm.add_constant(X)
+    ols=linear_model.LinearRegression().fit(X,y)
+
+    resid = y - ols.predict(X)
+    resid_1 = resid[df['Sz']==0.5]
+    resid_2 = resid[df['Sz']==1.5]
+    
+    density   = stats.kde.gaussian_kde(resid)
+    density_1 = stats.kde.gaussian_kde(resid_1)
+    density_2 = stats.kde.gaussian_kde(resid_2)
+    x   = np.linspace(min(resid),max(resid),100)
+    x_1 = np.linspace(min(resid_1),max(resid_1),100)
+    x_2 = np.linspace(min(resid_2),max(resid_2),100)
+
+    plt.subplot(211)
+    plt.title('Histogram of residuals')
+    plt.hist(resid_1,density=True,label='Sz=0.5') 
+    plt.hist(resid_2,density=True,label='Sz=1.5')
+    plt.hist(resid,density=True,label='combined') 
+    
+    plt.subplot(212)
+    plt.title('Gaussian KDE of residuals')
+    plt.plot(x_1,density_1(x_1),label='Sz=0.5') 
+    plt.plot(x_2,density_2(x_2),label='Sz=1.5')
+    plt.plot(x,density(x),label='combined') 
+   
+    plt.suptitle('Model ='+' '.join(model))
+    plt.legend(loc='best')
+     
+    if(save):
+      plt.savefig('analysis/resid_analysis_'+str(zz)+'.pdf',bbox_inches='tight')
+    else:
+      plt.show()
+    plt.close()
+    zz+=1
+  return 1
+
+#Regression plots
+def regr_plot(df,model,save=False):
   y=df['energy']
   Z=df[model]
   Z=sm.add_constant(Z)
   ols=sm.OLS(y,Z).fit() 
   
   __,l_ols,u_ols=wls_prediction_std(ols,alpha=0.05) #Confidence level for two-sided hypothesis, 95 right now
-  print(ols.summary())
+  if(save):
+    with open('analysis/fit.csv', 'w') as fh:
+      fh.write(ols.summary().as_csv())
+  else:
+    print(ols.summary())
 
   df['pred']=ols.predict(Z)
   df['resid']=df['energy']-df['pred']
@@ -192,18 +174,53 @@ def analyze(df):
   g = sns.FacetGrid(df,hue='Sz',hue_kws=dict(marker=['.']*3))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))
   g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
   plt.plot(df['energy'],df['energy'],'k--')
-  plt.show()
-  #plt.savefig('fit_Jsd.pdf')
+  if(save):
+    plt.savefig('analysis/fit.pdf',bbox_inches='tight')
+  else:
+    plt.show()
   plt.close()
 
   df=df[df['basestate']==-1]
   g = sns.FacetGrid(df,hue='Sz',hue_kws=dict(marker=['.']*3))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))
   g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
   plt.plot(df['energy'],df['energy'],'k--')
-  #plt.savefig('fit_baseonly.pdf')
-  plt.show()
-  exit(0)
+  if(save):
+    plt.savefig('analysis/fit_baseonly.pdf',bbox_inches='tight')
+  else:
+    plt.show()
+  plt.close()
+  return 1
+
+######################################################################################
+#Analysis pipeline, main thing to edit for runs
+def analyze(df):
+  ncv=10
+  model_list=[
+    ['mo_n_3d','mo_n_2ppi','mo_n_2pz'],
+    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi'],
+    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_ds'],
+    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds'],
+    
+    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','Jcu'],
+    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jcu'],
+    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_ds','Jcu'],
+    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds','Jcu'],
+  ]
+  oneparm_valid(df,ncv,model_list,save=True)
+ 
+  model_list=[
+    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi'],
+    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds'],
+    
+    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jcu'],
+    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds','Jcu'],
+  ]
+  resid_valid(df,model_list,save=True)
+  
+  model=['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jcu']
+  regr_plot(df,model,save=True)
 
 if __name__=='__main__':
-  df=collectdf()
+  df=collect_df()
+  df=format_df(df)
   analyze(df)
