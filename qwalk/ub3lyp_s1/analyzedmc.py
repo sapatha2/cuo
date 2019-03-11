@@ -171,6 +171,13 @@ def regr_plot(df,model,save=False):
   df['resid']=df['energy']-df['pred']
   df['pred_err']=(u_ols-l_ols)/2
 
+  sns.pairplot(df,vars=['energy','pred']+model,hue='Sz')
+  if(save):
+    plt.savefig('analysis/fit_pairplot.pdf',bbox_inches='tight')
+  else:
+    plt.show()
+  plt.close()
+
   g = sns.FacetGrid(df,hue='Sz',hue_kws=dict(marker=['.']*3))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))
   g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
   plt.plot(df['energy'],df['energy'],'k--')
@@ -193,7 +200,7 @@ def regr_plot(df,model,save=False):
 
 ######################################################################################
 #Analysis pipeline, main thing to edit for runs
-def analyze(df):
+def analyze(df,save=False):
   ncv=10
   model_list=[
     ['mo_n_3d','mo_n_2ppi','mo_n_2pz'],
@@ -202,25 +209,25 @@ def analyze(df):
     ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds'],
     
     ['mo_n_3d','mo_n_2ppi','mo_n_2pz','Jcu'],
-    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jcu'],
-    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_ds','Jcu'],
-    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds','Jcu'],
+    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jsd'],
+    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_ds','Jsd'],
+    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds','Jsd'],
   ]
-  oneparm_valid(df,ncv,model_list,save=True)
+  oneparm_valid(df,ncv,model_list,save=save)
  
   model_list=[
     ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi'],
     ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds'],
     
-    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jcu'],
-    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds','Jcu'],
+    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jsd'],
+    ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds','Jsd'],
   ]
-  resid_valid(df,model_list,save=True)
+  resid_valid(df,model_list,save=save)
   
-  model=['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jcu']
-  regr_plot(df,model,save=True)
+  model=['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jsd']
+  regr_plot(df,model,save=save)
 
 if __name__=='__main__':
   df=collect_df()
   df=format_df(df)
-  analyze(df)
+  analyze(df,save=True)

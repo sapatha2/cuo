@@ -1,21 +1,21 @@
                       OLS Regression Results                      
-Dep. Variable:   ,energy          ,  R-squared:         ,   0.980 
+Dep. Variable:   ,energy          ,  R-squared:         ,   0.979 
 Model:           ,OLS             ,  Adj. R-squared:    ,   0.979 
-Method:          ,Least Squares   ,  F-statistic:       ,   3193. 
-Date:            ,Mon, 11 Mar 2019,  Prob (F-statistic):,5.70e-277
-Time:            ,10:46:46        ,  Log-Likelihood:    ,  303.58 
-No. Observations:,   336          ,  AIC:               ,  -595.2 
-Df Residuals:    ,   330          ,  BIC:               ,  -572.3 
+Method:          ,Least Squares   ,  F-statistic:       ,   3148. 
+Date:            ,Mon, 11 Mar 2019,  Prob (F-statistic):,5.65e-276
+Time:            ,15:39:01        ,  Log-Likelihood:    ,  301.24 
+No. Observations:,   336          ,  AIC:               ,  -590.5 
+Df Residuals:    ,   330          ,  BIC:               ,  -567.6 
 Df Model:        ,     5          ,                     ,         
 Covariance Type: ,nonrobust       ,                     ,         
          ,   coef   , std err ,    t    ,P>|t| ,  [0.025 ,  0.975] 
-const    ,-5772.9974,    0.342,-1.69e+04, 0.000,-5773.671,-5772.324
-mo_n_3d  ,   -3.0934,    0.027, -115.071, 0.000,   -3.146,   -3.041
-mo_n_2ppi,   -0.7535,    0.028,  -27.015, 0.000,   -0.808,   -0.699
-mo_n_2pz ,   -1.6460,    0.035,  -47.510, 0.000,   -1.714,   -1.578
-mo_t_pi  ,    0.6950,    0.030,   23.312, 0.000,    0.636,    0.754
-Jcu      ,   -0.4209,    0.050,   -8.460, 0.000,   -0.519,   -0.323
-Omnibus:      , 4.508,  Durbin-Watson:     ,   1.402
-Prob(Omnibus):, 0.105,  Jarque-Bera (JB):  ,   4.436
-Skew:         ,-0.243,  Prob(JB):          ,   0.109
-Kurtosis:     , 2.717,  Cond. No.          ,    634.
+const    ,-5773.0424,    0.344,-1.68e+04, 0.000,-5773.720,-5772.365
+mo_n_3d  ,   -3.0903,    0.027, -114.307, 0.000,   -3.144,   -3.037
+mo_n_2ppi,   -0.7501,    0.028,  -26.728, 0.000,   -0.805,   -0.695
+mo_n_2pz ,   -1.6424,    0.035,  -47.030, 0.000,   -1.711,   -1.574
+mo_t_pi  ,    0.6930,    0.030,   23.092, 0.000,    0.634,    0.752
+Jsd      ,   -0.4296,    0.053,   -8.126, 0.000,   -0.534,   -0.326
+Omnibus:      , 4.564,  Durbin-Watson:     ,   1.384
+Prob(Omnibus):, 0.102,  Jarque-Bera (JB):  ,   4.475
+Skew:         ,-0.243,  Prob(JB):          ,   0.107
+Kurtosis:     , 2.711,  Cond. No.          ,    633.
