@@ -3,7 +3,7 @@ Dep. Variable:   ,energy          ,  R-squared:         ,   0.979
 Model:           ,OLS             ,  Adj. R-squared:    ,   0.979 
 Method:          ,Least Squares   ,  F-statistic:       ,   3148. 
 Date:            ,Mon, 11 Mar 2019,  Prob (F-statistic):,5.65e-276
-Time:            ,15:39:01        ,  Log-Likelihood:    ,  301.24 
+Time:            ,20:35:18        ,  Log-Likelihood:    ,  301.24 
 No. Observations:,   336          ,  AIC:               ,  -590.5 
 Df Residuals:    ,   330          ,  BIC:               ,  -567.6 
 Df Model:        ,     5          ,                     ,         

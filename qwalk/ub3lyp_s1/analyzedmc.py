@@ -201,6 +201,7 @@ def regr_plot(df,model,save=False):
 ######################################################################################
 #Analysis pipeline, main thing to edit for runs
 def analyze(df,save=False):
+  '''
   ncv=10
   model_list=[
     ['mo_n_3d','mo_n_2ppi','mo_n_2pz'],
@@ -214,7 +215,7 @@ def analyze(df,save=False):
     ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds','Jsd'],
   ]
   oneparm_valid(df,ncv,model_list,save=save)
- 
+  
   model_list=[
     ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi'],
     ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds'],
@@ -223,7 +224,7 @@ def analyze(df,save=False):
     ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds','Jsd'],
   ]
   resid_valid(df,model_list,save=save)
-  
+  ''' 
   model=['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jsd']
   regr_plot(df,model,save=save)
 

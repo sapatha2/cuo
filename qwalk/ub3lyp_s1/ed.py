@@ -68,7 +68,7 @@ def h2_IAO(Jsd):
     h2[1][s,i,i,s]=-0.50
     h2[1][i,s,s,i]=-0.50
   h2*=Jsd
-  h2[1][s,s,s,s]=0.0
+  h2[1][s,s,s,s]=4.0
   return h2
 
 def ED(parms, nroots, norb, nelec):
@@ -88,16 +88,19 @@ def ED(parms, nroots, norb, nelec):
   
   #Generate vector of number occupations 
   #['del','del','yz','xz','x','y','z2','z','s']
-  n_occ = []
+  n_occ_u = []
+  n_occ_d = []
   for i in range(nroots):
     dm=cis.make_rdm1s(ci[i],norb,nelec)
-    n_occ.append(np.diag(dm[0])+np.diag(dm[1]))
-  return e, ci, np.array(n_occ)
+    n_occ_u.append(np.diag(dm[0]))
+    n_occ_d.append(np.diag(dm[1]))
+  return e, ci, np.array(n_occ_u), np.array(n_occ_d)
 
 if __name__=='__main__':
-  nroots=10
+  nroots=20
   norb=9
   parms=(-3.0903,-0.7501,-1.6424,0.6930,0,0,0,-0.4296)
+  #parms=(-3.0314,-0.6640,-1.5162,0.6780,0,0,0,0)
 
   nelec=(8,7)
   res1=ED(parms,nroots,norb,nelec)
@@ -106,23 +109,37 @@ if __name__=='__main__':
   res3=ED(parms,nroots,norb,nelec)
 
   E = res1[0]
-  n_occ = res1[2]
+  n_occ_u = res1[2]
+  n_occ_d = res1[3]
   Sz = np.ones(len(E))*0.5
-  n_3d = n_occ[:,0] + n_occ[:,1] + n_occ[:,2] + n_occ[:,3] + n_occ[:,6]
-  n_2ppi = n_occ[:,4] + n_occ[:,5]
-  n_2pz = n_occ[:,7]
-  n_4s = n_occ[:,8]
-  df = pd.DataFrame({'E':E,'Sz':Sz,'n_3d':n_3d,'n_2pz':n_2pz,'n_2ppi':n_2ppi,'n_4s':n_4s})
-
+  n_3d_u = n_occ_u[:,0] + n_occ_u[:,1] + n_occ_u[:,2] + n_occ_u[:,3] + n_occ_u[:,6]
+  n_2ppi_u = n_occ_u[:,4] + n_occ_u[:,5]
+  n_2pz_u = n_occ_u[:,7]
+  n_4s_u = n_occ_u[:,8]
+  n_3d_d = n_occ_d[:,0] + n_occ_d[:,1] + n_occ_d[:,2] + n_occ_d[:,3] + n_occ_d[:,6]
+  n_2ppi_d = n_occ_d[:,4] + n_occ_d[:,5]
+  n_2pz_d = n_occ_d[:,7]
+  n_4s_d = n_occ_d[:,8]
+  df = pd.DataFrame({'E':E,'Sz':Sz,'n_3d_u':n_3d_u,'n_2pz_u':n_2pz_u,'n_2ppi_u':n_2ppi_u,'n_4s_u':n_4s_u,
+  'n_3d_d':n_3d_d,'n_2pz_d':n_2pz_d,'n_2ppi_d':n_2ppi_d,'n_4s_d':n_4s_d})
+  
   E = res3[0]
-  n_occ = res3[2]
+  n_occ_u = res3[2]
+  n_occ_d = res3[3]
   Sz = np.ones(len(E))*1.5
-  n_3d = n_occ[:,0] + n_occ[:,1] + n_occ[:,2] + n_occ[:,3] + n_occ[:,6]
-  n_2ppi = n_occ[:,4] + n_occ[:,5]
-  n_2pz = n_occ[:,7]
-  n_4s = n_occ[:,8]
-  df = pd.concat((df,pd.DataFrame({'E':E,'Sz':Sz,'n_3d':n_3d,'n_2pz':n_2pz,'n_2ppi':n_2ppi,'n_4s':n_4s})),axis=0)
+  n_3d_u = n_occ_u[:,0] + n_occ_u[:,1] + n_occ_u[:,2] + n_occ_u[:,3] + n_occ_u[:,6]
+  n_2ppi_u = n_occ_u[:,4] + n_occ_u[:,5]
+  n_2pz_u = n_occ_u[:,7]
+  n_4s_u = n_occ_u[:,8]
+  n_3d_d = n_occ_d[:,0] + n_occ_d[:,1] + n_occ_d[:,2] + n_occ_d[:,3] + n_occ_d[:,6]
+  n_2ppi_d = n_occ_d[:,4] + n_occ_d[:,5]
+  n_2pz_d = n_occ_d[:,7]
+  n_4s_d = n_occ_d[:,8]
+  df = pd.concat((df,pd.DataFrame({'E':E,'Sz':Sz,'n_3d_u':n_3d_u,'n_2pz_u':n_2pz_u,'n_2ppi_u':n_2ppi_u,'n_4s_u':n_4s_u,
+  'n_3d_d':n_3d_d,'n_2pz_d':n_2pz_d,'n_2ppi_d':n_2ppi_d,'n_4s_d':n_4s_d})),axis=0)
 
   df['E']-=min(df['E'])
-  sns.pairplot(df,vars=['E','n_3d','n_2pz','n_2ppi','n_4s'],hue='Sz')
+  print(df.sort_values(by=['E']))
+  plt.plot(df['E'][df['Sz']==0.5],'go')
+  plt.plot(df['E'][df['Sz']==1.5],'ro')
   plt.show()
