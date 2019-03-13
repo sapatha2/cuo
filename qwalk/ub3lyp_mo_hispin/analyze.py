@@ -17,7 +17,6 @@ def collectdf():
     for gsw in np.arange(0.1,1.1,0.1):
       f='../ub3lyp_mo3/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/gosling.pickle' 
       small_df=pd.read_pickle(f)
-      print(small_df.shape)
 
       small_df['Sz']=0.5
       small_df['basestate']=basestate
@@ -58,6 +57,16 @@ def analyze(df):
   df['t_sz']=2*df['t_12_13']
   df['n']=df['n_3d']+df['n_2p']+df['n_4s']+df['n_3s']+df['n_3p']+df['n_2s']
 
+  #VMC ordering of base states
+  df=df[df['basestate']==-1]
+  df['energy']-=min(df['energy'])
+  df=df.sort_values(by=['energy'])
+  df['order']=np.arange(df.shape[0])
+  #df=df.iloc[6:]
+  sns.pairplot(df,vars=['energy','order','n_3dz2','n_3dpi','n_3dd','n_2ppi','n_2pz','t_pi','t_dz','t_sz','t_ds'],hue='Sz')
+  plt.savefig('VMC_order.pdf')
+  exit(0)
+
   #PAIRPLOTS --------------------------------------------------------------------------
   #sns.pairplot(df,vars=['energy','n_3dd','n_3dpi','n_3dz2','n_3d'],hue='basestate',markers=['o']+['.']*10)
   #sns.pairplot(df,vars=['energy','n_2ppi','n_2pz','n_2p','n_4s'],hue='basestate',markers=['o']+['.']*10)
@@ -78,6 +87,7 @@ def analyze(df):
     ['n_3d','n_2ppi','n_2pz','t_pi','t_ds'],
     ['n_3d','n_2ppi','n_2pz','t_pi','t_ds','t_dz'],
     ['n_3d','n_2ppi','n_2pz','t_pi','t_ds','t_sz'],
+    ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz'],
     ['n_3d','n_2ppi','n_2pz','t_pi','t_ds','t_dz','t_sz']
   ]
   for model in model_list:
@@ -116,14 +126,14 @@ def analyze(df):
       plt.plot(np.ones(len(evals[pp]))*zz+0.30+pp*0.10,evals[pp]/100+0.94,'ko-')
     zz+=1
   plt.legend(loc='best')
-  plt.xlabel('Model')
-  plt.savefig('model_valid.pdf',bbox_inches='tight')
+  #plt.xlabel('Model')
+  #plt.savefig('model_valid.pdf',bbox_inches='tight')
   #plt.close()
-  #plt.show()
+  plt.show()
   exit(0)
-
+  
   #PREDICTION PLOTS ---------------------------------------------------------------
-  X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_dz']]
+  X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_ds']]
   #X=df[['n_3dz2','n_3dpi','n_3dd','n_2ppi','n_2pz','t_pi','t_ds']]
   #X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_ds']]
   #X=df[['n_3d','n_2ppi','n_2pz','t_pi']]

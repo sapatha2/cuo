@@ -7,7 +7,7 @@ import statsmodels.api as sm
 from sklearn import linear_model
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error, r2_score
-from diagonalize import diagonalize, new_gs
+#from diagonalize import diagonalize, new_gs
 from statsmodels.sandbox.regression.predstd import wls_prediction_std
 from sklearn.model_selection import KFold
 
@@ -52,18 +52,18 @@ def analyze(df):
   df['t_ds']=2*df['t_3_9']
   df['n']=df['n_3d']+df['n_4s']+df['n_2p']
 
-  #df=df[df['basestate']==-1]
+  df=df[df['basestate']==-1]
   #print(df.iloc[[2,10,4,11]][['energy','n_2pz','n_2ppi','n_4s','t_pi','t_ds','t_dz','t_sz']])
   #print(df.var())
   #exit(0)
 
   #PAIRPLOTS --------------------------------------------------------------------------
   #sns.pairplot(df,vars=['energy','n_3dd','n_3dpi','n_3dz2','n_3d'],hue='basestate',markers=['o']+['.']*10)
-  #sns.pairplot(df,vars=['energy','n_2ppi','n_2pz','n_2p','n_4s'],hue='basestate',markers=['o']+['.']*10)
+  sns.pairplot(df,vars=['energy','n_2ppi','n_2pz','n_2p','n_4s'],hue='basestate',markers=['o']+['.']*10)
   #sns.pairplot(df,vars=['energy','t_pi','t_dz','t_ds','t_sz'],hue='basestate',markers=['o']+['.']*10)
   #sns.pairplot(df,vars=['energy','n'],hue='Sz',markers=['o','o']) 
-  #plt.show()
-  #exit(0)
+  plt.show()
+  exit(0)
 
   #R2, RMSE AND MODEL PLOTS ----------------------------------------------------------
   zz=0

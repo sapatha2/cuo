@@ -7,7 +7,7 @@ import statsmodels.api as sm
 from sklearn import linear_model
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error, r2_score
-from diagonalize import diagonalize, new_gs
+from diagonalize import diagonalize_3d10
 from statsmodels.sandbox.regression.predstd import wls_prediction_std
 from sklearn.model_selection import KFold
 
@@ -39,7 +39,8 @@ def collectdf():
 def analyze(df):
   #Formatting
   df['gsw']=np.round(df['gsw'],2)
-  
+ 
+
   df['n_3s']=df['t_0_0']
   df['n_3p']=df['t_1_1']+df['t_2_2']+df['t_3_3']
   df['n_2s']=df['t_4_4']
@@ -57,6 +58,10 @@ def analyze(df):
   df['t_sz']=2*df['t_12_13']
   df['n']=df['n_3d']+df['n_2p']+df['n_4s']#+df['n_3s']+df['n_3p']+df['n_2s']
 
+  df=df[df['basestate']==-1]
+  print(df[['energy','n_2ppi','n_2pz','n_4s','Sz']].sort_values(by=['energy']))
+  exit(0)
+
   #PAIRPLOTS --------------------------------------------------------------------------
   #sns.pairplot(df,vars=['energy','n_3dd','n_3dpi','n_3dz2','n_3d'],hue='basestate',markers=['o']+['.']*10)
   #sns.pairplot(df,vars=['energy','n_2ppi','n_2pz','n_2p','n_4s'],hue='basestate',markers=['o']+['.']*10)
@@ -69,37 +74,39 @@ def analyze(df):
   #exit(0)
 
   #R2, RMSE AND MODEL PLOTS ----------------------------------------------------------
+  '''
   zz=0
   ncv=5
   kf=KFold(n_splits=ncv,shuffle=True)
   model_list=[
-    #1 body
-    ['n_3d','n_2ppi','n_2pz'],
-    ['n_3d','n_2ppi','n_2pz','t_pi'],
-    ['n_3d','n_2ppi','n_2pz','t_dz'],
-    ['n_3d','n_2ppi','n_2pz','t_sz'],
-    ['n_3d','n_2ppi','n_2pz','t_ds'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_dz'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_sz'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_ds'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_ds'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_sz','t_ds'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz','t_ds'],
-    #2 body
-    ['n_3d','n_2ppi','n_2pz','sigU'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','sigU'],
-    ['n_3d','n_2ppi','n_2pz','t_dz','sigU'],
-    ['n_3d','n_2ppi','n_2pz','t_sz','sigU'],
-    ['n_3d','n_2ppi','n_2pz','t_ds','sigU'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','sigU'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_sz','sigU'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_ds','sigU'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz','sigU'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_ds','sigU'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_sz','t_ds','sigU'],
-    ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz','t_ds','sigU'],
+  #1 body
+  ['n_3d','n_2ppi','n_2pz'],
+  ['n_3d','n_2ppi','n_2pz','t_pi'],
+  ['n_3d','n_2ppi','n_2pz','t_dz'],
+  ['n_3d','n_2ppi','n_2pz','t_sz'],
+  ['n_3d','n_2ppi','n_2pz','t_ds'],
+  ['n_3d','n_2ppi','n_2pz','t_pi','t_dz'],
+  ['n_3d','n_2ppi','n_2pz','t_pi','t_sz'],
+  ['n_3d','n_2ppi','n_2pz','t_pi','t_ds'],
+  ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz'],
+  ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_ds'],
+  ['n_3d','n_2ppi','n_2pz','t_pi','t_sz','t_ds'],
+  ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz','t_ds'],
+  #2 body
+  ['n_3d','n_2ppi','n_2pz','sigU'],
+  ['n_3d','n_2ppi','n_2pz','t_pi','sigU'],
+  ['n_3d','n_2ppi','n_2pz','t_dz','sigU'],
+  ['n_3d','n_2ppi','n_2pz','t_sz','sigU'],
+  ['n_3d','n_2ppi','n_2pz','t_ds','sigU'],
+  ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','sigU'],
+  ['n_3d','n_2ppi','n_2pz','t_pi','t_sz','sigU'],
+  ['n_3d','n_2ppi','n_2pz','t_pi','t_ds','sigU'],
+  ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz','sigU'],
+  ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_ds','sigU'],
+  ['n_3d','n_2ppi','n_2pz','t_pi','t_sz','t_ds','sigU'],
+  ['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz','t_ds','sigU'],
   ]
+
   for model in model_list:
     y=df['energy']
     X=df[model]
@@ -119,33 +126,38 @@ def analyze(df):
       r2.append(r2_score(y,ols.predict(X)))
 
       coefs=ols.coef_[1:]
-      parms=[0]
       zzz=0 
+      parms=[]
       for i in range(len(model_list[-1])):
         if(model_list[-1][i] in model):
           parms.append(coefs[zzz])
           zzz+=1
         else: parms.append(0)
-      #evals.append(diagonalize(parms))
+      if(zz==20): evals.append(diagonalize_3d10(parms,printvals=True)[:3])
+      else: evals.append(diagonalize_3d10(parms)[:3])
     
-    print(coefs)
+    plt.subplot(211)
     plt.plot(np.ones(ncv)*zz,r2_test,'gs-')
     plt.plot(np.ones(ncv)*zz+0.10,r2_train,'bo-')
     plt.plot(np.ones(ncv)*zz+0.20,r2,'r*-')
-    #for pp in range(len(evals)):
-    #  plt.plot(np.ones(len(evals[pp]))*zz+0.30+pp*0.10,evals[pp]/100+0.94,'ko-')
+    plt.subplot(212)
+    for pp in range(len(evals)):
+      plt.plot(np.ones(len(evals[pp]))*zz+pp*0.10,evals[pp],'ko-')
     zz+=1
   plt.legend(loc='best')
   plt.xlabel('Model')
-  plt.savefig('model_valid.pdf',bbox_inches='tight')
-  plt.close()
-
-  #PREDICTION PLOTS ---------------------------------------------------------------
+  #plt.savefig('model_valid.pdf',bbox_inches='tight')
+  #plt.close()
+  plt.show()
+  exit(0)
+  '''
   
-  X=df[['n_3d','n_2ppi','n_2pz','t_pi','sigU']]
+  #PREDICTION PLOTS ---------------------------------------------------------------
+  X=df[['n_3d','n_2ppi','n_2pz','t_pi','t_dz','t_sz','sigU']]
   X=sm.add_constant(X)
   y=df['energy']
   ols=sm.OLS(y,X).fit() 
+
   __,l_ols,u_ols=wls_prediction_std(ols,alpha=0.05) #Confidence level for two-sided hypothesis, 95 right now
   print(ols.summary())
 

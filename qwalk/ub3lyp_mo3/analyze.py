@@ -115,8 +115,10 @@ def analyze(df):
   g = sns.FacetGrid(df,hue='basestate',hue_kws=dict(marker=['o']+['.']*10))
   g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
   plt.plot(df['energy'],df['energy'],'k--')
-  plt.savefig('fit.pdf')
+  plt.show()
   exit(0)
+  #plt.savefig('fit.pdf')
+  #exit(0)
 if __name__=='__main__':
   df=collectdf()
   analyze(df)

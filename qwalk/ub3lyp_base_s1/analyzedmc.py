@@ -7,7 +7,7 @@ import statsmodels.api as sm
 from sklearn import linear_model
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error, r2_score
-from diagonalize import diagonalize, new_gs
+#from diagonalize import diagonalize, new_gs
 from statsmodels.sandbox.regression.predstd import wls_prediction_std
 from sklearn.model_selection import KFold
 
@@ -94,16 +94,18 @@ def analyze(df):
   '''
 
   #PAIRPLOTS --------------------------------------------------------------------------
-  '''
-  ind=np.argsort(df['energy'])
-  df=df.iloc[ind[:6]]
+  #ind=np.argsort(df['energy'])
+  #df=df.iloc[ind[:6]]
   #sns.pairplot(df,vars=['energy','mo_n_3d','mo_n_2ppi','mo_n_2pz','Jsd','Jsp'],hue='Sz')
   #plt.savefig('DMC.pdf',bbox_inches='tight')
-  #sns.pairplot(df,vars=['energy','iao_n_3d','iao_n_2ppi','iao_n_2pz','Jsd','Jsp'],hue='Sz')
-  #plt.show()
-  #plt.close()
-  #exit(0)
-  '''
+  
+  #sns.pairplot(df,vars=['energy','iao_n_3d','iao_n_2ppi','iao_n_2pz','iao_t_pi','iao_t_sz','iao_t_ds','iao_t_dz'],hue='Sz')
+  df['iao_n']=df['iao_n_3d']+df['iao_n_2ppi']+df['iao_n_2pz']+df['iao_n_4s']
+  df['mo_n']=df['mo_n_3d']+df['mo_n_2ppi']+df['mo_n_2pz']+df['mo_n_4s']
+  sns.pairplot(df,vars=['energy','iao_n','mo_n'],hue='Sz')
+  plt.show()
+  plt.close()
+  exit(0)
 
   '''
   y=df['energy']
@@ -185,30 +187,42 @@ def analyze(df):
   '''
 
   #PREDICTION PLOTS ---------------------------------------------------------------
-  ind=[0,1,2,3]#,3,8,10]
-  model=['mo_n_2ppi','mo_n_2pz']
-  X=df.sort_values(by=['energy']).iloc[ind]
-  #exit(0)
-  #df=df.iloc[[0,1,2,9,12]]
+  ind=[0,1,2,3,8,10]
+  sns.pairplot(df.sort_values(by=['energy']).iloc[ind],vars=['energy','mo_n_2ppi','mo_n_2pz','mo_n_3d','Jsd'],hue='Sz')
+  plt.savefig('tmp.pdf',bbox_inches='tight')
+  plt.close()
+
+  sns.pairplot(df.sort_values(by=['energy']).iloc[ind],vars=['energy','mo_t_pi','mo_t_dz','mo_t_sz','mo_t_ds'],hue='Sz')
+  plt.savefig('tmp_.pdf',bbox_inches='tight')
+  plt.close()
+  exit(0)
   
-  sns.pairplot(X,vars=['energy','mo_n_2ppi','mo_n_2pz','mo_n_4s'],hue='Sz')
-  plt.show()
+  model=['mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_n_3d']
+  X=df.sort_values(by=['energy']).iloc[ind]
+  presort_ind=np.argsort(df['energy']).values[ind]
+  print(presort_ind)
+
+  #X['energy']-=min(X['energy'])
+  #sns.pairplot(X,vars=['energy','mo_n_2ppi','mo_n_2pz','mo_t_pi'],hue='Sz')
+  #plt.show()
 
   y=X['energy']
-  X=X[model]#,'mo_n_3d','mo_t_pi','Jsd']]
-  X=sm.add_constant(X)
-  ols=sm.OLS(y,X).fit() 
+  Z=X[model]#,'mo_n_3d','mo_t_pi','Jsd']]
+  Z=sm.add_constant(Z)
+  ols=sm.OLS(y,Z).fit() 
   
   #__,l_ols,u_ols=wls_prediction_std(ols,alpha=1.0) #Confidence level for two-sided hypothesis, 95 right now
   print(ols.summary())
 
-  X['energy']=y
-  X['pred']=ols.predict(X)
-  X['resid']=X['energy']-X['pred']
-  
-  g = sns.FacetGrid(X,hue='Sz',hue_kws=dict(marker=['.']*3))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))
+  X=df[model]
+  X=sm.add_constant(X)
+  df['pred']=ols.predict(X)
+  df['resid']=df['energy']-df['pred']
+
+  df=df.sort_values(by=['energy']).iloc[ind]
+  g = sns.FacetGrid(df,hue='Sz',hue_kws=dict(marker=['.']*3))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))
   g.map(plt.errorbar, "pred", "energy", "energy_err","energy_err",fmt='o').add_legend()
-  plt.plot(X['energy'],X['energy'],'k--')
+  plt.plot(df['energy'],df['energy'],'k--')
   plt.show()
   exit(0)
   #plt.savefig('fit_Jsd.pdf')

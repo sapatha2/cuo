@@ -52,7 +52,7 @@ def h1_moToIAO(parms,printvals=False):
 
   return e
 
-def h2_IAO(Jsd):
+def h2_IAO(Jsd,Us):
   #Jsi = 0.25*(ns_u - ns_d)*(ni_u - ni_d) + 
   #0.5*(cs_u^+ cs_d ci_d^+ ci_u + cs_d^+ cs_u ci_u^+ ci_d)
 
@@ -68,13 +68,13 @@ def h2_IAO(Jsd):
     h2[1][s,i,i,s]=-0.50
     h2[1][i,s,s,i]=-0.50
   h2*=Jsd
-  h2[1][s,s,s,s]=4.0
+  h2[1][s,s,s,s]=Us
   return h2
 
 def ED(parms, nroots, norb, nelec):
-  h1=h1_moToIAO(parms[:-1],printvals=True)
+  h1=h1_moToIAO(parms[:-2],printvals=True)
   h1=np.array([h1,h1])  #SINGLE PARTICLE CHECK IS OK!
-  h2=h2_IAO(parms[-1])
+  h2=h2_IAO(parms[-2],parms[-1])
 
   #FCI Broken (Based off of pyscf/fci/direct_uhf.py __main__)
   mol = gto.Mole()
@@ -99,8 +99,9 @@ def ED(parms, nroots, norb, nelec):
 if __name__=='__main__':
   nroots=20
   norb=9
-  parms=(-3.0903,-0.7501,-1.6424,0.6930,0,0,0,-0.4296)
-  #parms=(-3.0314,-0.6640,-1.5162,0.6780,0,0,0,0)
+  #parms=(-2.9092,-0.6912,-2.0957,0.8289,0,0,0,-0.5530,0)
+  parms=(-3.0903,-0.7501,-1.6424,0.6930,0,0,0,-0.4296,0)
+  #parms=(-3.0314,-0.6640,-1.5162,0.6780,0,0,0,0,0)
 
   nelec=(8,7)
   res1=ED(parms,nroots,norb,nelec)
@@ -140,6 +141,11 @@ if __name__=='__main__':
 
   df['E']-=min(df['E'])
   print(df.sort_values(by=['E']))
-  plt.plot(df['E'][df['Sz']==0.5],'go')
-  plt.plot(df['E'][df['Sz']==1.5],'ro')
-  plt.show()
+  #plt.plot(df['E'][df['Sz']==0.5],'go')
+  #plt.plot(df['E'][df['Sz']==1.5],'ro')
+  df['n_4s']=df['n_4s_u']+df['n_4s_d']
+  df['n_3d']=df['n_3d_u']+df['n_3d_d']
+  df['n_2ppi']=df['n_2ppi_u']+df['n_2ppi_d']
+  df['n_2pz']=df['n_2pz_u']+df['n_2pz_d']
+  sns.pairplot(df,vars=['E','n_4s','n_3d','n_2ppi','n_2pz'],hue='Sz')
+  plt.savefig('ed_pairplot.pdf',bbox_inches='tight')

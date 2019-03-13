@@ -154,11 +154,12 @@ def resid_valid(df,model_list,save=False):
   return 1
 
 #Regression plots
-def regr_plot(df,model,save=False):
+def regr_plot(df,model,weights=None,save=False):
   y=df['energy']
   Z=df[model]
   Z=sm.add_constant(Z)
-  ols=sm.OLS(y,Z).fit() 
+  if(weights is None): ols=sm.OLS(y,Z).fit()
+  else: ols=sm.WLS(y,Z,weights).fit() 
   
   __,l_ols,u_ols=wls_prediction_std(ols,alpha=0.05) #Confidence level for two-sided hypothesis, 95 right now
   if(save):
@@ -171,12 +172,14 @@ def regr_plot(df,model,save=False):
   df['resid']=df['energy']-df['pred']
   df['pred_err']=(u_ols-l_ols)/2
 
+  '''
   sns.pairplot(df,vars=['energy','pred']+model,hue='Sz')
   if(save):
     plt.savefig('analysis/fit_pairplot.pdf',bbox_inches='tight')
   else:
     plt.show()
   plt.close()
+  '''
 
   g = sns.FacetGrid(df,hue='Sz',hue_kws=dict(marker=['.']*3))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))
   g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
@@ -201,6 +204,7 @@ def regr_plot(df,model,save=False):
 ######################################################################################
 #Analysis pipeline, main thing to edit for runs
 def analyze(df,save=False):
+  '''
   ncv=10
   model_list=[
     ['mo_n_3d','mo_n_2ppi','mo_n_2pz'],
@@ -239,10 +243,67 @@ def analyze(df,save=False):
     ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds','Jsd','Us'],
   ]
   resid_valid(df,model_list,save=save)
-  model=['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jsd','Us']
-  regr_plot(df,model,save=save)
+  '''
+
+  model=['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jsd','Us','Ud']
+  
+  #Logistical sigmoid with 1/2 cutoff specified
+  def cut_sigmoid(y,cutoff,beta):
+    return np.exp(-beta*(y-cutoff))/(np.exp(-beta*(y-cutoff))+1)
+
+  '''
+  cut=0.5
+  beta=7
+  zz=0
+
+  kf=KFold(n_splits=5,shuffle=True)
+  for cut in [0.7,0.6,0.5,0.4,0.3]:
+    for beta in [3,5,7,9]:
+      
+      weights=cut_sigmoid(-df['mo_n_3d']+max(df['mo_n_3d']),cut,beta)
+      y=df['energy']
+      X=df[model]
+      X=sm.add_constant(X)
+
+      r2_train=[]
+      r2_test=[]
+      r2=[]
+      evals=[]
+      for train_index,test_index in kf.split(df):
+        X_train,X_test=X.iloc[train_index],X.iloc[test_index]
+        y_train,y_test=y.iloc[train_index],y.iloc[test_index]
+        print(train_index.shape)
+        train_weights=weights[np.array(train_index)]
+        test_weights= weights[np.array(test_index)]
+
+        ols=linear_model.LinearRegression().fit(X_train,y_train,train_weights)
+        r2_train.append(r2_score(y_train,ols.predict(X_train),train_weights))
+        r2_test.append(r2_score(y_test,ols.predict(X_test),test_weights))
+        r2.append(r2_score(y,ols.predict(X),weights))
+    
+    plt.plot(np.ones(ncv)*zz,    r2_train,'gs')
+    plt.plot(np.ones(ncv)*zz+0.1,r2_test,'bo')
+    plt.plot(np.ones(ncv)*zz+0.2,r2,'r*')
+    zz+=1
+  plt.show()
+  exit(0)
+  '''
+
+  #plt.plot(df['mo_n_3d'],weights,'.')
+  #plt.xlabel('mo_n_3d')
+  #plt.ylabel('weight')
+  #plt.title('cut='+str(cut)+', beta='+str(beta))
+  #plt.savefig('analysis/weight.pdf')
+  weights=None
+  regr_plot(df,model,weights,save=save)
 
 if __name__=='__main__':
   df=collect_df()
   df=format_df(df)
-  analyze(df,save=True)
+  '''
+  ind=np.argsort(df['energy'][df['basestate']==-1])
+  df=df[df['basestate']==-1].iloc[[0,1,2,3,4,10,11,12]].sort_values(by=['energy'])
+  print(df[['energy','mo_n_2pz','mo_n_2ppi','mo_n_3d','mo_n_4s','Sz','Jsd','Us']])
+  exit(0)
+  '''
+  analyze(df,save=False)

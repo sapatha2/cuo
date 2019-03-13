@@ -174,7 +174,7 @@ def analyze(df):
   '''
 
   #PREDICTION PLOTS ---------------------------------------------------------------
-  model=['mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_n_3d']
+  model=['mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_n_3d','Jsd']
 
   y=df['energy']
   Z=df[model]
@@ -190,10 +190,9 @@ def analyze(df):
   g = sns.FacetGrid(df,hue='Sz',hue_kws=dict(marker=['.']*3))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))
   g.map(plt.errorbar, "pred", "energy", "energy_err","energy_err",fmt='o').add_legend()
   plt.plot(df['energy'],df['energy'],'k--')
-  plt.show()
+  #plt.show()
+  plt.savefig('fit_Jsd.pdf')
   exit(0)
-  #plt.savefig('fit_Jsd.pdf')
-  #plt.close()
 
   df=df[df['basestate']==-1]
   g = sns.FacetGrid(df,hue='Sz',hue_kws=dict(marker=['.']*3))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))

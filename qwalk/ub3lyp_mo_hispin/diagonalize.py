@@ -1,19 +1,23 @@
 import numpy as np 
 import matplotlib.pyplot as plt
 def diagonalize(parms):
+  print(parms)
   e4s,e3d,epi,ez,tpi,tds,tdz,tsz=parms
   H=np.diag([e3d,e3d,e3d,e3d,e3d,epi,epi,ez,e4s])
   
   #e4s,e3dpi,e3dz2,e3dd,epi,ez,tpi,tds,tdz,tsz=parms
   #H=np.diag([e3dpi,e3dpi,e3dz2,e3dd,e3dd,epi,epi,ez,e4s])
 
-  #dx, dy, dz2, dd, px, py, pz, 4s
+  #dx, dy, dz2, dd, dd, px, py, pz, 4s
   H[[0,1,5,6],[5,6,0,1]]=tpi
   H[[2,7],[7,2]]=tdz
   H[[7,8],[8,7]]=tsz
-  H[[2,8],[8,2]]=-tds
+  H[[2,8],[8,2]]=tds
 
   w,vr=np.linalg.eigh(H)
+  #print(w)
+  #print(vr.T)
+  #exit(0)
   return(w-w[0])
 
 def new_gs(parms):

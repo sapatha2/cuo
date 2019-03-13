@@ -52,9 +52,11 @@ def h1_moToIAO(parms,printvals=False):
 
   return e
 
-def h2_IAO(Jsd):
+def h2_IAO(Jsd,Us):
   #Jsi = 0.25*(ns_u - ns_d)*(ni_u - ni_d) + 
   #0.5*(cs_u^+ cs_d ci_d^+ ci_u + cs_d^+ cs_u ci_u^+ ci_d)
+  
+  print(Jsd,Us)
 
   #PYSCF ordering: 2rdm[p,r,q,s]_x,x' = <cp_x^+ cq_x'^+ cs_x' cr_x>
   h2=np.zeros((3,9,9,9,9))
@@ -68,13 +70,13 @@ def h2_IAO(Jsd):
     h2[1][s,i,i,s]=-0.50
     h2[1][i,s,s,i]=-0.50
   h2*=Jsd
-  h2[1][s,s,s,s]=4.0
+  h2[1][s,s,s,s]=Us
   return h2
 
 def ED(parms, nroots, norb, nelec):
-  h1=h1_moToIAO(parms[:-1],printvals=True)
+  h1=h1_moToIAO(parms[:-2],printvals=True)
   h1=np.array([h1,h1])  #SINGLE PARTICLE CHECK IS OK!
-  h2=h2_IAO(parms[-1])
+  h2=h2_IAO(parms[-2],parms[-1])
 
   #FCI Broken (Based off of pyscf/fci/direct_uhf.py __main__)
   mol = gto.Mole()
@@ -99,8 +101,15 @@ def ED(parms, nroots, norb, nelec):
 if __name__=='__main__':
   nroots=20
   norb=9
-  parms=(-3.0903,-0.7501,-1.6424,0.6930,0,0,0,-0.4296)
-  #parms=(-3.0314,-0.6640,-1.5162,0.6780,0,0,0,0)
+  parms=(-3.3497,-0.2666,-1.8632,1.2426, 0.4035,0,-1.2825,-0.8105,3.6965)
+  #parms=(-3.0469,-0.8068,-2.0120,0.6164,0,0,0,-0.6505, 3.3954)
+  #parms=(-3.0036, -0.7844,-2.0565,0.6780,0,0,0, -0.6126, 3.424)
+  #parms=(-3.1228,-0.8323,-1.9754,0.5603,0,0,0,-0.7487,3.3377)
+  #parms=(-2.9821,-0.8129,-1.9137,0.5934,0,0,0,-0.5586,3.0822)
+  #parms=(-3.1875,-0.6328,-2.1335,1.1236,0,0.7267,-1.2768,-0.8416,3.2801)
+  #parms=(-2.9085,-0.6995,-2.1782,0.8505,0,0,0,-0.6070,3.5297)
+  #parms=(-3.0903,-0.7501,-1.6424,0.6930,0,0,0,-0.4296,0)
+  #parms=(-3.0314,-0.6640,-1.5162,0.6780,0,0,0,0,0)
 
   nelec=(8,7)
   res1=ED(parms,nroots,norb,nelec)

@@ -52,10 +52,9 @@ def analyze(df):
   df['t_ds']=2*df['t_3_9']
   df['n']=df['n_3d']+df['n_4s']+df['n_2p']
 
-  #df=df[df['basestate']==-1]
-  #print(df.iloc[[2,10,4,11]][['energy','n_2pz','n_2ppi','n_4s','t_pi','t_ds','t_dz','t_sz']])
-  #print(df.var())
-  #exit(0)
+  sns.pairplot(df,vars=['energy','n'],hue='Sz')
+  plt.show()
+  exit(0)
 
   #PAIRPLOTS --------------------------------------------------------------------------
   #sns.pairplot(df,vars=['energy','n_3dd','n_3dpi','n_3dz2','n_3d'],hue='basestate',markers=['o']+['.']*10)
@@ -115,9 +114,9 @@ def analyze(df):
     zz+=1
   plt.legend(loc='best')
   plt.xlabel('Model')
-  plt.savefig('dmc_model_valid.pdf',bbox_inches='tight')
+  #plt.savefig('dmc_model_valid.pdf',bbox_inches='tight')
   #plt.close()
-  #plt.show()
+  plt.show()
   exit(0)
 
   #PREDICTION PLOTS ---------------------------------------------------------------
