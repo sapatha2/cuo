@@ -20,18 +20,24 @@ def gather_all(N,gsw,basename):
       print(f)
       data=json.load(open(f,'r'))
       obdm,__=get_qwalk_dm(data['properties']['tbdm_basis1'])
-      obdm2,__,tbdm,__=get_qwalk_dm(data['properties']['tbdm_basis2'])
+      obdm2,__=get_qwalk_dm(data['properties']['tbdm_basis2'])
+      __,__,tbdm,__=get_qwalk_dm(data['properties']['tbdm_basis3'])
       energy=data['properties']['total_energy']['value'][0]*27.2114
       energy_err=data['properties']['total_energy']['error'][0]*27.2114
 
       print(obdm.shape,obdm2.shape,tbdm.shape)
 
-      #MO ordering
-      #1-body
+      #MO 1-body
       orb1=[0,1,2,3,4,5,6,7,8,9,1,2,3,8,3]
       orb2=[0,1,2,3,4,5,6,7,8,9,6,7,8,9,9]      
       mo=sum_onebody(obdm,orb1,orb2)
       mo_labels=['mo_'+str(orb1[i])+'_'+str(orb2[i]) for i in range(len(orb1))]
+
+      #IAO 1-body
+      orb1=[0,1,2,3,4,5,6,7,8,0,0,3,2,4]
+      orb2=[0,1,2,3,4,5,6,7,8,3,8,8,7,6]
+      iao=sum_onebody(obdm2,orb1,orb2)
+      iao_labels=['iao_'+str(orb1[i])+'_'+str(orb2[i]) for i in range(len(orb1))]
 
       #2-body
       orb1=[0,1,2,3,4,5]
@@ -43,8 +49,8 @@ def gather_all(N,gsw,basename):
       j=sum_J(tbdm,orb1,orb2)
       j_labels=['j_'+str(orb1[i])+'_'+str(orb2[i]) for i in range(len(orb1))]
 
-      dat=np.array([energy,energy_err]+list(mo)+list(u)+list(j))
-      d=pd.DataFrame(dat[:,np.newaxis].T,columns=['energy','energy_err']+mo_labels+u_labels+j_labels)
+      dat=np.array([energy,energy_err]+list(mo)+list(iao)+list(u)+list(j))
+      d=pd.DataFrame(dat[:,np.newaxis].T,columns=['energy','energy_err']+mo_labels+iao_labels+u_labels+j_labels)
       d=d.astype('double')
       if(df is None): df=d
       else: df=pd.concat((df,d),axis=0)      
@@ -57,8 +63,7 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 import seaborn as sns 
 if __name__=='__main__':
-  for basestate in np.arange(6):
-    for gsw  in [0.2,0.4,0.6,0.8,1.0]:
-      N=5
-      if(gsw==1.0): N=1
+  for basestate in np.arange(2):
+    for gsw  in np.arange(0.1,1.1,0.1): 
+      N=1
       gather_all(N,gsw,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))
