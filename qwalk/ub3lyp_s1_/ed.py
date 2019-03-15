@@ -26,8 +26,8 @@ def h1_moToIAO(parms,printvals=False):
 
   #IAO ordering: ['del','del','yz','xz','x','y','z2','z','s'] 
   #MO ordering:  dxz, dyz, dz2, delta, delta, px, py, pz, 4s
-  ed,epi,epz,tpi,tdz,tsz,tds=parms
-  es=0
+  es,epi,epz,tpi,tdz,tsz,tds=parms
+  ed=0
 
   e=np.diag([ed,ed,ed,ed,ed,epi,epi,epz,es])
   e[[0,1,5,6],[5,6,0,1]]=tpi
@@ -52,29 +52,32 @@ def h1_moToIAO(parms,printvals=False):
 
   return e
 
-def h2_IAO(Jsd,Us):
+def h2_IAO(Jcu,Us):
   #Jsi = 0.25*(ns_u - ns_d)*(ni_u - ni_d) + 
   #0.5*(cs_u^+ cs_d ci_d^+ ci_u + cs_d^+ cs_u ci_u^+ ci_d)
-  
-  print(Jsd,Us)
 
   #PYSCF ordering: 2rdm[p,r,q,s]_x,x' = <cp_x^+ cq_x'^+ cs_x' cr_x>
   h2=np.zeros((3,9,9,9,9))
-  s=8 #index for 4s orbital
-  for i in [0,1,2,3,6]:
-    h2[0][s,s,i,i]=0.25
-    h2[2][s,s,i,i]=0.25
-    
-    h2[1][i,i,s,s]=-0.25
-    h2[1][s,s,i,i]=-0.25
-    h2[1][s,i,i,s]=-0.50
-    h2[1][i,s,s,i]=-0.50
-  h2*=Jsd
-  h2[1][s,s,s,s]=Us
+  index=[0,1,2,3,6,8]
+  #for p in range(len(index)):
+  #  for j in range(p+1,len(index)):
+  j=5
+  for p in range(len(index)-1):
+      s=index[p]
+      i=index[j]
+      h2[0][s,s,i,i]=0.25
+      h2[2][s,s,i,i]=0.25
+      
+      h2[1][i,i,s,s]=-0.25
+      h2[1][s,s,i,i]=-0.25
+      h2[1][s,i,i,s]=-0.50
+      h2[1][i,s,s,i]=-0.50
+  h2*=Jcu
+  h2[1][8,8,8,8]=Us
   return h2
 
 def ED(parms, nroots, norb, nelec):
-  h1=h1_moToIAO(parms[:-2],printvals=True)
+  h1=h1_moToIAO(parms[:-2])
   h1=np.array([h1,h1])  #SINGLE PARTICLE CHECK IS OK!
   h2=h2_IAO(parms[-2],parms[-1])
 
@@ -99,56 +102,53 @@ def ED(parms, nroots, norb, nelec):
   return e, ci, np.array(n_occ_u), np.array(n_occ_d)
 
 if __name__=='__main__':
-  nroots=20
+  '''
   norb=9
-  parms=(-3.3497,-0.2666,-1.8632,1.2426, 0.4035,0,-1.2825,-0.8105,3.6965)
-  #parms=(-3.0469,-0.8068,-2.0120,0.6164,0,0,0,-0.6505, 3.3954)
-  #parms=(-3.0036, -0.7844,-2.0565,0.6780,0,0,0, -0.6126, 3.424)
-  #parms=(-3.1228,-0.8323,-1.9754,0.5603,0,0,0,-0.7487,3.3377)
-  #parms=(-2.9821,-0.8129,-1.9137,0.5934,0,0,0,-0.5586,3.0822)
-  #parms=(-3.1875,-0.6328,-2.1335,1.1236,0,0.7267,-1.2768,-0.8416,3.2801)
-  #parms=(-2.9085,-0.6995,-2.1782,0.8505,0,0,0,-0.6070,3.5297)
-  #parms=(-3.0903,-0.7501,-1.6424,0.6930,0,0,0,-0.4296,0)
-  #parms=(-3.0314,-0.6640,-1.5162,0.6780,0,0,0,0,0)
 
-  nelec=(8,7)
-  res1=ED(parms,nroots,norb,nelec)
+  full_df=None
+  beta=0
+  for parms in [
+  (3.0019,2.2094,0.6435,0.8995,0,0,0,-0.5798,4.2049),
+  (3.0310,2.1832,0.7768,0.8089,0,0,0,-0.5531,4.0500),
+  (3.0589,2.1512,0.9370,0.6936,0,0,0,-0.5322,3.7743),
+  (3.0883,2.1305,1.0353,0.5985,0,0,0,-0.5459,3.6741),
+  (3.0982,2.1120,1.0622,0.5232,0,0,0,-0.5692,3.8343),
+  (3.0899,2.0986,1.0575,0.4635,0,0,0,-0.5529,4.0939),
+  (3.0686,2.0945,1.0467,0.4232,0,0,0,-0.4561,4.3103),
+  (3.0413,2.0918,1.0332,0.4002,0,0,0,-0.3107,4.4374)]:
 
-  nelec=(9,6)
-  res3=ED(parms,nroots,norb,nelec)
+    nelec=(8,7)
+    nroots=14
+    res1=ED(parms,nroots,norb,nelec)
 
-  E = res1[0]
-  n_occ_u = res1[2]
-  n_occ_d = res1[3]
-  Sz = np.ones(len(E))*0.5
-  n_3d_u = n_occ_u[:,0] + n_occ_u[:,1] + n_occ_u[:,2] + n_occ_u[:,3] + n_occ_u[:,6]
-  n_2ppi_u = n_occ_u[:,4] + n_occ_u[:,5]
-  n_2pz_u = n_occ_u[:,7]
-  n_4s_u = n_occ_u[:,8]
-  n_3d_d = n_occ_d[:,0] + n_occ_d[:,1] + n_occ_d[:,2] + n_occ_d[:,3] + n_occ_d[:,6]
-  n_2ppi_d = n_occ_d[:,4] + n_occ_d[:,5]
-  n_2pz_d = n_occ_d[:,7]
-  n_4s_d = n_occ_d[:,8]
-  df = pd.DataFrame({'E':E,'Sz':Sz,'n_3d_u':n_3d_u,'n_2pz_u':n_2pz_u,'n_2ppi_u':n_2ppi_u,'n_4s_u':n_4s_u,
-  'n_3d_d':n_3d_d,'n_2pz_d':n_2pz_d,'n_2ppi_d':n_2ppi_d,'n_4s_d':n_4s_d})
-  
-  E = res3[0]
-  n_occ_u = res3[2]
-  n_occ_d = res3[3]
-  Sz = np.ones(len(E))*1.5
-  n_3d_u = n_occ_u[:,0] + n_occ_u[:,1] + n_occ_u[:,2] + n_occ_u[:,3] + n_occ_u[:,6]
-  n_2ppi_u = n_occ_u[:,4] + n_occ_u[:,5]
-  n_2pz_u = n_occ_u[:,7]
-  n_4s_u = n_occ_u[:,8]
-  n_3d_d = n_occ_d[:,0] + n_occ_d[:,1] + n_occ_d[:,2] + n_occ_d[:,3] + n_occ_d[:,6]
-  n_2ppi_d = n_occ_d[:,4] + n_occ_d[:,5]
-  n_2pz_d = n_occ_d[:,7]
-  n_4s_d = n_occ_d[:,8]
-  df = pd.concat((df,pd.DataFrame({'E':E,'Sz':Sz,'n_3d_u':n_3d_u,'n_2pz_u':n_2pz_u,'n_2ppi_u':n_2ppi_u,'n_4s_u':n_4s_u,
-  'n_3d_d':n_3d_d,'n_2pz_d':n_2pz_d,'n_2ppi_d':n_2ppi_d,'n_4s_d':n_4s_d})),axis=0)
+    nelec=(9,6)
+    nroots=6
+    res3=ED(parms,nroots,norb,nelec)
 
-  df['E']-=min(df['E'])
-  print(df.sort_values(by=['E']))
-  plt.plot(df['E'][df['Sz']==0.5],'go')
-  plt.plot(df['E'][df['Sz']==1.5],'ro')
+    E = res1[0]
+    n_occ = res1[2]+res1[3]
+    Sz = np.ones(len(E))*0.5
+    n_3d = n_occ[:,0] + n_occ[:,1] + n_occ[:,2] + n_occ[:,3] + n_occ[:,6]
+    n_2ppi = n_occ[:,4] + n_occ[:,5]
+    n_2pz = n_occ[:,7]
+    n_4s = n_occ[:,8]
+    df = pd.DataFrame({'E':E,'Sz':Sz,'n_3d':n_3d,'n_2pz':n_2pz,'n_2ppi':n_2ppi,'n_4s':n_4s})
+    
+    E = res3[0]
+    n_occ = res3[2]+res3[3]
+    Sz = np.ones(len(E))*1.5
+    n_3d = n_occ[:,0] + n_occ[:,1] + n_occ[:,2] + n_occ[:,3] + n_occ[:,6]
+    n_2ppi = n_occ[:,4] + n_occ[:,5]
+    n_2pz = n_occ[:,7]
+    n_4s = n_occ[:,8]
+    df = pd.concat((df,pd.DataFrame({'E':E,'Sz':Sz,'n_3d':n_3d,'n_2pz':n_2pz,'n_2ppi':n_2ppi,'n_4s':n_4s})),axis=0)
+
+    df['E']-=min(df['E'])
+    df['eig']=np.arange(df.shape[0])
+    df['beta']=beta
+    if(full_df is None): full_df = df
+    else: full_df = pd.concat((full_df,df),axis=0)
+    beta+=0.5
+  sns.pairplot(full_df,vars=['E','n_3d','n_2pz','n_2ppi','n_4s'],hue='beta',markers=['o']+['.']*7)
   plt.show()
+  '''
