@@ -12,6 +12,9 @@ from statsmodels.sandbox.regression.predstd import wls_prediction_std
 from sklearn.model_selection import KFold
 from scipy import stats
 from ed import ED
+from roks_model import ED_roks
+from uks_model import ED_uks
+import itertools
 
 ######################################################################################
 #FROZEN METHODS
@@ -76,6 +79,7 @@ def oneparm_valid(df,ncv,model_list,save=False,weights=None):
   if(weights is None): weights=np.ones(df.shape[0])
   df['weights']=weights
   for model in model_list:
+    print(model)
     y=df['energy']
     X=df[model]
     X=sm.add_constant(X)
@@ -85,24 +89,23 @@ def oneparm_valid(df,ncv,model_list,save=False,weights=None):
     r2_test=[]
     r2=[]
     evals=[]
-    for i in range(10):
-      for train_index,test_index in kf.split(df):
-        X_train,X_test=X.iloc[train_index],X.iloc[test_index]
-        y_train,y_test=y.iloc[train_index],y.iloc[test_index]
-        w_train,w_test=df['weights'].iloc[train_index],df['weights'].iloc[test_index]
-        ols=linear_model.LinearRegression().fit(X_train,y_train,w_train)
-        r2_train.append(r2_score(y_train,ols.predict(X_train),w_train))
-        r2_test.append(r2_score(y_test,ols.predict(X_test),w_test))
-        r2.append(r2_score(y,ols.predict(X),weights))
+    for train_index,test_index in kf.split(df):
+      X_train,X_test=X.iloc[train_index],X.iloc[test_index]
+      y_train,y_test=y.iloc[train_index],y.iloc[test_index]
+      w_train,w_test=df['weights'].iloc[train_index],df['weights'].iloc[test_index]
+      ols=linear_model.LinearRegression().fit(X_train,y_train,w_train)
+      r2_train.append(r2_score(y_train,ols.predict(X_train),w_train))
+      r2_test.append(r2_score(y_test,ols.predict(X_test),w_test))
+      r2.append(r2_score(y,ols.predict(X),weights))
     
     if(zz==0):
-      plt.plot(np.ones(ncv*(i+1))*zz,r2_test,'gs-',label='r2 test')
-      plt.plot(np.ones(ncv*(i+1))*zz+0.10,r2_train,'bo-',label='r2 train')
-      plt.plot(np.ones(ncv*(i+1))*zz+0.20,r2,'r*-',label='full r2')
+      plt.plot(np.ones(ncv*(1))*zz,r2_test,'gs-',label='r2 test')
+      plt.plot(np.ones(ncv*(1))*zz+0.10,r2_train,'bo-',label='r2 train')
+      plt.plot(np.ones(ncv*(1))*zz+0.20,r2,'r*-',label='full r2')
     else:
-      plt.plot(np.ones(ncv*(i+1))*zz,r2_test,'gs-')
-      plt.plot(np.ones(ncv*(i+1))*zz+0.10,r2_train,'bo-')
-      plt.plot(np.ones(ncv*(i+1))*zz+0.20,r2,'r*-')
+      plt.plot(np.ones(ncv*(1))*zz,r2_test,'gs-')
+      plt.plot(np.ones(ncv*(1))*zz+0.10,r2_train,'bo-')
+      plt.plot(np.ones(ncv*(1))*zz+0.20,r2,'r*-')
     zz+=1
   plt.legend(loc='best')
   plt.title('R2 CV DMC')
@@ -115,48 +118,56 @@ def oneparm_valid(df,ncv,model_list,save=False,weights=None):
   plt.close()
   return 1
 
-#Residual analysis, KDE and histogram
-def resid_valid(df,model_list,save=False):
-  zz=0
-  for model in model_list:
-    y=df['energy']
-    X=df[model]
-    X=sm.add_constant(X)
-    ols=linear_model.LinearRegression().fit(X,y)
+#Exact diagonalization + beta fit 
+def ed_dmc_beta(df,model,betas=np.arange(0,3.75,0.25),save=False):
+  full_df=None
+  for beta in betas:
+    print("beta =============================================== "+str(beta))
+    weights=np.exp(-beta*(df['energy']-min(df['energy'])))
+    fit=regr_plot(df,model,weights,save=False)
+    params=list(fit.params[1:5])+[0,0,0]+list(fit.params[5:])
+    norb=9
 
-    resid = y - ols.predict(X)
-    resid_1 = resid[df['Sz']==0.5]
-    resid_2 = resid[df['Sz']==1.5]
-    
-    density   = stats.kde.gaussian_kde(resid)
-    density_1 = stats.kde.gaussian_kde(resid_1)
-    density_2 = stats.kde.gaussian_kde(resid_2)
-    x   = np.linspace(min(resid),max(resid),100)
-    x_1 = np.linspace(min(resid_1),max(resid_1),100)
-    x_2 = np.linspace(min(resid_2),max(resid_2),100)
+    nelec=(8,7)
+    nroots=14
+    res1=ED(params,nroots,norb,nelec)
 
-    plt.subplot(211)
-    plt.title('Histogram of residuals')
-    plt.hist(resid_1,density=True,label='Sz=0.5') 
-    plt.hist(resid_2,density=True,label='Sz=1.5')
-    plt.hist(resid,density=True,label='combined') 
+    nelec=(9,6)
+    nroots=6
+    res3=ED(params,nroots,norb,nelec)
+
+    E = res1[0]
+    n_occ = res1[2]+res1[3]
+    Sz = np.ones(len(E))*0.5
+    n_3d = n_occ[:,0] + n_occ[:,1] + n_occ[:,2] + n_occ[:,3] + n_occ[:,6]
+    n_2ppi = n_occ[:,4] + n_occ[:,5]
+    n_2pz = n_occ[:,7]
+    n_4s = n_occ[:,8]
+    d = pd.DataFrame({'E':E,'Sz':Sz,'n_3d':n_3d,'n_2pz':n_2pz,'n_2ppi':n_2ppi,'n_4s':n_4s})
     
-    plt.subplot(212)
-    plt.title('Gaussian KDE of residuals')
-    plt.plot(x_1,density_1(x_1),label='Sz=0.5') 
-    plt.plot(x_2,density_2(x_2),label='Sz=1.5')
-    plt.plot(x,density(x),label='combined') 
-   
-    plt.suptitle('Model ='+' '.join(model))
-    plt.legend(loc='best')
-     
-    if(save):
-      plt.savefig('analysis/resid_analysis_'+str(zz)+'.pdf',bbox_inches='tight')
-    else:
-      plt.show()
-    plt.close()
-    zz+=1
-  return 1
+    E = res3[0]
+    n_occ = res3[2]+res3[3]
+    Sz = np.ones(len(E))*1.5
+    n_3d = n_occ[:,0] + n_occ[:,1] + n_occ[:,2] + n_occ[:,3] + n_occ[:,6]
+    n_2ppi = n_occ[:,4] + n_occ[:,5]
+    n_2pz = n_occ[:,7]
+    n_4s = n_occ[:,8]
+    d = pd.concat((d,pd.DataFrame({'E':E,'Sz':Sz,'n_3d':n_3d,'n_2pz':n_2pz,'n_2ppi':n_2ppi,'n_4s':n_4s})),axis=0)
+
+    d['E']-=min(d['E'])
+    d['eig']=np.arange(d.shape[0])
+    d['beta']=beta
+    if(full_df is None): full_df = d
+    else: full_df = pd.concat((full_df,d),axis=0)
+
+  sns.pairplot(full_df,vars=['E','n_2ppi','n_2pz','n_4s','n_3d'],hue='beta',markers=['s']+['o']*14)
+  if(save): plt.savefig('analysis/beta_dmc_eigenvalues.pdf',bbox_inches='tight'); plt.close()
+  else: plt.show(); plt.close()
+  
+  sns.pairplot(full_df,vars=['E','n_2ppi','n_2pz','n_4s','n_3d'],hue='Sz')
+  if(save): plt.savefig('analysis/beta_dmc_eigenvalues_sz.pdf',bbox_inches='tight'); plt.close()
+  else: plt.show(); plt.close()
+  return full_df
 
 #Regression plots
 def regr_plot(df,model,weights=None,save=False):
@@ -198,142 +209,35 @@ def regr_plot(df,model,weights=None,save=False):
   '''
   return ols
 
-#Weighted bootstrap sampling
-def bootstrap(df,n,model,weights=None,save=False):
-  if(weights is None): bootstrap=np.ones(df.shape[0])
-  rdf = df.sample(n=n,weights=weights,replace=True) #Resampled df, using weights, with replacement
-  regr_plot(rdf,model,save=save)
-  
-  return 1
-
 ######################################################################################
 #Analysis pipeline, main thing to edit for runs
 def analyze(df,save=False):
+  #One paramter validation for different included hoppings
   ncv=5
-
-  '''
-  model_list=[
-    ['mo_n_4s','mo_n_2ppi','mo_n_2pz'],
-    ['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi'],
-    ['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds'],
-   
-    ['mo_n_4s','mo_n_2ppi','mo_n_2pz','Us'],
-    ['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','Us'],
-    ['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds','Us'],
- 
-    ['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd'],
-    ['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jsd'],
-    ['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds','Jsd'],
-  
-    ['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us'],
-    ['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jsd','Us'],
-    ['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds','Jsd','Us'],
-  ]
-  oneparm_valid(df,ncv,model_list,save=save)
-  '''
-  
-  '''
-  model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','Us']
+  X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
+  hopping=df[['mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
   y=df['energy']
-  X=df[model]
-  X=sm.add_constant(X)
-  df['resid']=df['energy']-sm.OLS(y,X).fit().predict()
-  df['pred']=sm.OLS(y,X).fit().predict()
-  sns.pairplot(df,vars=['energy','pred','resid','Jsd'],hue='Sz')
-  plt.show()
-  exit(0)
-  '''
-
-  #model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','Us']
-  #regr_plot(df,model)
-  #exit(0)
-
-  '''
-  model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jcu','Us']
-  #Logistical sigmoid with 1/2 cutoff specified
-  def cut_sigmoid(y,cutoff,beta):
-    return np.exp(-beta*(y-cutoff))/(np.exp(-beta*(y-cutoff))+1)
-
-  zz=0
-  ncv=10
-  Nrun=1 #How many times to sample CV DISTRIBUTION 
-  kf=KFold(n_splits=ncv,shuffle=True)
-  for beta in np.arange(0,3.5,0.5):
-    #weights=cut_sigmoid(-df['mo_n_3d']+max(df['mo_n_3d']),cut,beta)
-    print(beta,"-----------------")
-    y=df['energy']
-    X=df[model]
-    X=sm.add_constant(X)
-    df['weights']=np.exp(-beta*(y-min(y)))
-    weights=df['weights']
-    
-    r2_train=[]
-    r2_test=[]
-    r2=[]
-    evals=[]
-    for n in range(Nrun):
-      for train_index,test_index in kf.split(df):
-        X_train,X_test=X.iloc[train_index],X.iloc[test_index]
-        y_train,y_test=y.iloc[train_index],y.iloc[test_index]
-        train_weights=weights.iloc[train_index]
-        test_weights= weights.iloc[test_index]
-
-        ols=linear_model.LinearRegression().fit(X_train,y_train,train_weights)
-        r2_train.append(r2_score(y_train,ols.predict(X_train),train_weights))
-        r2_test.append(r2_score(y_test,ols.predict(X_test),test_weights))
-        r2.append(r2_score(y,ols.predict(X),weights))
-   
-    plt.plot(np.ones(ncv*Nrun)*beta,    r2_train,'g.')
-    plt.plot(np.ones(ncv*Nrun)*beta+0.1,r2_test,'b.')
-    plt.plot(np.ones(ncv*Nrun)*beta+0.2,r2,'r*')
-    zz+=1
-  plt.title("cv, model="+' '.join(model))
-  plt.show()
-  '''
-
-  full_df=None
+  model_list=[]
+  for n in range(1,hopping.shape[1]+1):
+    s=set(list(hopping))
+    models=list(map(set,itertools.combinations(s,n)))
+    model_list+=[list(X)+list(m) for m in models]
+  oneparm_valid(df,ncv,model_list,save=save)
+  
+  #ED_DMC + Beta
   model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jsd','Us']
-  for beta in np.arange(0,3.75,0.25):
-    weights=np.exp(-beta*(df['energy']-min(df['energy'])))
-    fit=regr_plot(df,model,weights,save)
-    params=list(fit.params[1:5])+[0,0,0]+list(fit.params[5:])
-    norb=9
+  dmc_eigenvalues = ed_dmc_beta(df,model,save=save) 
+  dmc_eigenvalues['calc']='dmc'
 
-    nelec=(8,7)
-    nroots=14
-    res1=ED(params,nroots,norb,nelec)
+  #ED_ROKS
+  roks_eigenvalues = ED_roks(save=save)
+  roks_eigenvalues['calc']='roks'
 
-    nelec=(9,6)
-    nroots=6
-    res3=ED(params,nroots,norb,nelec)
-
-    E = res1[0]
-    n_occ = res1[2]+res1[3]
-    Sz = np.ones(len(E))*0.5
-    n_3d = n_occ[:,0] + n_occ[:,1] + n_occ[:,2] + n_occ[:,3] + n_occ[:,6]
-    n_2ppi = n_occ[:,4] + n_occ[:,5]
-    n_2pz = n_occ[:,7]
-    n_4s = n_occ[:,8]
-    d = pd.DataFrame({'E':E,'Sz':Sz,'n_3d':n_3d,'n_2pz':n_2pz,'n_2ppi':n_2ppi,'n_4s':n_4s})
-    
-    E = res3[0]
-    n_occ = res3[2]+res3[3]
-    Sz = np.ones(len(E))*1.5
-    n_3d = n_occ[:,0] + n_occ[:,1] + n_occ[:,2] + n_occ[:,3] + n_occ[:,6]
-    n_2ppi = n_occ[:,4] + n_occ[:,5]
-    n_2pz = n_occ[:,7]
-    n_4s = n_occ[:,8]
-    d = pd.concat((d,pd.DataFrame({'E':E,'Sz':Sz,'n_3d':n_3d,'n_2pz':n_2pz,'n_2ppi':n_2ppi,'n_4s':n_4s})),axis=0)
-
-    d['E']-=min(d['E'])
-    d['eig']=np.arange(d.shape[0])
-    d['beta']=beta
-    if(full_df is None): full_df = d
-    else: full_df = pd.concat((full_df,d),axis=0)
-  sns.pairplot(full_df,vars=['E','n_2ppi','n_2pz','n_4s','n_3d'],hue='beta',markers=['o']+['.']*14)
-  plt.show() 
+  #ED UKS
+  uks_eigenvalues = ED_uks(save=save)
+  uks_eigenvalues['calc']='uks'
 
 if __name__=='__main__':
   df=collect_df()
   df=format_df(df)
-  analyze(df,save=False)
+  analyze(df,save=True)
