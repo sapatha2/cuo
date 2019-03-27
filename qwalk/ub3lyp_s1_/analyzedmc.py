@@ -240,4 +240,4 @@ def analyze(df,save=False):
 if __name__=='__main__':
   df=collect_df()
   df=format_df(df)
-  analyze(df,save=True)
+  analyze(df,save=False)

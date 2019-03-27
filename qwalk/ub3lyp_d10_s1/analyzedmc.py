@@ -18,8 +18,8 @@ from scipy import stats
 #Collect df
 def collect_df():
   df=None
-  for basestate in range(10):
-    for gsw in [0.2,0.4,0.6,0.8,1.0]:
+  for basestate in range(6):
+    for gsw in np.arange(0.1,1.1,0.1):
       f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
       small_df=pd.read_pickle(f)
 
@@ -28,27 +28,17 @@ def collect_df():
       small_df['Sz']=0.5
       if(df is None): df = small_df
       else: df = pd.concat((df,small_df),axis=0,sort=True)
-
-  for basestate in range(6):
-    for gsw in [0.2,0.4,0.6,0.8,1.0]:
-      f='../ub3lyp_s3/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
+  '''
+  for basestate in range(2):
+    for gsw in np.arange(0.1,1.1,0.1):
+      f='../ub3lyp_d10_s3/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
       small_df=pd.read_pickle(f)
     
-      small_df['basestate']=basestate
+      small_df['basestate']=basestate+6
       if(gsw==1.0): small_df['basestate']=-1
       small_df['Sz']=1.5
       df = pd.concat((df,small_df),axis=0,sort=True)
-  
-  for basestate in range(1,2):
-    for gsw in [1.0]:
-      f='../ub3lyp_do/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
-      small_df=pd.read_pickle(f)
-    
-      small_df['basestate']=basestate
-      if(gsw==1.0): small_df['basestate']=-1
-      small_df['Sz']=-0.5
-      df = pd.concat((df,small_df),axis=0,sort=True)
-  
+  '''
   return df
 
 #Formatting
@@ -66,6 +56,20 @@ def format_df(df):
   df['mo_t_sz']=2*df['mo_8_9']
   df['mo_t_ds']=2*df['mo_3_9']
   df['mo_n']=df['mo_n_3d']+df['mo_n_2p']+df['mo_n_4s']
+
+  df['iao_n_3dd']=df['iao_1_1']+df['iao_5_5']
+  df['iao_n_3dpi']=df['iao_2_2']+df['iao_4_4']
+  df['iao_n_3dz2']=df['iao_3_3']
+  df['iao_n_3d']=df['iao_n_3dd']+df['iao_n_3dpi']+df['iao_n_3dz2']
+  df['iao_n_2ppi']=df['iao_6_6']+df['iao_7_7']
+  df['iao_n_2pz']=df['iao_8_8']
+  df['iao_n_2p']=df['iao_n_2ppi']+df['iao_n_2pz']
+  df['iao_n_4s']=df['iao_0_0']
+  df['iao_t_pi']=2*(df['iao_2_7']+df['iao_4_6'])
+  df['iao_t_dz']=2*df['iao_3_8']
+  df['iao_t_sz']=2*df['iao_0_8']
+  df['iao_t_ds']=2*df['iao_0_3']
+  df['iao_n']=df['iao_n_3d']+df['iao_n_2p']+df['iao_n_4s']
 
   df['Us']=df['u0']
   df['Ud']=df['u1']+df['u2']+df['u3']+df['u4']+df['u5']
@@ -216,6 +220,9 @@ def regr_plot(df,model,save=False):
 ######################################################################################
 #Analysis pipeline, main thing to edit for runs
 def analyze(df,save=False):
+  #sns.pairplot(df,vars=['energy','mo_n_3d','mo_n_2pz','mo_n_2ppi','mo_t_pi','Jsd','Us'],hue='Sz')
+  #plt.show()
+  #exit(0)
   '''
   ncv=10
   model_list=[
@@ -236,7 +243,8 @@ def analyze(df,save=False):
   
   ]
   oneparm_valid(df,ncv,model_list,save=save)
-  
+  '''
+  '''
   model_list=[
     ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi'],
     ['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_ds'],
@@ -249,10 +257,28 @@ def analyze(df,save=False):
   ]
   resid_valid(df,model_list,save=save)
   '''
-  model=['mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jsd','Us']
+  model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','Us']
+  #model=['iao_n_2pz','iao_n_2ppi','iao_n_4s','Us']
+  
+  '''
+  df=df[['energy','Sz','basestate']+model]
+  df=df[df['basestate']==-1]
+  sns.pairplot(df,vars=['energy']+model,hue='Sz')
+  plt.show()
+  exit(0)
+  '''
+
   regr_plot(df,model,save=save)
 
 if __name__=='__main__':
   df=collect_df()
   df=format_df(df)
+  print(df.shape)
+  '''
+  df['energy']-=min(df['energy'])
+  df=df.sort_values(by=['energy'])
+  df=df[df['basestate']==-1]
+  print(df[['energy','Sz','mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_n_4s']])
+  exit(0)
+  '''
   analyze(df,save=False)

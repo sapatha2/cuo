@@ -2,8 +2,8 @@ SLATER
   ORBITALS  { 
   MAGNIFY 1.0 
   NMO 145 
-  ORBFILE qwalk_vtz/gs_do10.orb
-  INCLUDE qwalk_vtz/gs_do10.basis
+  ORBFILE qwalk_vtz/gs_do14.orb
+  INCLUDE qwalk_vtz/gs_do14.basis
   CENTERS { USEGLOBAL }
   }
 

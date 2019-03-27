@@ -9,3 +9,6 @@
 *.OU
 outputs/
 *.json
+*.aux
+*.pdf
+*.synctex.gz

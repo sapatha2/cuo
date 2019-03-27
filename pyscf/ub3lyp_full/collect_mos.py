@@ -16,7 +16,7 @@ el='Cu'
 
 occ=np.arange(14) 
 mo_coeff=None
-for run in [0,1,2]:
+for run in [0,1]:
   chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+".chk"
   mol=lib.chkfile.load_mol(chkfile)
   m=ROKS(mol)
@@ -34,4 +34,4 @@ for run in [0,1,2]:
 m.mo_coeff=mo_coeff
 print(m.mo_coeff[0].shape)
 print(m.mo_coeff[1].shape)
-print_qwalk_mol(mol,m,basename="all_min_s3")
+print_qwalk_mol(mol,m,basename="all_d10_s3")

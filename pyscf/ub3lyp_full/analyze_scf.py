@@ -14,7 +14,7 @@ el='Cu'
 r=1.725
 method='UB3LYP'
 S=1
-for run in range(10,11):
+for run in range(10,16):
   chkfile=el+'vtz'+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+".chk"
   mol=lib.chkfile.load_mol(chkfile)
   m=ROHF(mol)
