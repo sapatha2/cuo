@@ -42,6 +42,7 @@ def collect_df():
       if(gsw==1.0): small_df['basestate']=-1
       small_df['Sz']=1.5
       df = pd.concat((df,small_df),axis=0,sort=True)
+  
   return df
 
 #Formatting
@@ -124,7 +125,17 @@ def ed_dmc_beta(df,model,betas=np.arange(0,3.75,0.25),save=False):
   for beta in betas:
     print("beta =============================================== "+str(beta))
     weights=np.exp(-beta*(df['energy']-min(df['energy'])))
-    fit=regr_plot(df,model,weights,save=False)
+    fit=regr_plot(df,model,weights,show=False)
+
+    if(beta==2): 
+      plt.plot(df['mo_n'],weights,'o')
+      plt.title('Beta = 2')
+      plt.xlabel('MO trace')
+      plt.ylabel('Weight')
+      if(save): plt.savefig('analysis/w_vs_t.pdf'); plt.close()
+      else: plt.show(); plt.close()
+      fit=regr_plot(df,model,weights,show=True)
+    
     params=list(fit.params[1:5])+[0,0,0]+list(fit.params[5:])
     norb=9
 
@@ -170,7 +181,7 @@ def ed_dmc_beta(df,model,betas=np.arange(0,3.75,0.25),save=False):
   return full_df
 
 #Regression plots
-def regr_plot(df,model,weights=None,save=False):
+def regr_plot(df,model,weights=None,show=False):
   y=df['energy']
   Z=df[model]
   Z=sm.add_constant(Z)
@@ -178,7 +189,7 @@ def regr_plot(df,model,weights=None,save=False):
   else: ols=sm.WLS(y,Z,weights).fit() 
   
   __,l_ols,u_ols=wls_prediction_std(ols,alpha=0.05) #Confidence level for two-sided hypothesis, 95 right now
-  if(save):
+  if(show):
     with open('analysis/fit.csv', 'w') as fh:
       fh.write(ols.summary().as_csv())
   else:
@@ -187,26 +198,28 @@ def regr_plot(df,model,weights=None,save=False):
   df['pred']=ols.predict(Z)
   df['resid']=df['energy']-df['pred']
   df['pred_err']=(u_ols-l_ols)/2
-  '''
-  g = sns.FacetGrid(df,hue='Sz',hue_kws=dict(marker=['.']*3))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))
+  
+  g = sns.FacetGrid(df,hue='Sz')
   g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
   plt.plot(df['energy'],df['energy'],'k--')
-  if(save):
-    plt.savefig('analysis/fit.pdf',bbox_inches='tight')
-  else:
+  plt.title('Regression, 95% CI')
+  plt.xlabel('Predicted Energy, eV')
+  plt.ylabel('DMC Energy, eV')
+  if(show):
     plt.show()
   plt.close()
 
   df=df[df['basestate']==-1]
-  g = sns.FacetGrid(df,hue='Sz',hue_kws=dict(marker=['.']*3))#,hue='basestate',hue_kws=dict(marker=['o']+['.']*16))
+  g = sns.FacetGrid(df,hue='Sz')
   g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
   plt.plot(df['energy'],df['energy'],'k--')
-  if(save):
-    plt.savefig('analysis/fit_baseonly.pdf',bbox_inches='tight')
-  else:
+  plt.title('Regression base states only, 95% CI')
+  plt.xlabel('Predicted Energy, eV')
+  plt.ylabel('DMC Energy, eV')
+  if(show):
     plt.show()
   plt.close()
-  '''
+
   return ols
 
 ######################################################################################
@@ -240,4 +253,4 @@ def analyze(df,save=False):
 if __name__=='__main__':
   df=collect_df()
   df=format_df(df)
-  analyze(df,save=False)
+  analyze(df,save=True)
