@@ -33,25 +33,20 @@ First, we generated all the unique base states in the 3d9 and 3d10 sectors using
 There were two choices of the RDM basis that we could have used, either an IAO basis or an MO basis. The IAO basis is more theoretically pleasing because it's a set of functions which best capture the variation between the the Cu 3d, O 2p, and Cu 4s orbitals from our different base states. Further, the IAO basis is beneficial for representing local interactions since they are localized orbitals. However, the IAO basis has the drawback that many 1-body parameters will be correlated, for example $n_{p_\pi}$ and $t_\pi$. The MO basis choice is more arbitrary since we don't know a way of constructing "intrinsic molecular orbitals," but the RDM elements in this basis tend to vary in a less correlated fashion. This is because, to lowest order, excitations of CuO look very similar to single-particle molecular orbital excitations, so variations in the MO descriptor space are nearly orthogonal. In order to take advantage of the benefits of both bases, I chose to do my model fitting using a mixture of both bases: an MO basis for the non-interacting parts (n, t) and an IAO basis for the interacting pieces (J, U, etc.). In the end we can rotate the MO parameters into the IAO basis, leading to a fully localized representation of our model. The IAO basis I used was constructed on the collection of active MOs (Cu 3d, O 2p and Cu 4s) from every base state. The MO basis selected was the the set of active MOs from the first excited ROKS state of CuO. This is because the single-Slater determinant ground state of CuO from ROKS breaks O$p_x, p_y$ and Cu$d_{xz}, d_{yz}$ degeneracies. These degeneracies are restored in the first excited state ROKS calculation. Later in the analysis, a weighted linear regression (WLS) is used to fit our model, and it will be shown that the WLS assigns nearly zero weight to any sampled states which have a 1-rdm trace far less than 15, the total number of electrons expected in our active space, indicating that our MO model is functioning properly even though it was seemingly arbitrarily chosen. Ultimately, one just needs to ensure that the MO basis can capture variation in the electron number occupancy without having electrons vanish between relevant excitations.
 
 \section{Model selection}
-Model selection required both an understanding of the CuO molecule's low energy excitations and some statistical analysis. We know that the lowest energy excitations of CuO are between the O p and Cu 4s orbitals, as these are the only excitations which allow for a 3d10 configuration. Further, given that we will be including 3d9 states, it's clear that we will need at least consider the following non-interacting parameters:
+Model selection requires both an understanding of the CuO molecule's low energy excitations and some statistical analysis. We know that the lowest energy excitations of CuO are between the O p and Cu 4s orbitals, as these are the only excitations which allow for a 3d10 configuration. Further, given that we will be including 3d9 states, it's clear that we will need to at least consider the following non-interacting parameters:
 $$\bar{\epsilon}_d, \bar{\epsilon}_z, \bar{\epsilon}_\pi, \bar{\epsilon}_s, \bar{t}_\pi, \bar{t}_{d_z^2 z}, \bar{t}_{4s z}, \bar{t}_{dz^2 4s}$$
 
 Here the bars indicate parameters corresponding to RDM elements evaluated on our MO basis. In addition to these parameters, we know that the Cu$^+$ atom has a Hund's coupling, so we will consider a parameter $J_{sd}$ which is Hund's coupling between the Cu 4s and Cu 3d orbitals. Finally, some of our base states have a $4s^2$ occupation, and therefore including a $U_{4s}$ is necessary. Our final proposed model then looks like: 
 
 $$ \boxed{\text{Proposed model: }\bar{\epsilon}_d, \bar{\epsilon}_z, \bar{\epsilon}_\pi, \bar{\epsilon}_s, \bar{t}_\pi, \bar{t}_{d_z^2 z}, \bar{t}_{4s z}, \bar{t}_{dz^2 4s}, J_{sd}, U_{4s}}$$
 
-Since we know that $\bar{\epsilon}_d + \bar{\epsilon}_z + \bar{\epsilon}_\pi + \bar{\epsilon}_s = $ Const, we can eliminate $\bar{\epsilon}_d$ from our model since it is linearly dependent on the rest of the parameters. The left over occupation energies are certainly required in our model, given the knowledge we have of our low energy space. Since we know that $U_{4s}$ is required to describe the $4s^2$ states and that the $J_{sd}$ will probably play an important role as well, we just need to do model selection on the four hopping parameters. Below are 5-fold CV linear regressions using \textit{every} model which includes the $\bar{\epsilon}, J_{sd}, U_{4s}$ parameters above and one element in the power set of $\bar{t}_\pi, \bar{t}_{d_z^2 z}, \bar{t}_{4s z}, \bar{t}_{dz^2 4s}$. 
+Since we know that $\bar{n}_d + \bar{n}_z + \bar{n}_\pi + \bar{n}_s = $ Const, we can eliminate $\bar{\epsilon}_d$ from our model since it is linearly dependent on the rest of the parameters. The left over occupation energies are certainly required in our model, given the knowledge we have of our low energy space. Since we know that $U_{4s}$ is required to describe the $4s^2$ states and that the $J_{sd}$ will probably play an important role as well, we just need to do model selection on the four hopping parameters. Figure 2 shows 5-fold cross-validated (CV) linear regressions using \textit{every} model which includes the $\bar{\epsilon}, J_{sd}, U_{4s}$ parameters above and one element in the power set of $\{\bar{t}_\pi, \bar{t}_{d_z^2 z}, \bar{t}_{4s z}, \bar{t}_{dz^2 4s}\}$. 
 
-\begin{figure}
-\includegraphics[width=1.0\textwidth]{../qwalk/ub3lyp_s1_/analysis/cv_valid.pdf}
-\caption{5-fold CV regressions for model selection}
-\end{figure}
-
-The models are increasing in complexity from left-to-right, and it's clear that the fourth model listed here is as accurate as the most complex model, and significantly simpler. Therefore, we selected that model as it captures the most variation with the fewest parameters. The selected model then looks like this: 
+The models are increasing in complexity from left-to-right, and it's clear that the fourth model listed here is as accurate as the most complex model, and significantly simpler. Therefore, we select that model as it captures the most variation with the fewest parameters. The selected model then looks like this: 
 $$ \boxed{\text{Selected model: }\bar{\epsilon}_z, \bar{\epsilon}_\pi, \bar{\epsilon}_s, \bar{t}_\pi, J_{sd}, U_{4s}}$$
 
 \section{Model fitting}
-We conducted a weighted least squares on our samples in order to fit the six parameters in our selected model. The higher density of states with $3d9$ occupation made it so that an unweighted linear regression would fit in a biased way towards the $3d9$ states, leaving the $3d10$ states fit very poorly. The weighting function we used was $e^{-\beta E_{DMC}}$, where $\beta$ is a variable "temperature" which was varied from 0.25 to 3.75 in increments of 0.25. We find that in the range of $\beta \in {1.5, 2.5}$ the model does not change very much, therefore we select a model at $\beta = 2.0$, which leads to the following set of regressed parameters:
+We conducted a weighted least squares regression on our samples in order to fit the six parameters in our selected model. The higher density of states with 3d9 occupation made it so that an unweighted linear regression would bias towards a more accurate description of the 3d9 states, leaving the 3d10 states fit very poorly. Since we are particularly interested in describing the lowest energy eigenstates accurately, which are 3d10 in character, we need to weight our linear regression so that the 3d10 sector is fit more accurately than in the unweighted case. The weighting function we used was $e^{-\beta E_{DMC}}$, where $\beta$ is a variable "temperature" which was varied from 0.25 to 3.75 in increments of 0.25. We find that in the range of $\beta \in \{1.5, 2.5\}$ the model does not change very much, therefore we select a model at $\beta = 2.0$, which leads to the following set of regressed parameters:
 \begin{multline}
  \boxed{\text{Final model }  (\beta=2): \bar{\epsilon}_z = 1.06(6) eV, \bar{\epsilon}_\pi = 2.12(5) eV, \bar{\epsilon}_s = 3.08(4) eV}\\
 \boxed{\bar{t}_\pi = 0.52(4) eV, J_{sd} = -0.5(1) eV, U_{4s} = 3.9(2) eV}
@@ -63,12 +58,51 @@ In order to look at the predictions of this model, we can rotate the MO basis el
  \boxed{\text{Final model }  (\beta=2): \epsilon_{d_\delta} = 0.00 eV, \epsilon_{d_\pi} = -0.10 eV, \epsilon_{d_z^2} = 0.41 eV }\\
  \boxed{\epsilon_z = 1.2 eV, \epsilon_\pi = 2.21 eV, \epsilon_s = 2.44 eV}\\
 \boxed{t_\pi = -0.22 eV, t_{d_z^2 s} = 0.38 eV, t_{s z} = 0.80 eV, t_{d_z^2 z} = 0.70 eV}\\
-\boxed{ , J_{sd} = -0.5(1) eV, U_{4s} = 3.9(2) eV}
+\boxed{  J_{sd} = -0.5(1) eV, U_{4s} = 3.9(2) eV}
 \end{multline}
 
-\section{Comparison to DFT model}
-We can then do an exact diagonalization on this model Hamiltonian, which was accomplished using an FCI solver for a custom Hamiltonian in PySCF [ref]. Show in the figures below are the lowest lying eigenstates of this model Hamiltonian for the full range of $\beta$, showing the energies and occupations of different orbitals. We can see that as we let $2.5 > \beta > 1.25 $ the model is fairly stable. The ground state of our model matches that of experiment, namely it has an electron configuration of $Cu 3d^{10} O 2p_z^{1.75} O 2p_\pi^3 Cu 4s^{0.4}$, which would map to the approximate nominal filling of $Cu 3d^{10} O 2p_z^{2} O 2p_\pi^3 Cu 4s^{0}.$ This is also an $S_z=1/2$ state as expected in experiment. The first excited state in this range of $\beta$s is another $S_z=1/2$ state with occupations $Cu 3d^{9.7} O 2p_z^{1.2} O 2p_\pi^4 Cu 4s^{0.3}$, which would map to the approximate nominal filling of $Cu 3d^{10} O 2p_z^{1} O 2p_\pi^4 Cu 4s^{0}.$ This state is at an energy of 1 eV which matches the APES measurements up to a tenth of an eV! The first $3d^9$ state is at around 2.2 eV, which again matches the predictions of the APES measurements. Aside from these states, there are also various states with $S_z=3/2$ which our model predicts to be low in energy. For example, there is an $S_z=3/2$ state with occupation at around 1.4 eV with occupations $Cu 3d^{9.7} O 2p_z^{2.0} O 2p_\pi^2 Cu 4s^{1.0}$, which would map to the approximate nominal filling of $Cu 3d^{10} O 2p_z^{2} O 2p_\pi^2 Cu 4s^{1}.$ As predicted from the anion case, the lowest $S_z=3/2$ state is indeed a $O p_\pi \rightarrow Cu 4s$ excitation. There if another state at 2.0 eV which is $S_z =3/2$ and which corresponds to an $O p_z \rightarrow Cu 4s$ state. Therefore our model predicts that the measured state in APES is indeed a quartet state, however it should have $\Pi$ symmetry. The $\Sigma$ symmetry quartet state, which is indeed the lowest energy $S_z=3/2$ state, resides at an energy very close to the $^2Y$ state and may not have been able to resolve. Overall, our model matches every experimentally measured and rigorously confirmed eigenstate of CuO. We further argue that the labeling of a state at 2.0 eV as $^4\Sigma$ is faulty and it should be $^4\Pi$.
+Shown in Figure 3 are predictions using $\beta = 2.0$ with 95\% confidence intervals on the full set of samples and only on the base states. In both cases the model was fit using the full set of samples. Figure 4 shows for $\beta=2.0$ the sample weights versus the trace ($\bar{n}_{3d} + \bar{n}_{p_z} + \bar{n}_{p_\pi} + \bar{n}_{4s}$) of the 1-rdm in our chosen MO basis for the different samples. As mentioned in section 3, the weights of samples which have a trace that vary significantly from the ground state trace of 14.80 are small, indicating that our regression is fitting primarily to states for which the MO basis is functioning properly.
 
+\section{Comparison to DFT model}
+We did an exact diagonalization on our Hamiltonian (2) using an FCI solver for a custom Hamiltonian in PySCF [ref]. Show in Figure 5 below are the lowest lying eigenstates of this model Hamiltonian and their single particle occupations. At $\beta=2$ (what we will be focusing on from here onwards) the ground state of our model matches that of experiment, namely it has an electron configuration of $Cu 3d^{10} O 2p_z^{1.75} O 2p_\pi^3 Cu 4s^{0.4}$, which would map to the approximate nominal filling of $Cu 3d^{10} O 2p_z^{2} O 2p_\pi^3 Cu 4s^{0}$, and is an $S_z=1/2$ state. The first excited state is an $S_z=1/2$ state at 1eV and which looks like an $O p_z \rightarrow O p_\pi$ excitation on the ground state, matching the results from APES. The first $3d^9$ state is also an $S_z=1/2$ state and sits at around 2.2 eV, which again matches the predictions of the APES measurements. Our model eigenstates therefore match very closely in the $S_z=1/2$ sector to the experimentally measured eigenstates in both energy and single particle properties.
+
+There are also model eigenstates with $S_z=3/2$ which are low in energy. There is a quartet eigenstate at 2.0 eV which looks like an $O p_z \rightarrow Cu 4s$ excitation on the ground state, disagreeing with the experimental claims of a $^4\Sigma$ state at this energy. Our model predicts that the $^4\Sigma$ state is actually lower in energy at around 1.2 eV above the ground state, and looks like an $O p_\pi \rightarrow Cu 4s$ excitation on the ground state. These results indicate that a potential mislabelling may have occurred in experiment regarding the 2.0 eV quartet eigenstate, based on the faulty assumption that the lowest energy quartet state seen in the APES experiment was in fact the lowest energy quartet state. This may be due to the difficulty in measuring excitations to and out-of the $^4\Sigma$ state since it is so close in energy to the $S_z=1/2$ first excited state.
+
+We can compare these results to those found from, for example, an ROKS or UKS calculation of the ground state for CuO. Typically one would take the ROKS/UKS eigenvalues to build an approximate non-interacting model of the system. Shown in Figure 6 are the ROKS/UKS eigenstates if we do so and exactly diagonalize in the $S_z=1/2,3/2$ sectors. The UKS eigenstates here are twice in number to the ROKS, since the UKS gives us two independent models, one for each spin channel. Studying just the ROKS model for now, we see that it does predict an eigenstate at 1 eV which resembles the $^2Y$ state, however there are no low energy $S_z=3/2$ states at all. All of the $S_z=3/2$ states are $>$ 3eV above the ground state. I believe this is due, in part, to the lack of relaxation effects present in the 1-particle model, as the orbitals of excited states of the CuO molecule are augmented relative to the orbitals of the ground state. Further, the exclusion of the $J_{sd}$ pushes the $S_z=3/2$ states higher in energy than expected in reality. The UKS model also fails to describe the $S_z=3/2$ states accurately for similar reasons.
+
+\pagebreak
+%Figure 2
+\begin{figure}
+\includegraphics[width=1.0\textwidth]{../qwalk/ub3lyp_s1_/analysis/cv_valid.pdf}
+\caption{5-fold CV regressions for model selection}
+\end{figure}
+
+%Figure 3
+\begin{figure}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{../qwalk/ub3lyp_s1_/analysis/fit.pdf}
+  \caption{DMC predictions for all samples.}
+  \label{fig:sub6}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{../qwalk/ub3lyp_s1_/analysis/fit_baseonly.pdf}
+  \caption{DMC predictions for basestates. }
+  \label{fig:sub7}
+\end{subfigure}
+\label{fig:test2}
+\caption{DMC regression using all states and $\beta=2.0$.}
+\end{figure}
+
+%Figure 4
+\begin{figure}
+\includegraphics[width=1.0\textwidth]{../qwalk/ub3lyp_s1_/analysis/w_vs_t.pdf}
+\caption{Weights versus trace for linear regression with $\beta=2.0$.}
+\end{figure}
+
+%Figure 5
 \begin{figure}
 \centering
 \begin{subfigure}{.5\textwidth}
@@ -87,8 +121,7 @@ We can then do an exact diagonalization on this model Hamiltonian, which was acc
 \caption{Eigenstates of models from DMC}
 \end{figure}
 
-We can compare these results to those found from, for example, an ROKS or UKS calculation of the ground state for CuO (one of our base states!). Typically one would take the ROKS/UKS eigenvalues and claim that these eigenvalues can be used as an approximate non-interacting model of the system. If we do so and exactly diagonalize in the $S_z=1/2,3/2$ sectors the ROKS/UKS eigenvalue matrix, we will find the following results for the eigenstates. The UKS eigenstates here are twice in number to the ROKS, since the UKS gives us two independent, approximate models, one for each spin channel. In table 1 below we also present the model parameters for the $\beta=2$ DMC regression compared to the ROKS model, which we will be focusing on from now on. Studying just the ROKS model for now, we see that it does predict an eigenstate at 1 eV which resembles the $^2Y$ state, however there are no low energy $S_z=3/2$ states at all. All of the $S_z=3/2$ states are $>$ 3eV above the ground state. We believe this should is due to the lack of relaxation effects present in the 1-particle model. The excited states of the CuO molecule do not look like simple 1-particle excitations on the ground state, there are relaxations of orbitals within a given symmetry sector. Further, the exclusion of the $J_{sd}$ pushes the $S_z=3/2$ states higher in energy. Clearly we see a large difference between the DMC and ROKS models, and that the DMC model more accurately reflects experiment. 
-
+%Figure 6
 \begin{figure}
 \centering
 \begin{subfigure}{.5\textwidth}
@@ -107,23 +140,23 @@ We can compare these results to those found from, for example, an ROKS or UKS ca
 \caption{Eigenstates of 1-particle models from DFT}
 \end{figure}
 
-\begin{wrapfigure}{r}{0.4\textwidth}
-\begin{tabular}{lll}
- &  DMC (eV) & ROKS (eV) \\
-$\epsilon_{d_\delta}$ &  0.00 & 0.00  \\
-$\epsilon_{d_\pi}$ & -0.10 & -0.36 \\
-$\epsilon_{d_{z^2}}$ & 0.41 & 0.52 \\
-$\epsilon_z$ & 1.20 & 0.66 \\
-$\epsilon_\pi$ & 2.21 & 0.85 \\
-$\epsilon_s$ &  2.44 & 4.24 \\
-$t_\pi$ & -0.22 & -1.14 \\
-$t_{s d_{z^2}}$ & 0.38 & 0.97 \\
-$t_{s z}$ & 0.80 & 1.86\\
-$t_{d_{z^2} z}$ & 0.70 & 1.55\\
-$J_{sd}$ & -0.51 & 0.00 \\ 
-$U_s$ & 3.91 & 0.00 \\
-\end{tabular}
-\caption{Parameter differences between DFT/DMC models}
-\end{wrapfigure}
-
+%Table
+%\begin{wrapfigure}{r}{0.4\textwidth}
+%\begin{tabular}{lll}
+% &  DMC (eV) & ROKS (eV) \\
+%$\epsilon_{d_\delta}$ &  0.00 & 0.00  \\
+%$\epsilon_{d_\pi}$ & -0.10 & -0.36 \\
+%$\epsilon_{d_{z^2}}$ & 0.41 & 0.52 \\
+%$\epsilon_z$ & 1.20 & 0.66 \\
+%$\epsilon_\pi$ & 2.21 & 0.85 \\
+%$\epsilon_s$ &  2.44 & 4.24 \\
+%$t_\pi$ & -0.22 & -1.14 \\
+%$t_{s d_{z^2}}$ & 0.38 & 0.97 \\
+%$t_{s z}$ & 0.80 & 1.86\\
+%$t_{d_{z^2} z}$ & 0.70 & 1.55\\
+%$J_{sd}$ & -0.51 & 0.00 \\ 
+%$U_s$ & 3.91 & 0.00 \\
+%\end{tabular}
+%\caption{Parameter differences between DFT/DMC models}
+%\end{wrapfigure}
 \end{document}
