@@ -15,7 +15,8 @@ from ed import ED
 from roks_model import ED_roks
 from uks_model import ED_uks
 import itertools
-
+from expectile import expectile_fit
+from log import log_fit,log_fit_bootstrap
 ######################################################################################
 #FROZEN METHODS
 
@@ -222,10 +223,43 @@ def regr_plot(df,model,weights=None,show=False):
 
   return ols
 
+#Log regression plots
+def log_plot(df,model,weights=None,n=500,show=False):
+  X=df[model+['energy']]
+  X=sm.add_constant(X)
+  X['weights']=weights
+  if(weights is None): weights=np.ones(df.shape[0])
+  
+  exp_parms, yhat, yerr_u, yerr_l = log_fit_bootstrap(X,n)
+  df['pred']=yhat
+  df['pred_err']=(yerr_u - yerr_l)/2
+
+  g = sns.FacetGrid(df,hue='Sz')
+  g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
+  plt.plot(df['energy'],df['energy'],'k--')
+  plt.title('Regression')
+  plt.xlabel('Predicted Energy, eV')
+  plt.ylabel('DMC Energy, eV')
+  if(show): plt.show()
+  plt.close()
+
+  df=df[df['basestate']==-1]
+  g = sns.FacetGrid(df,hue='Sz')
+  g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
+  plt.plot(df['energy'],df['energy'],'k--')
+  plt.title('Regression base states only')
+  plt.xlabel('Predicted Energy, eV')
+  plt.ylabel('DMC Energy, eV')
+  if(show): plt.show()
+  plt.close()
+
+  return exp_parms, yhat, (yerr_u - yerr_l)/2
+
 ######################################################################################
 #Analysis pipeline, main thing to edit for runs
 def analyze(df,save=False):
   #One paramter validation for different included hoppings
+  '''
   ncv=5
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
   hopping=df[['mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
@@ -249,6 +283,12 @@ def analyze(df,save=False):
   #ED UKS
   uks_eigenvalues = ED_uks(save=save)
   uks_eigenvalues['calc']='uks'
+  '''
+
+  beta=5.0 #Weight scale
+  w=np.exp(-beta*(df['energy']-min(df['energy'])))
+  model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jsd','Us']
+  log_plot(df,model,weights=w,show=True)
 
 if __name__=='__main__':
   df=collect_df()
