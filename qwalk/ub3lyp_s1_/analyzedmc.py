@@ -253,6 +253,10 @@ def log_plot(df,model,weights=None,n=500,show=False):
   if(show): plt.show()
   plt.close()
 
+  print(['const']+model)
+  print(np.mean(exp_parms,axis=0))
+  print(np.std(exp_parms,axis=0))
+
   return exp_parms, yhat, (yerr_u - yerr_l)/2
 
 ######################################################################################
@@ -285,7 +289,7 @@ def analyze(df,save=False):
   uks_eigenvalues['calc']='uks'
   '''
 
-  beta=5.0 #Weight scale
+  beta=1.0 #Weight scale
   w=np.exp(-beta*(df['energy']-min(df['energy'])))
   model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jsd','Us']
   log_plot(df,model,weights=w,show=True)
