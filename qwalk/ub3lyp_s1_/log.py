@@ -24,7 +24,7 @@ def log_fit(df):
   res_exp = minimize(lambda b: cost(b,X,y,w), b0).x
   return res_exp, pred(res_exp,X)
 
-def log_fit_bootstrap(df,n):
+def log_fit_bootstrap(df,n=500):
   #Boostrap loop
   yhat=[]
   coef=[]
