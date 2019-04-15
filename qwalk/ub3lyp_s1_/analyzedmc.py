@@ -264,7 +264,7 @@ def oneparm_valid_log(df,ncv,model,weights=None):
   r2_test=np.array(r2_test)
   return [np.mean(r2_train),np.std(r2_train),np.mean(r2_test),np.std(r2_test)]
 
-#Log regression plots
+#Log regression + plots
 def regr_log_plot(df,model,weights=None,n=500,show=False,fname=None):
   X=df[model+['energy']]
   X=sm.add_constant(X)
@@ -327,6 +327,42 @@ def regr_beta_log(df,model_list,betas=np.arange(0,3.75,0.25),save=False):
       else: full_df = pd.concat((full_df,d),axis=0)
       print(full_df)
   return full_df
+
+#Plot single parameter goodness of fit 
+def plot_valid_log(save=False):
+  full_df=pd.read_pickle('analysis/regr_beta_log.pickle')
+  model=[]
+  for i in range(15):
+    model+=[i]*15
+  full_df['model']=model
+
+  '''
+  print(full_df[full_df['model']==2].iloc[0])
+  print(full_df[full_df['model']==5].iloc[0])
+  print(full_df[full_df['model']==7].iloc[0])
+  print(full_df[full_df['model']==9].iloc[0])
+  print(full_df[full_df['model']==10].iloc[0])
+  print(full_df[full_df['model']==12].iloc[0])
+  print(full_df[full_df['model']==13].iloc[0])
+  print(full_df[full_df['model']==14].iloc[0])
+  exit(0)
+  '''
+  
+  g = sns.FacetGrid(full_df,hue='beta')
+  g.map(plt.errorbar, "model", "R2cv_mu_train", "R2cv_std_train",fmt='.').add_legend()
+  plt.xlabel('Model, eV')
+  plt.ylabel('R2cv_train, eV')
+  if(save): plt.savefig('analysis/oneparm_valid_log_train.pdf',bbox_inches='tight')
+  else: plt.show()
+  plt.close()
+
+  g = sns.FacetGrid(full_df,hue='beta')
+  g.map(plt.errorbar, "model", "R2cv_mu_test", "R2cv_std_test",fmt='.').add_legend()
+  plt.xlabel('Model, eV')
+  plt.ylabel('R2cv_test, eV')
+  if(save): plt.savefig('analysis/oneparm_valid_log_test.pdf',bbox_inches='tight')
+  else: plt.show()
+  plt.close()
 
 '''
 #Exact diagonalization using log regression
@@ -397,7 +433,7 @@ def ed_dmc_beta_log(df,model,betas=np.arange(0,3.75,0.25),save=False):
 ######################################################################################
 #Analysis pipeline, main thing to edit for runs
 def analyze(df,save=False):
-  #One paramter validation for different included hoppings
+  #One paramter validation for different included hoppings, OLS
   '''
   ncv=5
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
@@ -425,6 +461,7 @@ def analyze(df,save=False):
   '''
 
   #Plotting everything for log
+  '''
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
   hopping=df[['mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
   y=df['energy']
@@ -436,13 +473,10 @@ def analyze(df,save=False):
   
   full_df = regr_beta_log(df,model_list,save=save) 
   full_df.to_pickle('analysis/regr_beta_log.pickle')
+  '''
 
-  '''
-  beta=1.0 #Weight scale
-  w=np.exp(-beta*(df['energy']-min(df['energy'])))
-  model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','Jsd','Us']
-  log_plot(df,model,weights=w,show=True)
-  '''
+  plot_valid_log(save)
+
 if __name__=='__main__':
   df=collect_df()
   df=format_df(df)
