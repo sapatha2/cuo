@@ -479,6 +479,8 @@ def ed_dmc_beta_log(df,model,betas=np.arange(0,3.75,0.25),save=False,fname=None)
     d['energy']-=min(d['energy'])
     d['eig']=np.arange(d.shape[0])
     d['beta']=beta
+    d['model']=len(model)
+
     if(full_df is None): full_df = d
     else: full_df = pd.concat((full_df,d),axis=0)
 
@@ -488,9 +490,9 @@ def ed_dmc_beta_log(df,model,betas=np.arange(0,3.75,0.25),save=False,fname=None)
   else: plt.show(); plt.close()
 
   #All parameters AND sampled states
-  df['energy']-=exp_parms[0]
-  full_df = pd.concat((full_df,df[['energy','iao_n_2ppi','iao_n_2pz','iao_n_4s','iao_n_3d','iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','beta','Sz']]),axis=0)
-  sns.pairplot(full_df,vars=['energy','iao_n_2ppi','iao_n_2pz','iao_n_4s','iao_n_3d','iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz'],hue='beta',markers=['.']+['s']+['o']*14)
+  df['energy']-=min(df['energy'])
+  z_df = pd.concat((full_df,df[['energy','iao_n_2ppi','iao_n_2pz','iao_n_4s','iao_n_3d','iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','beta','Sz']]),axis=0)
+  sns.pairplot(z_df,vars=['energy','iao_n_2ppi','iao_n_2pz','iao_n_4s','iao_n_3d','iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz'],hue='beta',markers=['.']+['s']+['o']*14)
   if(save): plt.savefig(fname+'.pdf',bbox_inches='tight'); plt.close()
   else: plt.show(); plt.close()
   
@@ -544,15 +546,22 @@ def analyze(df,save=False):
   #plot_valid_log(save)
 
   #ED + Plots of eigenvalues/eigenvectors
+  eig_df=None
   for i in [2,5,7,9,10,12,13,14]:
     model=model_list[i]
-    ed_dmc_beta_log(df,model,betas=np.arange(0,3.75,0.25),save=save,fname='analysis/ed_dmc_beta_log_'+str(i))
-
+    d=ed_dmc_beta_log(df,model,betas=np.arange(0,3.75,0.25),save=save,fname='analysis/ed_dmc_beta_log_'+str(i))
+    if(eig_df is None): eig_df = d
+    else: eig_df = pd.concat((eig_df, d),axis=0)
+  eig_df.to_pickle('analysis/ed_gosling.pickle')
+  
 if __name__=='__main__':
   #df=collect_df()
   #df=format_df(df)
   #df.to_pickle('formatted_gosling.pickle')
   #exit(0)
 
-  df=pd.read_pickle('formatted_gosling.pickle')
-  analyze(df,save=True)
+  #df=pd.read_pickle('formatted_gosling.pickle')
+  #analyze(df,save=True)
+
+  df=pd.read_pickle('analysis/ed_gosling.pickle')
+  print(df)
