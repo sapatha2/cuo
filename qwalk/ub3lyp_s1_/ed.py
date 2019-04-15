@@ -96,13 +96,13 @@ def ED(parms, nroots, norb, nelec):
   
   #Generate vector of number occupations 
   #['del','del','yz','xz','x','y','z2','z','s']
-  n_occ_u = []
-  n_occ_d = []
+  dm_u = []
+  dm_d = []
   for i in range(nroots):
     dm=cis.make_rdm1s(ci[i],norb,nelec)
-    n_occ_u.append(np.diag(dm[0]))
-    n_occ_d.append(np.diag(dm[1]))
-  return e, ci, np.array(n_occ_u), np.array(n_occ_d)
+    dm_u.append(dm[0])
+    dm_d.append(dm[1])
+  return e, ci, np.array(dm_u), np.array(dm_d)
 
 if __name__=='__main__':
   '''

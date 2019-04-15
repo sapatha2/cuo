@@ -7,7 +7,6 @@ import statsmodels.api as sm
 from sklearn import linear_model
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error, r2_score
-#from diagonalize import diagonalize, new_gs
 from statsmodels.sandbox.regression.predstd import wls_prediction_std
 from sklearn.model_selection import KFold
 from scipy import stats
@@ -17,6 +16,9 @@ from uks_model import ED_uks
 import itertools
 from expectile import expectile_fit
 from log import log_fit,log_fit_bootstrap
+from pyscf import gto, scf, ao2mo, cc, fci, mcscf, lib
+from pyscf.scf import ROKS
+from functools import reduce
 ######################################################################################
 #FROZEN METHODS
 
@@ -72,6 +74,59 @@ def format_df(df):
     df['Jd']+=df['j_'+str(orb1[i])+'_'+str(orb2[i])]
   df['Jsd']=df['j_0_1']+df['j_0_2']+df['j_0_3']+df['j_0_4']+df['j_0_5']
   df['Jcu']=df['Jsd']+df['Jd']
+  return format_df_iao(df)
+
+#Get IAO psums
+def format_df_iao(df):
+  df['beta']=-1000
+  #LOAD IN IAOS
+  act_iao=[5,9,6,8,11,12,7,13,1]
+  iao=np.load('../../pyscf/ub3lyp_full/b3lyp_iao_b.pickle')
+  iao=iao[:,act_iao]
+  
+  #LOAD IN MOS
+  act_mo=[5,6,7,8,9,10,11,12,13]
+  chkfile='../../pyscf/chk/Cuvtz_r1.725_s1_B3LYP_1.chk'
+  mol=lib.chkfile.load_mol(chkfile)
+  m=ROKS(mol)
+  m.__dict__.update(lib.chkfile.load(chkfile, 'scf'))
+  mo=m.mo_coeff[:,act_mo]
+  s=m.get_ovlp()
+
+  #IAO ordering: ['del','del','yz','xz','x','y','z2','z','s']
+  #MO ordering:  dxz, dyz, dz2, delta, delta, px, py, pz, 4s
+  
+  df['iao_n_3d']=0
+  df['iao_n_2pz']=0
+  df['iao_n_2ppi']=0
+  df['iao_n_4s']=0
+  df['iao_t_pi']=0
+  df['iao_t_dz']=0
+  df['iao_t_ds']=0
+  df['iao_t_sz']=0
+
+  for z in range(df.shape[0]):
+    print(z)
+    e=np.zeros((9,9))
+    orb1=[1,2,3,4,5,6,7,8,9,1,2,3,8,3]
+    orb2=[1,2,3,4,5,6,7,8,9,6,7,8,9,9]
+    for i in range(len(orb1)):
+      e[orb1[i]-1,orb2[i]-1]=df['mo_'+str(orb1[i])+'_'+str(orb2[i])].values[z]
+    
+    mo_to_iao = reduce(np.dot,(mo.T,s,iao))
+    e = reduce(np.dot,(mo_to_iao.T,e,mo_to_iao))
+    e[np.abs(e)<1e-10]=0
+    e=(e+e.T)/2
+
+    df['iao_n_3d'].iloc[z]=np.sum(np.diag(e)[[0,1,2,3,6]])
+    df['iao_n_2pz'].iloc[z]=np.sum(np.diag(e)[7])
+    df['iao_n_2ppi'].iloc[z]=np.sum(np.diag(e)[[4,5]])
+    df['iao_n_4s'].iloc[z]=np.sum(np.diag(e)[8])
+    df['iao_t_pi'].iloc[z]=2*(e[3,4]+e[2,5])
+    df['iao_t_ds'].iloc[z]=2*e[6,8]
+    df['iao_t_dz'].iloc[z]=2*e[6,7]
+    df['iao_t_sz'].iloc[z]=2*e[7,8]
+
   return df
 
 ######################################################################################
@@ -281,7 +336,7 @@ def regr_log_plot(df,model,weights=None,n=500,show=False,fname=None):
   plt.title('Regression')
   plt.xlabel('Predicted Energy, eV')
   plt.ylabel('DMC Energy, eV')
-  if(show): plt.show()
+  if(show): pass
   else: plt.savefig(fname+'.pdf',bbox_inches='tight')
   plt.close()
 
@@ -292,7 +347,7 @@ def regr_log_plot(df,model,weights=None,n=500,show=False,fname=None):
   plt.title('Regression base states only')
   plt.xlabel('Predicted Energy, eV')
   plt.ylabel('DMC Energy, eV')
-  if(show): plt.show()
+  if(show): pass 
   else: plt.savefig(fname+'_baseonly.pdf',bbox_inches='tight')
   plt.close()
 
@@ -364,14 +419,13 @@ def plot_valid_log(save=False):
   else: plt.show()
   plt.close()
 
-'''
 #Exact diagonalization using log regression
-def ed_dmc_beta_log(df,model,betas=np.arange(0,3.75,0.25),save=False):
+def ed_dmc_beta_log(df,model,betas=np.arange(0,3.75,0.25),save=False,fname=None):
   full_df=None
   for beta in betas:
     print("beta =============================================== "+str(beta))
     weights=np.exp(-beta*(df['energy']-min(df['energy'])))
-    exp_parms, yhat, yerr=regr_log_plot(df,model,weights,show=(not save),fname='analysis/dmc_fit_log_beta'+str(beta)+'_'+str(len(model)))
+    exp_parms, yhat, yerr=regr_log_plot(df,model,weights,show=save)
     exp_parms = np.mean(exp_parms,axis=0)
 
     #Figure out which parameters are in my list
@@ -395,40 +449,52 @@ def ed_dmc_beta_log(df,model,betas=np.arange(0,3.75,0.25),save=False):
     res3=ED(params,nroots,norb,nelec)
 
     E = res1[0]
-    n_occ = res1[2]+res1[3]
     Sz = np.ones(len(E))*0.5
-    n_3d = n_occ[:,0] + n_occ[:,1] + n_occ[:,2] + n_occ[:,3] + n_occ[:,6]
-    n_2ppi = n_occ[:,4] + n_occ[:,5]
-    n_2pz = n_occ[:,7]
-    n_4s = n_occ[:,8]
-    d = pd.DataFrame({'E':E,'Sz':Sz,'n_3d':n_3d,'n_2pz':n_2pz,'n_2ppi':n_2ppi,'n_4s':n_4s})
-    
-    E = res3[0]
-    n_occ = res3[2]+res3[3]
-    Sz = np.ones(len(E))*1.5
-    n_3d = n_occ[:,0] + n_occ[:,1] + n_occ[:,2] + n_occ[:,3] + n_occ[:,6]
-    n_2ppi = n_occ[:,4] + n_occ[:,5]
-    n_2pz = n_occ[:,7]
-    n_4s = n_occ[:,8]
-    d = pd.concat((d,pd.DataFrame({'E':E,'Sz':Sz,'n_3d':n_3d,'n_2pz':n_2pz,'n_2ppi':n_2ppi,'n_4s':n_4s})),axis=0)
+    dm = res1[2] + res1[3]
+    n_3d = dm[:,0,0]+dm[:,1,1]+dm[:,2,2]+dm[:,3,3]+dm[:,6,6]
+    n_2ppi = dm[:,4,4]+dm[:,5,5]
+    n_2pz = dm[:,7,7]
+    n_4s = dm[:,8,8]
+    t_pi = 2*(dm[:,3,4]+dm[:,2,5])
+    t_ds = 2*dm[:,6,8]
+    t_dz = 2*dm[:,6,7]
+    t_sz = 2*dm[:,7,8]
+    d = pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3d':n_3d,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s,
+    'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz})
 
-    d['E']-=min(d['E'])
+    E = res3[0]
+    Sz = np.ones(len(E))*1.5
+    dm = res3[2] + res3[3]
+    n_3d = dm[:,0,0]+dm[:,1,1]+dm[:,2,2]+dm[:,3,3]+dm[:,6,6]
+    n_2ppi = dm[:,4,4]+dm[:,5,5]
+    n_2pz = dm[:,7,7]
+    n_4s = dm[:,8,8]
+    t_pi = 2*(dm[:,3,4]+dm[:,2,5])
+    t_ds = 2*dm[:,6,8]
+    t_dz = 2*dm[:,6,7]
+    t_sz = 2*dm[:,7,8]
+    d = pd.concat((d,pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3d':n_3d,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s,
+    'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz})),axis=0)
+
+    d['energy']-=min(d['energy'])
     d['eig']=np.arange(d.shape[0])
     d['beta']=beta
     if(full_df is None): full_df = d
     else: full_df = pd.concat((full_df,d),axis=0)
 
   #Spin only and number occupations
-  sns.pairplot(full_df,vars=['E','n_2ppi','n_2pz','n_4s','n_3d'],hue='Sz')
-  if(save): plt.savefig('analysis/beta_dmc_ed_log_'+str(len(model))+'_sz.pdf',bbox_inches='tight'); plt.close()
+  sns.pairplot(full_df,vars=['energy','iao_n_2ppi','iao_n_2pz','iao_n_4s','iao_n_3d'],hue='Sz')
+  if(save): plt.savefig(fname+'_sz.pdf',bbox_inches='tight'); plt.close()
   else: plt.show(); plt.close()
 
-  sns.pairplot(full_df,vars=['E','n_2ppi','n_2pz','n_4s','n_3d'],hue='beta',markers=['s']+['o']*14)
-  if(save): plt.savefig('analysis/beta_dmc_ed_log_'+str(len(model))+'.pdf',bbox_inches='tight'); plt.close()
+  #All parameters AND sampled states
+  df['energy']-=exp_parms[0]
+  full_df = pd.concat((full_df,df[['energy','iao_n_2ppi','iao_n_2pz','iao_n_4s','iao_n_3d','iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','beta','Sz']]),axis=0)
+  sns.pairplot(full_df,vars=['energy','iao_n_2ppi','iao_n_2pz','iao_n_4s','iao_n_3d','iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz'],hue='beta',markers=['.']+['s']+['o']*14)
+  if(save): plt.savefig(fname+'.pdf',bbox_inches='tight'); plt.close()
   else: plt.show(); plt.close()
   
   return full_df
-'''
 
 ######################################################################################
 #Analysis pipeline, main thing to edit for runs
@@ -460,8 +526,7 @@ def analyze(df,save=False):
   uks_eigenvalues['calc']='uks'
   '''
 
-  #Plotting everything for log
-  '''
+  #Generate all possible models
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
   hopping=df[['mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
   y=df['energy']
@@ -470,14 +535,24 @@ def analyze(df,save=False):
     s=set(list(hopping))
     models=list(map(set,itertools.combinations(s,n)))
     model_list+=[list(X)+list(m) for m in models]
-  
-  full_df = regr_beta_log(df,model_list,save=save) 
-  full_df.to_pickle('analysis/regr_beta_log.pickle')
-  '''
 
-  plot_valid_log(save)
+  #Plotting regr + creating 1parm valid database log
+  #full_df = regr_beta_log(df,model_list,save=save) 
+  #full_df.to_pickle('analysis/regr_beta_log.pickle')
+  
+  #Plotting 1 parm valid database log
+  #plot_valid_log(save)
+
+  #ED + Plots of eigenvalues/eigenvectors
+  for i in [2,5,7,9,10,12,13,14]:
+    model=model_list[i]
+    ed_dmc_beta_log(df,model,betas=np.arange(0,3.75,0.25),save=save,fname='analysis/ed_dmc_beta_log_'+str(i))
 
 if __name__=='__main__':
-  df=collect_df()
-  df=format_df(df)
+  #df=collect_df()
+  #df=format_df(df)
+  #df.to_pickle('formatted_gosling.pickle')
+  #exit(0)
+
+  df=pd.read_pickle('formatted_gosling.pickle')
   analyze(df,save=True)
