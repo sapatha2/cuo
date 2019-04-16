@@ -1,0 +1,21 @@
+                      WLS Regression Results                      
+Dep. Variable:   ,energy          ,  R-squared:         ,   0.984 
+Model:           ,WLS             ,  Adj. R-squared:    ,   0.984 
+Method:          ,Least Squares   ,  F-statistic:       ,   4351. 
+Date:            ,Tue, 16 Apr 2019,  Prob (F-statistic):,3.04e-313
+Time:            ,10:07:21        ,  Log-Likelihood:    , -13.355 
+No. Observations:,   357          ,  AIC:               ,   38.71 
+Df Residuals:    ,   351          ,  BIC:               ,   61.98 
+Df Model:        ,     5          ,                     ,         
+Covariance Type: ,nonrobust       ,                     ,         
+         ,   coef   , std err ,    t    ,P>|t| ,  [0.025 ,  0.975] 
+const    ,-5816.5218,    0.268,-2.17e+04, 0.000,-5817.049,-5815.995
+mo_n_4s  ,    3.0400,    0.053,   57.521, 0.000,    2.936,    3.144
+mo_n_2ppi,    1.8634,    0.052,   35.984, 0.000,    1.762,    1.965
+mo_n_2pz ,    0.7885,    0.067,   11.761, 0.000,    0.657,    0.920
+Jsd      ,   -0.7658,    0.159,   -4.814, 0.000,   -1.079,   -0.453
+Us       ,    4.6561,    0.293,   15.880, 0.000,    4.079,    5.233
+Omnibus:      ,30.444,  Durbin-Watson:     ,   1.147
+Prob(Omnibus):, 0.000,  Jarque-Bera (JB):  ,  64.539
+Skew:         ,-0.458,  Prob(JB):          ,9.67e-15
+Kurtosis:     , 4.871,  Cond. No.          ,    212.

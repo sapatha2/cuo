@@ -185,8 +185,29 @@ def regr_plot(df,model,weights=None,show=False):
   Z=sm.add_constant(Z)
   if(weights is None): ols=sm.OLS(y,Z).fit()
   else: ols=sm.WLS(y,Z,weights).fit() 
+ 
+  #USE 500x Bootstrap to get CIs
+  yhat=[]
+  coef=[]
+  df['weights']=weights
+  for i in range(500):
+    dfi=df.sample(n=df.shape[0],replace=True)
+    #res_expi, __ = log_fit(dfi)
+    #yhati = pred(res_expi,df.drop(columns=['energy','weights']))
+    Zi=df[model]
+    Zi=sm.add_constant(Zi)
+    yhati = sm.OLS(dfi['energy'],Zi,weights=dfi['weights']).fit().predict()
+
+    yhat.append(yhati)
+  yhat=np.array(yhat)
   
-  __,l_ols,u_ols=wls_prediction_std(ols,alpha=0.05) #Confidence level for two-sided hypothesis, 95 right now
+  #Confidence intervals
+  u_ols = np.percentile(yhat,97.5,axis=0)
+  l_ols = np.percentile(yhat,2.5,axis=0)
+
+  #USE analytic method
+  #__,l_ols,u_ols=wls_prediction_std(ols,alpha=0.05) #Confidence level for two-sided hypothesis, 95 right now
+  
   if(show):
     with open('analysis/fit.csv', 'w') as fh:
       fh.write(ols.summary().as_csv())
@@ -528,6 +549,11 @@ def analyze(df,save=False):
   uks_eigenvalues['calc']='uks'
   '''
 
+  model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']
+  weights=np.exp(-2*(df['energy']-min(df['energy'])))
+  regr_plot(df,model,weights,show=True)
+  exit(0)
+
   #Generate all possible models
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
   hopping=df[['mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
@@ -561,8 +587,8 @@ if __name__=='__main__':
   #df.to_pickle('formatted_gosling.pickle')
   #exit(0)
 
-  #df=pd.read_pickle('formatted_gosling.pickle')
-  #analyze(df,save=True)
+  df=pd.read_pickle('formatted_gosling.pickle')
+  analyze(df,save=True)
 
   #df=pd.read_pickle('analysis/ed_gosling.pickle')
   #print(df.shape[0])
