@@ -561,9 +561,8 @@ if __name__=='__main__':
   #df.to_pickle('formatted_gosling.pickle')
   #exit(0)
 
-  df=pd.read_pickle('formatted_gosling.pickle')
-  analyze(df,save=True)
+  #df=pd.read_pickle('formatted_gosling.pickle')
+  #analyze(df,save=True)
 
   #df=pd.read_pickle('analysis/ed_gosling.pickle')
-  #ind=(df['model']==7)*(df['beta']==2.0)
-  #print(df[ind])
+  #print(df.shape[0])
