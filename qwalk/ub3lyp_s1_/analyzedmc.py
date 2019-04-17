@@ -457,83 +457,162 @@ def ed_dmc_beta_log(df,model,betas=np.arange(0,3.75,0.25),save=False,fname=None)
   for beta in betas:
     print("beta =============================================== "+str(beta))
     weights=np.exp(-beta*(df['energy']-min(df['energy'])))
-    exp_parms, yhat, yerr=regr_log_plot(df,model,weights,show=save)
-    exp_parms = np.mean(exp_parms,axis=0)
-
-    #Figure out which parameters are in my list
-    param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz',
-    'mo_t_ds','mo_t_sz','Jsd','Us']
-    params=[]
-    for parm in param_names:
-      if(parm in model): params.append(exp_parms[model.index(parm)+1])
-      else: params.append(0)
-  
-    print(param_names)
-    print(params)
+    exp_parms_list, yhat, yerr=regr_log_plot(df,model,weights,show=True)
+    #exp_parms = np.mean(exp_parms,axis=0)
     
-    norb=9
-    nelec=(8,7)
-    nroots=14
-    res1=ED(params,nroots,norb,nelec)
+    for exp_parms in exp_parms_list:
+      #Figure out which parameters are in my list
+      param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz',
+      'mo_t_ds','mo_t_sz','Jsd','Us']
+      params=[]
+      for parm in param_names:
+        if(parm in model): params.append(exp_parms[model.index(parm)+1])
+        else: params.append(0)
+      
+      norb=9
+      nelec=(8,7)
+      nroots=20
+      res1=ED(params,nroots,norb,nelec)
 
-    nelec=(9,6)
-    nroots=6
-    res3=ED(params,nroots,norb,nelec)
+      nelec=(9,6)
+      nroots=20
+      res3=ED(params,nroots,norb,nelec)
 
-    E = res1[0]
-    Sz = np.ones(len(E))*0.5
-    dm = res1[2] + res1[3]
-    n_3d = dm[:,0,0]+dm[:,1,1]+dm[:,2,2]+dm[:,3,3]+dm[:,6,6]
-    n_2ppi = dm[:,4,4]+dm[:,5,5]
-    n_2pz = dm[:,7,7]
-    n_4s = dm[:,8,8]
-    t_pi = 2*(dm[:,3,4]+dm[:,2,5])
-    t_ds = 2*dm[:,6,8]
-    t_dz = 2*dm[:,6,7]
-    t_sz = 2*dm[:,7,8]
-    d = pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3d':n_3d,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s,
-    'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz})
+      E = res1[0]
+      Sz = np.ones(len(E))*0.5
+      dm = res1[2] + res1[3]
+      n_3d = dm[:,0,0]+dm[:,1,1]+dm[:,2,2]+dm[:,3,3]+dm[:,6,6]
+      n_2ppi = dm[:,4,4]+dm[:,5,5]
+      n_2pz = dm[:,7,7]
+      n_4s = dm[:,8,8]
+      t_pi = 2*(dm[:,3,4]+dm[:,2,5])
+      t_ds = 2*dm[:,6,8]
+      t_dz = 2*dm[:,6,7]
+      t_sz = 2*dm[:,7,8]
+      d = pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3d':n_3d,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s,
+      'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz})
 
-    E = res3[0]
-    Sz = np.ones(len(E))*1.5
-    dm = res3[2] + res3[3]
-    n_3d = dm[:,0,0]+dm[:,1,1]+dm[:,2,2]+dm[:,3,3]+dm[:,6,6]
-    n_2ppi = dm[:,4,4]+dm[:,5,5]
-    n_2pz = dm[:,7,7]
-    n_4s = dm[:,8,8]
-    t_pi = 2*(dm[:,3,4]+dm[:,2,5])
-    t_ds = 2*dm[:,6,8]
-    t_dz = 2*dm[:,6,7]
-    t_sz = 2*dm[:,7,8]
-    d = pd.concat((d,pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3d':n_3d,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s,
-    'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz})),axis=0)
+      E = res3[0]
+      Sz = np.ones(len(E))*1.5
+      dm = res3[2] + res3[3]
+      n_3d = dm[:,0,0]+dm[:,1,1]+dm[:,2,2]+dm[:,3,3]+dm[:,6,6]
+      n_2ppi = dm[:,4,4]+dm[:,5,5]
+      n_2pz = dm[:,7,7]
+      n_4s = dm[:,8,8]
+      t_pi = 2*(dm[:,3,4]+dm[:,2,5])
+      t_ds = 2*dm[:,6,8]
+      t_dz = 2*dm[:,6,7]
+      t_sz = 2*dm[:,7,8]
+      d = pd.concat((d,pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3d':n_3d,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s,
+      'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz})),axis=0)
 
-    d['energy']-=min(d['energy'])
-    d['eig']=np.arange(d.shape[0])
-    d['beta']=beta
+      d['energy']-=min(d['energy'])
+      d['eig']=np.arange(d.shape[0])
+      d['beta']=beta
 
-    if(full_df is None): full_df = d
-    else: full_df = pd.concat((full_df,d),axis=0)
-
-  #Spin only and number occupations
-  sns.pairplot(full_df,vars=['energy','iao_n_2ppi','iao_n_2pz','iao_n_4s','iao_n_3d'],hue='Sz')
-  if(save): plt.savefig(fname+'_sz.pdf',bbox_inches='tight'); plt.close()
-  else: plt.show(); plt.close()
-
-  #All parameters AND sampled states
-  df['energy']-=min(df['energy'])
-  z_df = pd.concat((full_df,df[['energy','iao_n_2ppi','iao_n_2pz','iao_n_4s','iao_n_3d','iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','beta','Sz']]),axis=0)
-  #sns.pairplot(z_df,vars=['energy','iao_n_2ppi','iao_n_2pz','iao_n_4s','iao_n_3d','iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz'],hue='beta',markers=['.']+['s']+['o']*14)
-  sns.pairplot(z_df,vars=['energy','iao_n_2ppi','iao_n_2pz','iao_n_4s','iao_n_3d','iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz'],hue='beta',markers=['.']+['o']) #Beta=2
-  if(save): plt.savefig(fname+'.pdf',bbox_inches='tight'); plt.close()
-  else: plt.show(); plt.close()
-  
+      if(full_df is None): full_df = d
+      else: full_df = pd.concat((full_df,d),axis=0)
   return full_df
+
+#Getting means and CI for the aggregate data frame
+def average_ed_dmc_beta_log(eig_df):
+  av_df = None
+  for model in range(15):
+    for beta in np.arange(0,3.75,0.25):
+      for eig in range(40):
+        sub_df = eig_df[(eig_df['model']==model)*(eig_df['eig']==eig)*(eig_df['beta']==beta)]
+        data = sub_df.values 
+        means = np.mean(data,axis=0)
+        u = np.percentile(data,97.5,axis=0)
+        l = np.percentile(data,2.5,axis=0)
+        err = (u - l)/2
+
+        d=pd.DataFrame(data=np.array(list(means) + list(err))[:,np.newaxis].T,
+        columns=list(sub_df) + [x+'_err' for x in list(sub_df)])
+     
+        if(av_df is None): av_df = d
+        else: av_df = pd.concat((av_df,d),axis=0)
+  return  av_df
+
+def plot_ed_dmc_log(av_df,full_df):
+  #EIGENVALUES ONLY
+  for model in np.arange(15):
+    for beta in np.arange(0,3.75,0.25):
+      if(beta==0): 
+        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==0.5)]
+        plt.errorbar(np.ones(sub_df.shape[0])*beta,sub_df['energy'].values,sub_df['energy_err'],fmt='o',c='b',label='Sz=1/2')
+        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==1.5)]
+        plt.errorbar(np.ones(sub_df.shape[0])*(beta+0.05),sub_df['energy'].values,sub_df['energy_err'],fmt='o',c='r',label='Sz=3/2')
+      else: 
+        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==0.5)]
+        plt.errorbar(np.ones(sub_df.shape[0])*beta,sub_df['energy'].values,sub_df['energy_err'],fmt='o',c='b')
+        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==1.5)]
+        plt.errorbar(np.ones(sub_df.shape[0])*(beta+0.05),sub_df['energy'].values,sub_df['energy_err'],fmt='o',c='r')
+    plt.legend(loc='best')
+    plt.savefig('analysis/ed_dmc_log_'+str(model)+'.pdf',bbox_inches='tight')
+    plt.close()
+
+  #FULL EIGENPROPERTIES and EIGENVALUES
+  for model in np.arange(15):
+    for beta in np.arange(0,3.75,0.25):
+      z=0
+      for parm in ['iao_n_3d','iao_n_2pz','iao_n_2ppi','iao_n_4s',
+      'iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz']:
+        z+=1
+        plt.subplot(240+z)
+
+        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==0.5)]
+        x=sub_df[parm].values
+        xerr=sub_df[parm+'_err'].values
+        y=sub_df['energy'].values
+        yerr=sub_df['energy_err'].values
+        plt.errorbar(x,y,xerr=xerr,yerr=yerr,fmt='.',c='b',label='Sz=1/2')
+        
+        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==1.5)]
+        x=sub_df[parm].values
+        xerr=sub_df[parm+'_err'].values
+        y=sub_df['energy'].values
+        yerr=sub_df['energy_err'].values
+        plt.errorbar(x,y,xerr=xerr,yerr=yerr,fmt='.',c='r',label='Sz=1/2')
+      
+        plt.xlabel(parm)
+        plt.ylabel('energy (eV)')
+    plt.savefig('analysis/ed_dmc_log_pp'+str(model)+'.pdf',bbox_inches='tight')
+    plt.close()
+  
+  #EIGENPROPERTIES and EIGENVALUES
+  for model in np.arange(15):
+    for beta in np.arange(1.5,2.75,0.25):
+      z=0
+      for parm in ['iao_n_3d','iao_n_2pz','iao_n_2ppi','iao_n_4s',
+      'iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz']:
+        z+=1
+        plt.subplot(240+z)
+
+        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==0.5)]
+        x=sub_df[parm].values
+        xerr=sub_df[parm+'_err'].values
+        y=sub_df['energy'].values
+        yerr=sub_df['energy_err'].values
+        plt.errorbar(x,y,xerr=xerr,yerr=yerr,fmt='.',c='b',label='Sz=1/2')
+        
+        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==1.5)]
+        x=sub_df[parm].values
+        xerr=sub_df[parm+'_err'].values
+        y=sub_df['energy'].values
+        yerr=sub_df['energy_err'].values
+        plt.errorbar(x,y,xerr=xerr,yerr=yerr,fmt='.',c='r',label='Sz=1/2')
+      
+        plt.xlabel(parm)
+        plt.ylabel('energy (eV)')
+    plt.savefig('analysis/ed_dmc_log_pp2'+str(model)+'.pdf',bbox_inches='tight')
+    plt.close()
+  return 0
 
 ######################################################################################
 #Analysis pipeline, main thing to edit for runs
 def analyze(df,save=False):
-  #One paramter validation for different included hoppings, OLS
+  #OLS ANALYSIS
   '''
   ncv=5
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
@@ -560,6 +639,7 @@ def analyze(df,save=False):
   uks_eigenvalues['calc']='uks'
   '''
 
+  #LOG ANALYSIS
   #Generate all possible models
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
   hopping=df[['mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
@@ -575,18 +655,28 @@ def analyze(df,save=False):
   #full_df.to_pickle('analysis/regr_beta_log.pickle')
   
   #Plotting 1 parm valid database log
-  plot_valid_log(save=False)
-  exit(0)
+  #plot_valid_log(save=False)
+  #exit(0)
 
-  #ED + Plots of eigenvalues/eigenvectors
+  #Bulk ED
   eig_df=None
   for i in np.arange(15):
+    print(i)
     model=model_list[i]
-    d=ed_dmc_beta_log(df,model,betas=[2.0],save=save,fname='analysis/ed_dmc_beta_log_'+str(i))
+    d=ed_dmc_beta_log(df,model)
     d['model']=i
     if(eig_df is None): eig_df = d
     else: eig_df = pd.concat((eig_df, d),axis=0)
   eig_df.to_pickle('analysis/ed_gosling.pickle')
+
+  #AVERAGE ED
+  #eig_df=pd.read_pickle('analysis/ed_gosling.pickle')
+  av_df=average_ed_dmc_beta_log(eig_df)
+  av_df.to_pickle('analysis/av_ed_gosling.pickle')
+
+  #PLOT ED
+  #av_df=pd.read_pickle('analysis/av_ed_gosling.pickle')
+  plot_ed_dmc_log(av_df,df)
 
 if __name__=='__main__':
   #df=collect_df()
@@ -596,6 +686,3 @@ if __name__=='__main__':
 
   df=pd.read_pickle('formatted_gosling.pickle')
   analyze(df,save=True)
-
-  #df=pd.read_pickle('analysis/ed_gosling.pickle')
-  #print(df.shape[0])
