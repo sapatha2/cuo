@@ -320,7 +320,8 @@ def oneparm_valid_log(df,ncv,model,weights=None):
   kf=KFold(n_splits=ncv,shuffle=True)
   r2_train=[]
   r2_test=[]
-  r2=[]
+  rmse_train=[]
+  rmse_test=[]
   evals=[]
   for train_index,test_index in kf.split(X):
     X_train,X_test=X.iloc[train_index],X.iloc[test_index]
@@ -336,9 +337,14 @@ def oneparm_valid_log(df,ncv,model,weights=None):
 
     r2_train.append(r2_score(yhat_train,y_train,w_train))
     r2_test.append(r2_score(yhat_test,y_test,w_test))
+    rmse_train.append(mean_squared_error(y_train,yhat_train,w_train))
+    rmse_test.append(mean_squared_error(y_test,yhat_test,w_test))
   r2_train=np.array(r2_train)
   r2_test=np.array(r2_test)
-  return [np.mean(r2_train),np.std(r2_train),np.mean(r2_test),np.std(r2_test)]
+  rmse_train=np.array(rmse_train)
+  rmse_test=np.array(rmse_test)
+  return [np.mean(r2_train),np.std(r2_train),np.mean(r2_test),np.std(r2_test),
+  np.mean(rmse_train),np.std(rmse_train),np.mean(rmse_test),np.std(rmse_test)]
 
 #Log regression + plots
 def regr_log_plot(df,model,weights=None,n=500,show=False,fname=None):
@@ -396,7 +402,8 @@ def regr_beta_log(df,model_list,betas=np.arange(0,3.75,0.25),save=False):
         if(parm in model): params.append(exp_parms[model.index(parm)+1])
         else: params.append(0)
 
-      param_names=['beta']+param_names+['R2cv_mu_train','R2cv_std_train','R2cv_mu_test','R2cv_std_test']
+      param_names=['beta']+param_names+['R2cv_mu_train','R2cv_std_train','R2cv_mu_test','R2cv_std_test',
+      'RMSEcv_mu_train','RMSEcv_std_train','RMSEcv_mu_test','RMSEcv_std_test']
       params=[beta]+params+oneparm_valid_log(df,ncv,model,weights)
       d=pd.DataFrame(data=np.array(params)[np.newaxis,:],columns=param_names,index=[0])
       if(full_df is None): full_df=d
@@ -411,18 +418,6 @@ def plot_valid_log(save=False):
   for i in range(15):
     model+=list(np.linspace(i,i+0.75,15))#[i]*15
   full_df['model']=model
-
-  '''
-  print(full_df[full_df['model']==2].iloc[0])
-  print(full_df[full_df['model']==5].iloc[0])
-  print(full_df[full_df['model']==7].iloc[0])
-  print(full_df[full_df['model']==9].iloc[0])
-  print(full_df[full_df['model']==10].iloc[0])
-  print(full_df[full_df['model']==12].iloc[0])
-  print(full_df[full_df['model']==13].iloc[0])
-  print(full_df[full_df['model']==14].iloc[0])
-  exit(0)
-  '''
   
   g = sns.FacetGrid(full_df,hue='beta')
   g.map(plt.errorbar, "model", "R2cv_mu_train", "R2cv_std_train",fmt='.').add_legend()
@@ -437,6 +432,22 @@ def plot_valid_log(save=False):
   plt.xlabel('Model, eV')
   plt.ylabel('R2cv_test, eV')
   if(save): plt.savefig('analysis/oneparm_valid_log_test.pdf',bbox_inches='tight')
+  else: plt.show()
+  plt.close()
+  
+  g = sns.FacetGrid(full_df,hue='beta')
+  g.map(plt.errorbar, "model", "RMSEcv_mu_train", "RMSEcv_std_train",fmt='.').add_legend()
+  plt.xlabel('Model, eV')
+  plt.ylabel('RMSEcv_train, eV')
+  if(save): plt.savefig('analysis/oneparm_valid_log_train2.pdf',bbox_inches='tight')
+  else: plt.show()
+  plt.close()
+
+  g = sns.FacetGrid(full_df,hue='beta')
+  g.map(plt.errorbar, "model", "RMSEcv_mu_test", "RMSEcv_std_test",fmt='.').add_legend()
+  plt.xlabel('Model, eV')
+  plt.ylabel('RMSEcv_test, eV')
+  if(save): plt.savefig('analysis/oneparm_valid_log_test2.pdf',bbox_inches='tight')
   else: plt.show()
   plt.close()
 
@@ -549,11 +560,6 @@ def analyze(df,save=False):
   uks_eigenvalues['calc']='uks'
   '''
 
-  model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']
-  weights=np.exp(-2*(df['energy']-min(df['energy'])))
-  regr_plot(df,model,weights,show=True)
-  exit(0)
-
   #Generate all possible models
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
   hopping=df[['mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
@@ -569,7 +575,8 @@ def analyze(df,save=False):
   #full_df.to_pickle('analysis/regr_beta_log.pickle')
   
   #Plotting 1 parm valid database log
-  #plot_valid_log(save)
+  plot_valid_log(save=False)
+  exit(0)
 
   #ED + Plots of eigenvalues/eigenvectors
   eig_df=None
