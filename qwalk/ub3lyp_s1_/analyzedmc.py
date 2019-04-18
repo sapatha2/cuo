@@ -303,48 +303,7 @@ def ed_dmc_beta(df,model,betas=np.arange(0,3.75,0.25),save=False):
   return full_df
 
 ######################################################################################
-#LOG METHODS
-
-#Single parameter goodness of fit validation
-def oneparm_valid_log(df,ncv,model,weights=None):
-  X=df[model+['energy']]
-  X=sm.add_constant(X)
-  if(weights is None): weights=np.ones(df.shape[0])
-  X['weights']=weights
-
-  exp_parms, yhat, yerr_u, yerr_l = log_fit_bootstrap(X)
-  df['pred']=yhat
-  df['pred_err']=(yerr_u - yerr_l)/2
-  
-  #10 samples of ncv
-  kf=KFold(n_splits=ncv,shuffle=True)
-  r2_train=[]
-  r2_test=[]
-  rmse_train=[]
-  rmse_test=[]
-  evals=[]
-  for train_index,test_index in kf.split(X):
-    X_train,X_test=X.iloc[train_index],X.iloc[test_index]
-    exp_parms, yhat, yerr_u, yerr_l = log_fit_bootstrap(X_train)
-    exp_parms = np.mean(exp_parms,axis=0)
-
-    y_train = X_train['energy']
-    y_test = X_test['energy']
-    w_train = X_train['weights']
-    w_test = X_test['weights']
-    yhat_train = np.dot(exp_parms,X_train.drop(columns=['energy','weights']).values.T)
-    yhat_test = np.dot(exp_parms,X_test.drop(columns=['energy','weights']).values.T)
-
-    r2_train.append(r2_score(yhat_train,y_train,w_train))
-    r2_test.append(r2_score(yhat_test,y_test,w_test))
-    rmse_train.append(mean_squared_error(y_train,yhat_train,w_train))
-    rmse_test.append(mean_squared_error(y_test,yhat_test,w_test))
-  r2_train=np.array(r2_train)
-  r2_test=np.array(r2_test)
-  rmse_train=np.array(rmse_train)
-  rmse_test=np.array(rmse_test)
-  return [np.mean(r2_train),np.std(r2_train),np.mean(r2_test),np.std(r2_test),
-  np.mean(rmse_train),np.std(rmse_train),np.mean(rmse_test),np.std(rmse_test)]
+#LOG METHODS (PLOTS) 
 
 #Log regression + plots
 def regr_log_plot(df,model,weights=None,n=500,show=False,fname=None):
@@ -394,18 +353,7 @@ def regr_beta_log(df,model_list,betas=np.arange(0,3.75,0.25),save=False):
       exp_parms, yhat, yerr=regr_log_plot(df,model,weights,show=(not save),fname='analysis/dmc_fit_log_beta'+str(beta)+'_'+str(zz))
       exp_parms = np.mean(exp_parms,axis=0)
 
-      #Figure out which parameters are in my list
-      param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz',
-      'mo_t_ds','mo_t_sz','Jsd','Us']
-      params=[]
-      for parm in param_names:
-        if(parm in model): params.append(exp_parms[model.index(parm)+1])
-        else: params.append(0)
 
-      param_names=['beta']+param_names+['R2cv_mu_train','R2cv_std_train','R2cv_mu_test','R2cv_std_test',
-      'RMSEcv_mu_train','RMSEcv_std_train','RMSEcv_mu_test','RMSEcv_std_test']
-      params=[beta]+params+oneparm_valid_log(df,ncv,model,weights)
-      d=pd.DataFrame(data=np.array(params)[np.newaxis,:],columns=param_names,index=[0])
       if(full_df is None): full_df=d
       else: full_df = pd.concat((full_df,d),axis=0)
       print(full_df)
@@ -451,73 +399,10 @@ def plot_valid_log(save=False):
   else: plt.show()
   plt.close()
 
-#Exact diagonalization using log regression
-def ed_dmc_beta_log(df,model,betas=np.arange(0,3.75,0.25),save=False,fname=None):
-  full_df=None
-  for beta in betas:
-    print("beta =============================================== "+str(beta))
-    weights=np.exp(-beta*(df['energy']-min(df['energy'])))
-    exp_parms_list, yhat, yerr=regr_log_plot(df,model,weights,show=True)
-    #exp_parms = np.mean(exp_parms,axis=0)
-    
-    for exp_parms in exp_parms_list:
-      #Figure out which parameters are in my list
-      param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz',
-      'mo_t_ds','mo_t_sz','Jsd','Us']
-      params=[]
-      for parm in param_names:
-        if(parm in model): params.append(exp_parms[model.index(parm)+1])
-        else: params.append(0)
-      
-      norb=9
-      nelec=(8,7)
-      nroots=20
-      res1=ED(params,nroots,norb,nelec)
-
-      nelec=(9,6)
-      nroots=20
-      res3=ED(params,nroots,norb,nelec)
-
-      E = res1[0]
-      Sz = np.ones(len(E))*0.5
-      dm = res1[2] + res1[3]
-      n_3d = dm[:,0,0]+dm[:,1,1]+dm[:,2,2]+dm[:,3,3]+dm[:,6,6]
-      n_2ppi = dm[:,4,4]+dm[:,5,5]
-      n_2pz = dm[:,7,7]
-      n_4s = dm[:,8,8]
-      t_pi = 2*(dm[:,3,4]+dm[:,2,5])
-      t_ds = 2*dm[:,6,8]
-      t_dz = 2*dm[:,6,7]
-      t_sz = 2*dm[:,7,8]
-      d = pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3d':n_3d,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s,
-      'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz})
-
-      E = res3[0]
-      Sz = np.ones(len(E))*1.5
-      dm = res3[2] + res3[3]
-      n_3d = dm[:,0,0]+dm[:,1,1]+dm[:,2,2]+dm[:,3,3]+dm[:,6,6]
-      n_2ppi = dm[:,4,4]+dm[:,5,5]
-      n_2pz = dm[:,7,7]
-      n_4s = dm[:,8,8]
-      t_pi = 2*(dm[:,3,4]+dm[:,2,5])
-      t_ds = 2*dm[:,6,8]
-      t_dz = 2*dm[:,6,7]
-      t_sz = 2*dm[:,7,8]
-      d = pd.concat((d,pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3d':n_3d,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s,
-      'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz})),axis=0)
-
-      d['energy']-=min(d['energy'])
-      d['eig']=np.arange(d.shape[0])
-      d['beta']=beta
-
-      if(full_df is None): full_df = d
-      else: full_df = pd.concat((full_df,d),axis=0)
-  return full_df
-
 #Getting means and CI for the aggregate data frame
 def average_ed_dmc_beta_log(eig_df):
   av_df = None
-  for model in range(15):
+  for model in range(16):
     for beta in np.arange(0,3.75,0.25):
       for eig in range(40):
         sub_df = eig_df[(eig_df['model']==model)*(eig_df['eig']==eig)*(eig_df['beta']==beta)]
@@ -536,7 +421,7 @@ def average_ed_dmc_beta_log(eig_df):
 
 def plot_ed_dmc_log(av_df,full_df):
   #EIGENVALUES ONLY
-  for model in np.arange(15):
+  for model in np.arange(16):
     for beta in np.arange(0,3.75,0.25):
       if(beta==0): 
         sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==0.5)]
@@ -553,7 +438,7 @@ def plot_ed_dmc_log(av_df,full_df):
     plt.close()
 
   #FULL EIGENPROPERTIES and EIGENVALUES
-  for model in np.arange(15):
+  for model in np.arange(16):
     for beta in np.arange(0,3.75,0.25):
       z=0
       for parm in ['iao_n_3d','iao_n_2pz','iao_n_2ppi','iao_n_4s',
@@ -581,7 +466,7 @@ def plot_ed_dmc_log(av_df,full_df):
     plt.close()
   
   #EIGENPROPERTIES and EIGENVALUES
-  for model in np.arange(15):
+  for model in np.arange(16):
     for beta in np.arange(1.5,2.75,0.25):
       z=0
       for parm in ['iao_n_3d','iao_n_2pz','iao_n_2ppi','iao_n_4s',
@@ -608,6 +493,184 @@ def plot_ed_dmc_log(av_df,full_df):
     plt.savefig('analysis/ed_dmc_log_pp2'+str(model)+'.pdf',bbox_inches='tight')
     plt.close()
   return 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+######################################################################################
+#LOG METHODS
+
+def main_log(df,model_list,betas=np.arange(0,3.75,0.25)):
+  ncv=5
+  zz=0
+  regr_df=None
+  oneparm_df=None
+  ed_df=None
+  for model in model_list:
+    print("model =============================================== "+str(zz))
+    for beta in betas:
+      print("beta -------------------------------------------------- "+str(beta))
+      weights=np.exp(-beta*(df['energy']-min(df['energy'])))
+      X=df[model+['energy']]
+      X=sm.add_constant(X)
+      X['weights']=weights
+
+      exp_parms_list, d0 = regr_log(X,model)
+      d1 = oneparm_valid_log(X,ncv,model)
+      d2 = ed_log(model,exp_parms_list)
+    
+      d0['beta']=beta
+      d0['model']=zz
+      d1['beta']=beta
+      d1['model']=zz
+      d2['beta']=beta
+      d2['model']=zz
+      if(regr_df is None): regr_df = d0
+      else: regr_df = pd.concat((regr_df, d0),axis=0)
+      if(oneparm_df is None): oneparm_df = d1
+      else: oneparm_df = pd.concat((oneparm_df, d1),axis=0)
+      if(ed_df is None): ed_df = d2
+      else: ed_df = pd.concat((ed_df, d2),axis=0)
+    zz+=1
+  return regr_df, oneparm_df, ed_df
+
+#Log cost function regression
+def regr_log(X,model):
+  print("REGR LOG ~~~~~~~~~~~~~~~~~")
+  exp_parms_list, yhat, yerr_u, yerr_l = log_fit_bootstrap(X,n=100)
+
+  param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz',
+  'mo_t_ds','mo_t_sz','Jsd','Us']
+  params=[]
+  params_err=[]
+
+  exp_mu = np.mean(exp_parms_list,axis=0)
+  l = np.percentile(exp_parms_list,2.5,axis=0)
+  u = np.percentile(exp_parms_list,97.5, axis=0)
+  exp_err = (u-l)/2
+
+  for parm in param_names:
+    if(parm in model): 
+      params.append(exp_mu[model.index(parm)+1])
+      params_err.append(exp_err[model.index(parm)+1])
+    else: 
+      params.append(0) 
+      params_err.append(0)
+  d = pd.DataFrame(data=np.array(params + params_err)[:,np.newaxis].T, columns = param_names + [x+'_err' for x in param_names],index=[0])
+  return exp_parms_list, d
+
+#Single parameter goodness of fit validation
+def oneparm_valid_log(X,ncv,model):
+  print("ONEPARM LOG ~~~~~~~~~~~~~~~~~")
+  #Figure out which parameters are in my list
+  param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz',
+  'mo_t_ds','mo_t_sz','Jsd','Us']
+  params=[]
+  for parm in param_names:
+    if(parm in model): params.append(1)
+    else: params.append(0)
+ 
+  kf=KFold(n_splits=ncv,shuffle=True)
+  r2_train=[]
+  r2_test=[]
+  rmse_train=[]
+  rmse_test=[]
+  evals=[]
+  for train_index,test_index in kf.split(X):
+    X_train,X_test=X.iloc[train_index],X.iloc[test_index]
+    exp_parms, yhat, yerr_u, yerr_l = log_fit_bootstrap(X_train,n=100)
+    exp_parms = np.mean(exp_parms,axis=0)
+
+    y_train = X_train['energy']
+    y_test = X_test['energy']
+    w_train = X_train['weights']
+    w_test = X_test['weights']
+    yhat_train = np.dot(exp_parms,X_train.drop(columns=['energy','weights']).values.T)
+    yhat_test = np.dot(exp_parms,X_test.drop(columns=['energy','weights']).values.T)
+
+    r2_train.append(r2_score(yhat_train,y_train,w_train))
+    r2_test.append(r2_score(yhat_test,y_test,w_test))
+    rmse_train.append(mean_squared_error(y_train,yhat_train,w_train))
+    rmse_test.append(mean_squared_error(y_test,yhat_test,w_test))
+  r2_train=np.array(r2_train)
+  r2_test=np.array(r2_test)
+  rmse_train=np.array(rmse_train)
+  rmse_test=np.array(rmse_test)
+
+  param_names=['R2cv_mu_train','R2cv_std_train','R2cv_mu_test','R2cv_std_test',
+  'RMSEcv_mu_train','RMSEcv_std_train','RMSEcv_mu_test','RMSEcv_std_test']
+  params=[np.mean(r2_train),np.std(r2_train),np.mean(r2_test),np.std(r2_test),
+  np.mean(rmse_train),np.std(rmse_train),np.mean(rmse_test),np.std(rmse_test)]
+  d=pd.DataFrame(data=np.array(params)[np.newaxis,:],columns=param_names,index=[0])
+  return d
+
+#Exact diagonalization using log regression
+def ed_log(model,exp_parms_list):
+  print("ED LOG ~~~~~~~~~~~~~~~~~")
+  full_df=None
+  for exp_parms in exp_parms_list:
+    #Figure out which parameters are in my list
+    param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz',
+    'mo_t_ds','mo_t_sz','Jsd','Us']
+    params=[]
+    for parm in param_names:
+      if(parm in model): params.append(exp_parms[model.index(parm)+1])
+      else: params.append(0)
+    
+    norb=9
+    nelec=(8,7)
+    nroots=20
+    res1=ED(params,nroots,norb,nelec)
+
+    nelec=(9,6)
+    nroots=20
+    res3=ED(params,nroots,norb,nelec)
+
+    E = res1[0]
+    Sz = np.ones(len(E))*0.5
+    dm = res1[2] + res1[3]
+    n_3d = dm[:,0,0]+dm[:,1,1]+dm[:,2,2]+dm[:,3,3]+dm[:,6,6]
+    n_2ppi = dm[:,4,4]+dm[:,5,5]
+    n_2pz = dm[:,7,7]
+    n_4s = dm[:,8,8]
+    t_pi = 2*(dm[:,3,4]+dm[:,2,5])
+    t_ds = 2*dm[:,6,8]
+    t_dz = 2*dm[:,6,7]
+    t_sz = 2*dm[:,7,8]
+    d = pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3d':n_3d,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s,
+    'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz})
+
+    E = res3[0]
+    Sz = np.ones(len(E))*1.5
+    dm = res3[2] + res3[3]
+    n_3d = dm[:,0,0]+dm[:,1,1]+dm[:,2,2]+dm[:,3,3]+dm[:,6,6]
+    n_2ppi = dm[:,4,4]+dm[:,5,5]
+    n_2pz = dm[:,7,7]
+    n_4s = dm[:,8,8]
+    t_pi = 2*(dm[:,3,4]+dm[:,2,5])
+    t_ds = 2*dm[:,6,8]
+    t_dz = 2*dm[:,6,7]
+    t_sz = 2*dm[:,7,8]
+    d = pd.concat((d,pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3d':n_3d,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s,
+    'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz})),axis=0)
+
+    d['energy']-=min(d['energy'])
+    d['eig']=np.arange(d.shape[0])
+
+    if(full_df is None): full_df = d
+    else: full_df = pd.concat((full_df,d),axis=0)
+  return full_df
 
 ######################################################################################
 #Analysis pipeline, main thing to edit for runs
@@ -644,23 +707,32 @@ def analyze(df,save=False):
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
   hopping=df[['mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
   y=df['energy']
-  model_list=[]
+  model_list=[list(X)]
   for n in range(1,hopping.shape[1]+1):
     s=set(list(hopping))
     models=list(map(set,itertools.combinations(s,n)))
     model_list+=[list(X)+list(m) for m in models]
+  print(len(model_list))
 
+  df0,df1,df2=main_log(df,model_list)
+  print(df0)
+  print(df1)
+  print(df2)
+  df0.to_pickle('analysis/regr_log.pickle')
+  df1.to_pickle('analysis/oneparm_log.pickle')
+  df2.to_pickle('analysis/ed_log.pickle')
+
+  '''
   #Plotting regr + creating 1parm valid database log
-  #full_df = regr_beta_log(df,model_list,save=save) 
-  #full_df.to_pickle('analysis/regr_beta_log.pickle')
+  full_df = regr_beta_log(df,model_list,save=save) 
+  full_df.to_pickle('analysis/regr_beta_log.pickle')
   
   #Plotting 1 parm valid database log
-  #plot_valid_log(save=False)
-  #exit(0)
+  plot_valid_log(save=False)
 
   #Bulk ED
   eig_df=None
-  for i in np.arange(15):
+  for i in np.arange(16):
     print(i)
     model=model_list[i]
     d=ed_dmc_beta_log(df,model)
@@ -672,12 +744,12 @@ def analyze(df,save=False):
   #AVERAGE ED
   #eig_df=pd.read_pickle('analysis/ed_gosling.pickle')
   av_df=average_ed_dmc_beta_log(eig_df)
-  av_df.to_pickle('analysis/av_ed_gosling.pickle')
+  av_df.to_pickle('analysis/av_ed_gosling_small.pickle')
 
   #PLOT ED
   #av_df=pd.read_pickle('analysis/av_ed_gosling.pickle')
   plot_ed_dmc_log(av_df,df)
-
+  '''
 if __name__=='__main__':
   #df=collect_df()
   #df=format_df(df)
@@ -685,4 +757,4 @@ if __name__=='__main__':
   #exit(0)
 
   df=pd.read_pickle('formatted_gosling.pickle')
-  analyze(df,save=True)
+  analyze(df)
