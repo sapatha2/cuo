@@ -385,8 +385,15 @@ def plot_ed_log(save=False):
   g.map(plt.errorbar, "eig", "energy", "energy_err",fmt='.').add_legend()
   if(save): plt.savefig('analysis/ed_eig_log.pdf',bbox_inches='tight')
   else: plt.show()
+  plt.clf()
 
-  '''
+  #EIGENVALUES ONLY
+  g = sns.FacetGrid(av_df,col='model',col_wrap=4,hue='Sz')
+  g.map(plt.errorbar, "eig", "energy", "energy_err",fmt='.').add_legend()
+  if(save): plt.savefig('analysis/ed_eig_Sz_log.pdf',bbox_inches='tight')
+  else: plt.show()
+  plt.clf()
+
   #FULL EIGENPROPERTIES and EIGENVALUES
   for model in np.arange(16):
     for beta in np.arange(0,3.75,0.25):
@@ -412,37 +419,37 @@ def plot_ed_log(save=False):
       
         plt.xlabel(parm)
         plt.ylabel('energy (eV)')
-    plt.savefig('analysis/ed_log_pp'+str(model)+'.pdf',bbox_inches='tight')
-    plt.close()
-  
-  #EIGENPROPERTIES and EIGENVALUES
-  for model in np.arange(16):
-    for beta in np.arange(1.5,2.75,0.25):
-      z=0
-      for parm in ['iao_n_3d','iao_n_2pz','iao_n_2ppi','iao_n_4s',
-      'iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz']:
-        z+=1
-        plt.subplot(240+z)
+    plt.savefig('analysis/ed_'+str(model)+'_log.pdf',bbox_inches='tight')
+    plt.clf()
 
-        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==0.5)]
-        x=sub_df[parm].values
-        xerr=sub_df[parm+'_err'].values
-        y=sub_df['energy'].values
-        yerr=sub_df['energy_err'].values
-        plt.errorbar(x,y,xerr=xerr,yerr=yerr,fmt='.',c='b',label='Sz=1/2')
-        
-        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==1.5)]
-        x=sub_df[parm].values
-        xerr=sub_df[parm+'_err'].values
-        y=sub_df['energy'].values
-        yerr=sub_df['energy_err'].values
-        plt.errorbar(x,y,xerr=xerr,yerr=yerr,fmt='.',c='r',label='Sz=1/2')
-      
-        plt.xlabel(parm)
-        plt.ylabel('energy (eV)')
-    plt.savefig('analysis/ed_log_pp2'+str(model)+'.pdf',bbox_inches='tight')
-    plt.close()
-  '''
+  #SELECTED EIGENPROPERTIES and EIGENVALUES
+  model=0
+  beta=2
+  z=0
+  for parm in ['iao_n_3d','iao_n_2pz','iao_n_2ppi','iao_n_4s',
+  'iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz']:
+    z+=1
+    plt.subplot(240+z)
+
+    sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==0.5)]
+    x=sub_df[parm].values
+    xerr=sub_df[parm+'_err'].values
+    y=sub_df['energy'].values
+    yerr=sub_df['energy_err'].values
+    plt.errorbar(x,y,xerr=xerr,yerr=yerr,fmt='.',c='b',label='Sz=1/2')
+    
+    sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==1.5)]
+    x=sub_df[parm].values
+    xerr=sub_df[parm+'_err'].values
+    y=sub_df['energy'].values
+    yerr=sub_df['energy_err'].values
+    plt.errorbar(x,y,xerr=xerr,yerr=yerr,fmt='.',c='r',label='Sz=1/2')
+  
+    plt.xlabel(parm)
+    plt.ylabel('energy (eV)')
+  plt.savefig('analysis/ed_'+str(model)+'_sel_log.pdf',bbox_inches='tight')
+  plt.clf()
+  
   return 0
 
 ######################################################################################
