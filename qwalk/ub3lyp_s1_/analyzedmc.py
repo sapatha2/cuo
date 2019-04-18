@@ -305,73 +305,19 @@ def ed_dmc_beta(df,model,betas=np.arange(0,3.75,0.25),save=False):
 ######################################################################################
 #LOG METHODS (PLOTS) 
 
-#Log regression + plots
-def regr_log_plot(df,model,weights=None,n=500,show=False,fname=None):
-  X=df[model+['energy']]
-  X=sm.add_constant(X)
-  if(weights is None): weights=np.ones(df.shape[0])
-  X['weights']=weights
-  
-  exp_parms, yhat, yerr_u, yerr_l = log_fit_bootstrap(X,n)
-  df['pred']=yhat
-  df['pred_err']=(yerr_u - yerr_l)/2
-
-  g = sns.FacetGrid(df,hue='Sz')
-  g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='.').add_legend()
-  plt.plot(df['energy'],df['energy'],'k--')
-  plt.title('Regression')
-  plt.xlabel('Predicted Energy, eV')
-  plt.ylabel('DMC Energy, eV')
-  if(show): pass
-  else: plt.savefig(fname+'.pdf',bbox_inches='tight')
-  plt.close()
-
-  df=df[df['basestate']==-1]
-  g = sns.FacetGrid(df,hue='Sz')
-  g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='.').add_legend()
-  plt.plot(df['energy'],df['energy'],'k--')
-  plt.title('Regression base states only')
-  plt.xlabel('Predicted Energy, eV')
-  plt.ylabel('DMC Energy, eV')
-  if(show): pass 
-  else: plt.savefig(fname+'_baseonly.pdf',bbox_inches='tight')
-  plt.close()
-
-  return exp_parms, yhat, (yerr_u - yerr_l)/2
-
-#Beta regression
-def regr_beta_log(df,model_list,betas=np.arange(0,3.75,0.25),save=False):
-  full_df=None
-  ncv=5
-
-  zz=0
-  for model in model_list:
-    zz+=1
-    for beta in betas:
-      print("beta =============================================== "+str(beta))
-      weights=np.exp(-beta*(df['energy']-min(df['energy'])))
-      exp_parms, yhat, yerr=regr_log_plot(df,model,weights,show=(not save),fname='analysis/dmc_fit_log_beta'+str(beta)+'_'+str(zz))
-      exp_parms = np.mean(exp_parms,axis=0)
-
-
-      if(full_df is None): full_df=d
-      else: full_df = pd.concat((full_df,d),axis=0)
-      print(full_df)
-  return full_df
-
 #Plot single parameter goodness of fit 
-def plot_valid_log(save=False):
-  full_df=pd.read_pickle('analysis/regr_beta_log.pickle')
+def plot_oneparm_valid_log(save=False):
+  full_df=pd.read_pickle('analysis/oneparm_log.pickle')
   model=[]
-  for i in range(15):
-    model+=list(np.linspace(i,i+0.75,15))#[i]*15
+  for i in range(16):
+    model+=list(np.linspace(i,i+0.75,15))
   full_df['model']=model
-  
+ 
   g = sns.FacetGrid(full_df,hue='beta')
   g.map(plt.errorbar, "model", "R2cv_mu_train", "R2cv_std_train",fmt='.').add_legend()
   plt.xlabel('Model, eV')
   plt.ylabel('R2cv_train, eV')
-  if(save): plt.savefig('analysis/oneparm_valid_log_train.pdf',bbox_inches='tight')
+  if(save): plt.savefig('analysis/oneparm_train_r2.pdf',bbox_inches='tight')
   else: plt.show()
   plt.close()
 
@@ -379,7 +325,7 @@ def plot_valid_log(save=False):
   g.map(plt.errorbar, "model", "R2cv_mu_test", "R2cv_std_test",fmt='.').add_legend()
   plt.xlabel('Model, eV')
   plt.ylabel('R2cv_test, eV')
-  if(save): plt.savefig('analysis/oneparm_valid_log_test.pdf',bbox_inches='tight')
+  if(save): plt.savefig('analysis/oneparm_test_r2.pdf',bbox_inches='tight')
   else: plt.show()
   plt.close()
   
@@ -387,7 +333,7 @@ def plot_valid_log(save=False):
   g.map(plt.errorbar, "model", "RMSEcv_mu_train", "RMSEcv_std_train",fmt='.').add_legend()
   plt.xlabel('Model, eV')
   plt.ylabel('RMSEcv_train, eV')
-  if(save): plt.savefig('analysis/oneparm_valid_log_train2.pdf',bbox_inches='tight')
+  if(save): plt.savefig('analysis/oneparm_train_rmse.pdf',bbox_inches='tight')
   else: plt.show()
   plt.close()
 
@@ -395,48 +341,40 @@ def plot_valid_log(save=False):
   g.map(plt.errorbar, "model", "RMSEcv_mu_test", "RMSEcv_std_test",fmt='.').add_legend()
   plt.xlabel('Model, eV')
   plt.ylabel('RMSEcv_test, eV')
-  if(save): plt.savefig('analysis/oneparm_valid_log_test2.pdf',bbox_inches='tight')
+  if(save): plt.savefig('analysis/oneparm_test_rmse.pdf',bbox_inches='tight')
   else: plt.show()
   plt.close()
+ 
+def plot_regr_log(save=False):
+  full_df=pd.read_pickle('analysis/regr_log.pickle')
+  model=[]
+  for i in range(16):
+    model+=list(np.linspace(i,i+0.75,15))
+  full_df['model']=model
 
-#Getting means and CI for the aggregate data frame
-def average_ed_dmc_beta_log(eig_df):
-  av_df = None
-  for model in range(16):
-    for beta in np.arange(0,3.75,0.25):
-      for eig in range(40):
-        sub_df = eig_df[(eig_df['model']==model)*(eig_df['eig']==eig)*(eig_df['beta']==beta)]
-        data = sub_df.values 
-        means = np.mean(data,axis=0)
-        u = np.percentile(data,97.5,axis=0)
-        l = np.percentile(data,2.5,axis=0)
-        err = (u - l)/2
-
-        d=pd.DataFrame(data=np.array(list(means) + list(err))[:,np.newaxis].T,
-        columns=list(sub_df) + [x+'_err' for x in list(sub_df)])
-     
-        if(av_df is None): av_df = d
-        else: av_df = pd.concat((av_df,d),axis=0)
-  return  av_df
-
-def plot_ed_dmc_log(av_df,full_df):
-  #EIGENVALUES ONLY
-  for model in np.arange(16):
-    for beta in np.arange(0,3.75,0.25):
-      if(beta==0): 
-        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==0.5)]
-        plt.errorbar(np.ones(sub_df.shape[0])*beta,sub_df['energy'].values,sub_df['energy_err'],fmt='o',c='b',label='Sz=1/2')
-        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==1.5)]
-        plt.errorbar(np.ones(sub_df.shape[0])*(beta+0.05),sub_df['energy'].values,sub_df['energy_err'],fmt='o',c='r',label='Sz=3/2')
-      else: 
-        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==0.5)]
-        plt.errorbar(np.ones(sub_df.shape[0])*beta,sub_df['energy'].values,sub_df['energy_err'],fmt='o',c='b')
-        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==1.5)]
-        plt.errorbar(np.ones(sub_df.shape[0])*(beta+0.05),sub_df['energy'].values,sub_df['energy_err'],fmt='o',c='r')
-    plt.legend(loc='best')
-    plt.savefig('analysis/ed_dmc_log_'+str(model)+'.pdf',bbox_inches='tight')
+  for parm in list(full_df)[:9]:
+    g = sns.FacetGrid(full_df,hue='beta')
+    g.map(plt.errorbar, "model", parm, parm+'_err',fmt='.').add_legend()
+    plt.xlabel('Model, eV')
+    plt.ylabel(parm+', eV')
+    if(save): plt.savefig('analysis/regr_'+parm+'.pdf',bbox_inches='tight')
+    else: plt.show()
     plt.close()
 
+def plot_ed_log(save=False):
+  av_df=pd.read_pickle('analysis/av_ed_log.pickle')
+  
+  #EIGENVALUES ONLY
+  z=0
+  for beta in np.arange(0,3.75,0.25):
+    av_df['eig'][av_df['beta']==beta]+=0.05*z
+    z+=1
+  g = sns.FacetGrid(av_df,col='model',col_wrap=4,hue='beta')
+  g.map(plt.errorbar, "eig", "energy", "energy_err",fmt='.').add_legend()
+  if(save): plt.savefig('analysis/ed_eig_log.pdf',bbox_inches='tight')
+  else: plt.show()
+
+  '''
   #FULL EIGENPROPERTIES and EIGENVALUES
   for model in np.arange(16):
     for beta in np.arange(0,3.75,0.25):
@@ -462,7 +400,7 @@ def plot_ed_dmc_log(av_df,full_df):
       
         plt.xlabel(parm)
         plt.ylabel('energy (eV)')
-    plt.savefig('analysis/ed_dmc_log_pp'+str(model)+'.pdf',bbox_inches='tight')
+    plt.savefig('analysis/ed_log_pp'+str(model)+'.pdf',bbox_inches='tight')
     plt.close()
   
   #EIGENPROPERTIES and EIGENVALUES
@@ -490,8 +428,9 @@ def plot_ed_dmc_log(av_df,full_df):
       
         plt.xlabel(parm)
         plt.ylabel('energy (eV)')
-    plt.savefig('analysis/ed_dmc_log_pp2'+str(model)+'.pdf',bbox_inches='tight')
+    plt.savefig('analysis/ed_log_pp2'+str(model)+'.pdf',bbox_inches='tight')
     plt.close()
+  '''
   return 0
 
 
@@ -672,6 +611,26 @@ def ed_log(model,exp_parms_list):
     else: full_df = pd.concat((full_df,d),axis=0)
   return full_df
 
+#Getting means and CI for the aggregate data frame
+def av_ed_log(eig_df):
+  av_df = None
+  for model in range(16):
+    for beta in np.arange(0,3.75,0.25):
+      for eig in range(40):
+        sub_df = eig_df[(eig_df['model']==model)*(eig_df['eig']==eig)*(eig_df['beta']==beta)]
+        data = sub_df.values 
+        means = np.mean(data,axis=0)
+        u = np.percentile(data,97.5,axis=0)
+        l = np.percentile(data,2.5,axis=0)
+        err = (u - l)/2
+
+        d=pd.DataFrame(data=np.array(list(means) + list(err))[:,np.newaxis].T,
+        columns=list(sub_df) + [x+'_err' for x in list(sub_df)])
+     
+        if(av_df is None): av_df = d
+        else: av_df = pd.concat((av_df,d),axis=0)
+  return  av_df
+
 ######################################################################################
 #Analysis pipeline, main thing to edit for runs
 def analyze(df,save=False):
@@ -702,7 +661,8 @@ def analyze(df,save=False):
   uks_eigenvalues['calc']='uks'
   '''
 
-  #LOG ANALYSIS
+  #LOG DATA COLLECTION
+  '''
   #Generate all possible models
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
   hopping=df[['mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
@@ -715,41 +675,21 @@ def analyze(df,save=False):
   print(len(model_list))
 
   df0,df1,df2=main_log(df,model_list)
+  df3=av_ed_log(df2)
   print(df0)
   print(df1)
   print(df2)
   df0.to_pickle('analysis/regr_log.pickle')
   df1.to_pickle('analysis/oneparm_log.pickle')
   df2.to_pickle('analysis/ed_log.pickle')
-
+  df3.to_pickle('analysis/av_ed_log.pickle')
   '''
-  #Plotting regr + creating 1parm valid database log
-  full_df = regr_beta_log(df,model_list,save=save) 
-  full_df.to_pickle('analysis/regr_beta_log.pickle')
-  
-  #Plotting 1 parm valid database log
-  plot_valid_log(save=False)
 
-  #Bulk ED
-  eig_df=None
-  for i in np.arange(16):
-    print(i)
-    model=model_list[i]
-    d=ed_dmc_beta_log(df,model)
-    d['model']=i
-    if(eig_df is None): eig_df = d
-    else: eig_df = pd.concat((eig_df, d),axis=0)
-  eig_df.to_pickle('analysis/ed_gosling.pickle')
+  #LOG PLOTTING
+  #plot_regr_log(save=False)
+  #plot_oneparm_valid_log(save=False)
+  plot_ed_log(save=True) 
 
-  #AVERAGE ED
-  #eig_df=pd.read_pickle('analysis/ed_gosling.pickle')
-  av_df=average_ed_dmc_beta_log(eig_df)
-  av_df.to_pickle('analysis/av_ed_gosling_small.pickle')
-
-  #PLOT ED
-  #av_df=pd.read_pickle('analysis/av_ed_gosling.pickle')
-  plot_ed_dmc_log(av_df,df)
-  '''
 if __name__=='__main__':
   #df=collect_df()
   #df=format_df(df)
