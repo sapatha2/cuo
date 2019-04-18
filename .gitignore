@@ -12,3 +12,4 @@ outputs/
 *.aux
 *.pdf
 *.synctex.gz
+*ed_log.pickle
