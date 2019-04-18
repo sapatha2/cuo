@@ -452,6 +452,31 @@ def plot_ed_log(save=False):
   
   return 0
 
+def plot_fit_log(X,save=True,fname=None):
+  print("PLOT FIT ~~~~~~~~~~~~~~~~~")
+  exp_parms_list, yhat, yerr_u, yerr_l = log_fit_bootstrap(X,n=100)
+  X['pred']=yhat
+  X['pred_err']=(yerr_u - yerr_l)/2
+  g = sns.FacetGrid(X,hue='Sz')
+  g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
+  plt.plot(X['energy'],X['energy'],'k--')
+  plt.title('Regression, 95% CI')
+  plt.xlabel('Predicted Energy, eV')
+  plt.ylabel('DMC Energy, eV')
+  if(save): plt.savefig(fname+'.pdf',bbox_inches='tight')
+  else: plt.show()
+  plt.close()
+  X=X[X['basestate']==-1]
+  g = sns.FacetGrid(X,hue='Sz')
+  g.map(plt.errorbar, "pred", "energy", "energy_err","pred_err",fmt='o').add_legend()
+  plt.plot(X['energy'],X['energy'],'k--')
+  plt.title('Regression base states only, 95% CI')
+  plt.xlabel('Predicted Energy, eV')
+  plt.ylabel('DMC Energy, eV')
+  if(save): plt.savefig(fname+'_base.pdf',bbox_inches='tight')
+  else: plt.show()
+  plt.close()  
+
 ######################################################################################
 #RUN
 def analyze(df,save=False):
@@ -483,7 +508,17 @@ def analyze(df,save=False):
   #LOG PLOTTING
   #plot_regr_log(save=False)
   #plot_oneparm_valid_log(save=False)
-  plot_ed_log(save=True) 
+  #plot_ed_log(save=True) 
+  
+  '''
+  beta=2
+  model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']
+  weights=np.exp(-beta*(df['energy']-min(df['energy'])))
+  X=df[model+['energy','energy_err']+['Sz','basestate']]
+  X=sm.add_constant(X)
+  X['weights']=weights
+  plot_fit_log(X,save=True,fname='analysis/fit_0_sel_log')
+  '''
 
 if __name__=='__main__':
   #DATA COLLECTION
