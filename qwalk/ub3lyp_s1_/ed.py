@@ -98,60 +98,17 @@ def ED(parms, nroots, norb, nelec):
   #['del','del','yz','xz','x','y','z2','z','s']
   dm_u = []
   dm_d = []
+  sigU = []
+  sigJ = []
   for i in range(nroots):
-    dm=cis.make_rdm1s(ci[i],norb,nelec)
-    dm_u.append(dm[0])
-    dm_d.append(dm[1])
-  return e, ci, np.array(dm_u), np.array(dm_d)
-
-if __name__=='__main__':
-  '''
-  norb=9
-
-  full_df=None
-  beta=0
-  for parms in [
-  (3.0019,2.2094,0.6435,0.8995,0,0,0,-0.5798,4.2049),
-  (3.0310,2.1832,0.7768,0.8089,0,0,0,-0.5531,4.0500),
-  (3.0589,2.1512,0.9370,0.6936,0,0,0,-0.5322,3.7743),
-  (3.0883,2.1305,1.0353,0.5985,0,0,0,-0.5459,3.6741),
-  (3.0982,2.1120,1.0622,0.5232,0,0,0,-0.5692,3.8343),
-  (3.0899,2.0986,1.0575,0.4635,0,0,0,-0.5529,4.0939),
-  (3.0686,2.0945,1.0467,0.4232,0,0,0,-0.4561,4.3103),
-  (3.0413,2.0918,1.0332,0.4002,0,0,0,-0.3107,4.4374)]:
-
-    nelec=(8,7)
-    nroots=14
-    res1=ED(parms,nroots,norb,nelec)
-
-    nelec=(9,6)
-    nroots=6
-    res3=ED(parms,nroots,norb,nelec)
-
-    E = res1[0]
-    n_occ = res1[2]+res1[3]
-    Sz = np.ones(len(E))*0.5
-    n_3d = n_occ[:,0] + n_occ[:,1] + n_occ[:,2] + n_occ[:,3] + n_occ[:,6]
-    n_2ppi = n_occ[:,4] + n_occ[:,5]
-    n_2pz = n_occ[:,7]
-    n_4s = n_occ[:,8]
-    df = pd.DataFrame({'E':E,'Sz':Sz,'n_3d':n_3d,'n_2pz':n_2pz,'n_2ppi':n_2ppi,'n_4s':n_4s})
+    dm2=cis.make_rdm12s(ci[i],norb,nelec)
+    dm_u.append(dm2[0][0])
+    dm_d.append(dm2[0][1])
+    sigU.append(dm2[1][1][8,8,8,8]) #U4s parameter sum
     
-    E = res3[0]
-    n_occ = res3[2]+res3[3]
-    Sz = np.ones(len(E))*1.5
-    n_3d = n_occ[:,0] + n_occ[:,1] + n_occ[:,2] + n_occ[:,3] + n_occ[:,6]
-    n_2ppi = n_occ[:,4] + n_occ[:,5]
-    n_2pz = n_occ[:,7]
-    n_4s = n_occ[:,8]
-    df = pd.concat((df,pd.DataFrame({'E':E,'Sz':Sz,'n_3d':n_3d,'n_2pz':n_2pz,'n_2ppi':n_2ppi,'n_4s':n_4s})),axis=0)
-
-    df['E']-=min(df['E'])
-    df['eig']=np.arange(df.shape[0])
-    df['beta']=beta
-    if(full_df is None): full_df = df
-    else: full_df = pd.concat((full_df,df),axis=0)
-    beta+=0.5
-  sns.pairplot(full_df,vars=['E','n_3d','n_2pz','n_2ppi','n_4s'],hue='beta',markers=['o']+['.']*7)
-  plt.show()
-  '''
+    Jsd = 0
+    for i in [0,1,2,3,6]:
+      Jsd += 0.25*(dm2[1][0][8,8,i,i] + dm2[1][2][8,8,i,i] - dm2[1][1][8,8,i,i] - dm2[1][1][i,i,8,8])+\
+             0.5*(dm2[1][1][i,8,8,i] + dm2[1][1][8,i,i,8])
+    sigJ.append(Jsd) #Jsd parameter sum
+  return e, ci, np.array(dm_u), np.array(dm_d), sigU, sigJ

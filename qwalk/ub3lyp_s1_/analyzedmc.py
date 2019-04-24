@@ -272,7 +272,7 @@ def ed_log(model,exp_parms_list):
     t_dz = 2*dm[:,6,7]
     t_sz = 2*dm[:,7,8]
     d = pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3d':n_3d,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s,
-    'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz})
+    'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz,'iao_Us':res1[4],'iao_Jsd':res1[5]})
 
     E = res3[0]
     Sz = np.ones(len(E))*1.5
@@ -286,7 +286,7 @@ def ed_log(model,exp_parms_list):
     t_dz = 2*dm[:,6,7]
     t_sz = 2*dm[:,7,8]
     d = pd.concat((d,pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3d':n_3d,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s,
-    'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz})),axis=0)
+    'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz,'iao_Us':res1[4],'iao_Jsd':res1[5]})),axis=0)
 
     d['energy']-=min(d['energy'])
     d['eig']=np.arange(d.shape[0])
@@ -398,7 +398,7 @@ def plot_ed_log(save=False):
   
   #normalize item number values to colormap
   norm = matplotlib.colors.Normalize(vmin=0, vmax=3.75)
-  
+  '''
   #FULL EIGENPROPERTIES and EIGENVALUES
   for model in np.arange(16):
     for beta in np.arange(3.75,-0.25,-0.25):
@@ -428,36 +428,35 @@ def plot_ed_log(save=False):
         plt.ylabel('energy (eV)')
     plt.savefig('analysis/ed_'+str(model)+'_log.pdf',bbox_inches='tight')
     plt.clf()
- 
-  '''
+  ''' 
   #SELECTED EIGENPROPERTIES and EIGENVALUES
   model=0
-  beta=0
-  z=0
-  for parm in ['iao_n_3d','iao_n_2pz','iao_n_2ppi','iao_n_4s',
-  'iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz']:
-    z+=1
-    plt.subplot(240+z)
+  for beta in np.arange(0,3.75,0.25):
+    z=0
+    rgba_color = cm.Blues(norm(3.75-beta))
+    rgba_color2 = cm.Oranges(norm(3.75-beta))
+    for parm in ['iao_n_3d','iao_n_2pz','iao_n_2ppi','iao_n_4s']:
+      z+=1
+      plt.subplot(220+z)
 
-    sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==0.5)]
-    x=sub_df[parm].values
-    xerr=sub_df[parm+'_err'].values
-    y=sub_df['energy'].values
-    yerr=sub_df['energy_err'].values
-    plt.errorbar(x,y,xerr=xerr,yerr=yerr,fmt='.',c='b',label='Sz=1/2')
+      sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==0.5)]
+      x=sub_df[parm].values
+      xerr=sub_df[parm+'_err'].values
+      y=sub_df['energy'].values
+      yerr=sub_df['energy_err'].values
+      plt.errorbar(x,y,xerr=xerr,yerr=yerr,fmt='o',c=rgba_color,label='Sz=1/2')
+      
+      sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==1.5)].iloc[:13]
+      x=sub_df[parm].values
+      xerr=sub_df[parm+'_err'].values
+      y=sub_df['energy'].values
+      yerr=sub_df['energy_err'].values
+      plt.errorbar(x,y,xerr=xerr,yerr=yerr,fmt='s',c=rgba_color2,label='Sz=1/2')
     
-    sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==1.5)]
-    x=sub_df[parm].values
-    xerr=sub_df[parm+'_err'].values
-    y=sub_df['energy'].values
-    yerr=sub_df['energy_err'].values
-    plt.errorbar(x,y,xerr=xerr,yerr=yerr,fmt='.',c='r',label='Sz=1/2')
-  
-    plt.xlabel(parm)
-    plt.ylabel('energy (eV)')
-  plt.savefig('analysis/ed_'+str(model)+'_sel2_log.pdf',bbox_inches='tight')
-  plt.clf()
-  '''
+      plt.xlabel(parm)
+      plt.ylabel('energy (eV)')
+    plt.savefig('analysis/ed_'+str(model)+'_sel'+str(beta)+'_log.pdf',bbox_inches='tight')
+    plt.clf()
   return 0
 
 def plot_fit_log(X,save=True,fname=None):
@@ -485,13 +484,67 @@ def plot_fit_log(X,save=True,fname=None):
   else: plt.show()
   plt.close()  
 
+def plot_noiser2(save=True):
+  ed_df=pd.read_pickle('analysis/av_ed_log.pickle')
+  r2_df=pd.read_pickle('analysis/oneparm_log.pickle')
+
+  betas=[]
+  models=[]
+  e_errs=[]
+  p_errs=[]
+  r2s=[]
+  r2_errs=[]
+  for beta in np.arange(0,3.75,0.25):
+    for model in range(16):
+      a=ed_df[(ed_df['beta']==beta)*(ed_df['model']==model)]
+      b=r2_df[(r2_df['beta']==beta)*(r2_df['model']==model)]
+      betas.append(beta)
+      models.append(model)
+      r2s.append(b['R2cv_mu_test'])
+      r2_errs.append(b['R2cv_std_test'])
+      e_errs.append(np.sum(a['energy_err'].values))
+      p_err=0
+      for col in ['iao_n_3d', 'iao_n_2pz', 'iao_n_2ppi', 'iao_n_4s',
+      'iao_t_pi', 'iao_t_ds', 'iao_t_dz', 'iao_t_sz', 'iao_Us', 'iao_Jsd']:
+        p_err += np.sum(a[col+'_err'].values)
+      p_errs.append(p_err)
+
+  ret_df = pd.DataFrame(columns=['beta','model','R2cv_mu_test','R2cv_std_test','e_err','p_err'],
+  data=np.array([betas,models,r2s,r2_errs,e_errs,p_errs]).T)
+
+  for error in ['e_err','p_err']:
+    norm = matplotlib.colors.Normalize(vmin=0, vmax=3.75)
+    for beta in np.arange(0,3.75,0.25):
+      rgba_color = cm.rainbow(norm(beta))
+      for model in range(16):
+        pdf=ret_df[(ret_df['model']==model)*(ret_df['beta']==beta)]
+        plt.subplot(4,4,1+model)
+        plt.errorbar(pdf[error],pdf['R2cv_mu_test'],pdf['R2cv_std_test'],c=rgba_color,marker='o')
+        plt.ylim((0.90,1.0))
+        
+        if(error=='p_err'):
+          plt.xlim((0,100))
+          plt.axvline(40,ls='--',c='gray')
+        else:
+          plt.xlim((0,20))
+          plt.axvline(5,ls='--',c='gray')
+        
+        plt.title(model)
+        plt.axhline(0.975,ls='--',c='gray')
+    plt.suptitle('R2cv_test vs '+error)
+    if(save): plt.savefig('analysis/r2vs'+error+'.pdf',bbox_inches='tight')
+    else: plt.show()
+    plt.clf()
+
+  exit(0)
+
 ######################################################################################
 #RUN
 def analyze(df,save=False):
 
   #LOG DATA COLLECTION
-  '''
   #Generate all possible models
+  '''
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
   hopping=df[['mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
   y=df['energy']
@@ -511,12 +564,13 @@ def analyze(df,save=False):
   df1.to_pickle('analysis/oneparm_log.pickle')
   df2.to_pickle('analysis/ed_log.pickle')
   df3.to_pickle('analysis/av_ed_log.pickle')
+  exit(0)
   '''
 
   #LOG PLOTTING
-  #plot_regr_log(save=False)
-  #plot_oneparm_valid_log(save=False)
-  plot_ed_log(save=True) 
+  #plot_regr_log(save=True)
+  #plot_oneparm_valid_log(save=True)
+  #plot_ed_log(save=True) 
   
   '''
   beta=0
@@ -527,6 +581,8 @@ def analyze(df,save=False):
   X['weights']=weights
   plot_fit_log(X,save=True,fname='analysis/fit_0_sel2_log')
   '''
+
+  plot_noiser2(save=False)
 
 if __name__=='__main__':
   #DATA COLLECTION
