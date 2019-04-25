@@ -52,7 +52,7 @@ def h1_moToIAO(parms,printvals=False):
 
   return e
 
-def h2_IAO(Jcu,Us):
+def h2_IAO(Jcu,Us,t=False):
   #Jsi = 0.25*(ns_u - ns_d)*(ni_u - ni_d) + 
   #0.5*(cs_u^+ cs_d ci_d^+ ci_u + cs_d^+ cs_u ci_u^+ ci_d)
 
@@ -66,7 +66,9 @@ def h2_IAO(Jcu,Us):
       s=index[p]
       i=index[j]
       h2[0][s,s,i,i]=0.25
+      h2[0][i,i,s,s]=0.25
       h2[2][s,s,i,i]=0.25
+      h2[2][i,i,s,s]=0.25
       
       h2[1][i,i,s,s]=-0.25
       h2[1][s,s,i,i]=-0.25
@@ -74,6 +76,7 @@ def h2_IAO(Jcu,Us):
       h2[1][i,s,s,i]=-0.50
   h2*=Jcu
   h2[1][8,8,8,8]=Us
+
   return h2
 
 def ED(parms, nroots, norb, nelec):
@@ -89,11 +92,10 @@ def ED(parms, nroots, norb, nelec):
   cis = fci.direct_uhf.FCISolver(mol)
   eri_aa = ao2mo.restore(1, h2[0], norb)
   eri_ab = ao2mo.restore(1, h2[1], norb)
-  eri_bb = ao2mo.restore(1, h2[2], norb)
+  eri_bb = ao2mo.restore(1, h2[2], norb) #4 and 8 fold identical since we have no complex entries
   eri = (eri_aa, eri_ab, eri_bb)
 
   e, ci = fci.direct_uhf.kernel(h1, eri, norb, nelec, nroots=nroots)
-  
   #Generate vector of number occupations 
   #['del','del','yz','xz','x','y','z2','z','s']
   dm_u = []

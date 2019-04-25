@@ -264,13 +264,13 @@ def ed_log(model,exp_parms_list):
     
     norb=9
     nelec=(8,7)
-    nroots=20
+    nroots=40
     res1=ED(params,nroots,norb,nelec)
 
     nelec=(9,6)
-    nroots=20
+    nroots=40
     res3=ED(params,nroots,norb,nelec)
-
+  
     E = res1[0]
     Sz = np.ones(len(E))*0.5
     dm = res1[2] + res1[3]
@@ -297,7 +297,7 @@ def ed_log(model,exp_parms_list):
     t_dz = 2*dm[:,6,7]
     t_sz = 2*dm[:,7,8]
     d = pd.concat((d,pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3d':n_3d,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s,
-    'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz,'iao_Us':res1[4],'iao_Jsd':res1[5]})),axis=0)
+    'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz,'iao_Us':res3[4],'iao_Jsd':res3[5]})),axis=0)
 
     d['energy']-=min(d['energy'])
     d['eig']=np.arange(d.shape[0])
@@ -331,7 +331,10 @@ def av_ed_log(eig_df):
 #Plot regression parameters
 def plot_regr_log(save=False):
   full_df=pd.read_pickle('analysis/regr_log.pickle')
-  
+ 
+  for model in [0,1,2,5,11]:
+    print(full_df[full_df['model']==model].iloc[0])
+
   model=[]
   for i in range(16):
     model+=list(np.linspace(i,i+0.75,15))
@@ -413,8 +416,8 @@ def plot_ed_log(full_df,save=False):
   #normalize item number values to colormap
   norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
   #FULL EIGENPROPERTIES and EIGENVALUES
-  for model in np.arange(16):
-    for beta in [1.75,2.0,2.25]:#np.arange(3.75,-0.25,-0.25):
+  for model in [0,1,2,5,11]: #np.arange(16):
+    for beta in [2.0]:#np.arange(3.75,-0.25,-0.25):
       rgba_color = cm.Blues(norm(3.75-beta))
       rgba_color2 = cm.Oranges(norm(3.75-beta))
       z=0
@@ -589,7 +592,8 @@ def plot_Xerr(df,save=True):
   for parm in var:
     zb=df[parm]
     for model in range(16):
-      za=ed_df[(ed_df['model']==model)*(ed_df['beta']==beta)].iloc[[0,1,2,3,4,5,6,7,8,9,20,21,22,23,24,25,26,27,28,29]]
+      za=ed_df[(ed_df['model']==model)*(ed_df['beta']==beta)]
+      #za = za.iloc[[0,1,2,3,4,5,6,7,8,9,20,21,22,23,24,25,26,27,28,29]]
       
       lo = (za[parm] - za[parm+'_err']).min()
       hi = (za[parm] + za[parm+'_err']).max()
@@ -613,7 +617,6 @@ def plot_Xerr(df,save=True):
 def analyze(df,save=False):
   #LOG DATA COLLECTION
   #Generate all possible models
-  '''
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
   hopping=df[['mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
   y=df['energy']
@@ -633,25 +636,24 @@ def analyze(df,save=False):
   df1.to_pickle('analysis/oneparm_log.pickle')
   df2.to_pickle('analysis/ed_log.pickle')
   df3.to_pickle('analysis/av_ed_log.pickle')
-  exit(0)
-  '''
 
   #LOG PLOTTING
-  #plot_regr_log(save=True)
   #plot_oneparm_valid_log(save=False)
+  #plot_Xerr(df)
   #plot_ed_log(df,save=True) 
-  #plot_noiser2(save=True)
-  plot_Xerr(df)
-  exit(0)
+  #exit(0)
   
   '''
   beta=2.0
-  model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_ds','Jsd','Us']
-  weights=np.exp(-beta*(df['energy']-min(df['energy'])))
-  X=df[model+['energy','energy_err']+['Sz','basestate']]
-  X=sm.add_constant(X)
-  X['weights']=weights
-  plot_fit_log(X,save=True,fname='analysis/fit_3_sel'+str(beta)+'_log')
+  model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']
+  add=[[],['mo_t_dz'],['mo_t_sz'],['mo_t_dz','mo_t_sz'],['mo_t_dz','mo_t_sz','mo_t_ds']]
+  m=[0,1,2,5,11]
+  for i in range(len(add)):
+    weights=np.exp(-beta*(df['energy']-min(df['energy'])))
+    X=df[model+add[i]+['energy','energy_err']+['Sz','basestate']]
+    X=sm.add_constant(X)
+    X['weights']=weights
+    plot_fit_log(X,save=True,fname='analysis/fit_model'+str(m[i])+'_beta'+str(beta)+'_log')
   '''
 
 if __name__=='__main__':
