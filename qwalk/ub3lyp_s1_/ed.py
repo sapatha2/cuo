@@ -108,7 +108,7 @@ def ED(parms, nroots, norb, nelec):
     
     Jsd = 0
     for i in [0,1,2,3,6]:
-      Jsd += 0.25*(dm2[1][0][8,8,i,i] + dm2[1][2][8,8,i,i] - dm2[1][1][8,8,i,i] - dm2[1][1][i,i,8,8])+\
+      Jsd += 0.25*(dm2[1][0][8,8,i,i] + dm2[1][2][8,8,i,i] - dm2[1][1][8,8,i,i] - dm2[1][1][i,i,8,8])-\
              0.5*(dm2[1][1][i,8,8,i] + dm2[1][1][8,i,i,8])
     sigJ.append(Jsd) #Jsd parameter sum
   return e, ci, np.array(dm_u), np.array(dm_d), sigU, sigJ

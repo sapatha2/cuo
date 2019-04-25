@@ -583,7 +583,6 @@ def plot_noiser2(save=True):
 def analyze(df,save=False):
   #LOG DATA COLLECTION
   #Generate all possible models
-  '''
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
   hopping=df[['mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
   y=df['energy']
@@ -604,7 +603,6 @@ def analyze(df,save=False):
   df2.to_pickle('analysis/ed_log.pickle')
   df3.to_pickle('analysis/av_ed_log.pickle')
   exit(0)
-  '''
 
   #LOG PLOTTING
   #plot_regr_log(save=True)
