@@ -578,11 +578,42 @@ def plot_noiser2(save=True):
     else: plt.show()
     plt.clf()
 
+def plot_Xerr(df,save=True):
+  ed_df=pd.read_pickle('analysis/av_ed_log.pickle')
+  df['iao_Jsd']=df['Jsd']
+  df['iao_Us']=df['Us']
+  var=['iao_n_3d','iao_n_2pz','iao_n_2ppi','iao_n_4s','iao_t_pi','iao_t_dz','iao_t_ds','iao_t_sz','iao_Jsd','iao_Us']
+  fig, ax = plt.subplots(2,5,sharey=True)
+  beta=2.0
+  z=0
+  for parm in var:
+    zb=df[parm]
+    for model in range(16):
+      za=ed_df[(ed_df['model']==model)*(ed_df['beta']==beta)].iloc[[0,1,2,3,4,5,6,7,8,9,20,21,22,23,24,25,26,27,28,29]]
+      
+      lo = (za[parm] - za[parm+'_err']).min()
+      hi = (za[parm] + za[parm+'_err']).max()
+
+      ax[z//5,z%5].plot([lo,hi],[model+1,model+1],marker='|',c='cornflowerblue')
+    
+    #MIN MAX
+    ax[z//5,z%5].axvline(zb.min(),c='k',ls='--')
+    ax[z//5,z%5].axvline(zb.max(),c='k',ls='--')
+    
+    #HISTOGRAM
+    bins, edges = np.histogram(zb,bins=10,density=True)
+    bins*=16/max(bins)
+    ax[z//5,z%5].bar(x=edges[:-1],height=bins,width=edges[1:] - edges[:-1],color='gray',alpha=0.5)
+    ax[z//5,z%5].set_xlabel(parm)
+    z+=1
+  plt.show()
+
 ######################################################################################
 #RUN
 def analyze(df,save=False):
   #LOG DATA COLLECTION
   #Generate all possible models
+  '''
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
   hopping=df[['mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
   y=df['energy']
@@ -603,13 +634,16 @@ def analyze(df,save=False):
   df2.to_pickle('analysis/ed_log.pickle')
   df3.to_pickle('analysis/av_ed_log.pickle')
   exit(0)
+  '''
 
   #LOG PLOTTING
   #plot_regr_log(save=True)
   #plot_oneparm_valid_log(save=False)
-  plot_ed_log(df,save=True) 
+  #plot_ed_log(df,save=True) 
   #plot_noiser2(save=True)
+  plot_Xerr(df)
   exit(0)
+  
   '''
   beta=2.0
   model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_ds','Jsd','Us']
