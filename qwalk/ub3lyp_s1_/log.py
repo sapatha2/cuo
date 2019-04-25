@@ -4,13 +4,19 @@ from scipy.optimize import minimize
 import pandas as pd 
 import statsmodels.api as sm
 
+def rmse_bar(yhat,y,w):
+  #RMSE score for logarithmic cost function 
+  mi = min([min(yhat),min(y)]) - 1e-6 #log(0) inf
+  c=np.sum(w*np.log((yhat-mi)/(y-mi))**2)/yhat.shape[0]
+  return np.sqrt(c)
+
 def pred(b,X):
   return np.dot(b,X.values.T)
 
 def cost(b,X,y,w):
   yhat = pred(b,X)
   mi = min([min(yhat),min(y)])
-  c=np.sum(w*np.log((yhat-mi)/(y-mi)))
+  c=np.sum(w*np.log((yhat-mi)/(y-mi))**2)
   return c
 
 def log_fit(df):

@@ -15,12 +15,13 @@ from roks_model import ED_roks
 from uks_model import ED_uks
 import itertools
 from expectile import expectile_fit
-from log import log_fit,log_fit_bootstrap
+from log import log_fit,log_fit_bootstrap, rmse_bar
 from pyscf import gto, scf, ao2mo, cc, fci, mcscf, lib
 from pyscf.scf import ROKS
 from functools import reduce
 from matplotlib import cm
-import matplotlib 
+import matplotlib.pyplot as plt
+import matplotlib as mpl
 
 ######################################################################################
 #FROZEN METHODS
@@ -205,6 +206,8 @@ def oneparm_valid_log(X,ncv,model):
     else: params.append(0)
  
   kf=KFold(n_splits=ncv,shuffle=True)
+  rmsebar_train=[]
+  rmsebar_test=[]
   r2_train=[]
   r2_test=[]
   rmse_train=[]
@@ -222,19 +225,32 @@ def oneparm_valid_log(X,ncv,model):
     yhat_train = np.dot(exp_parms,X_train.drop(columns=['energy','weights']).values.T)
     yhat_test = np.dot(exp_parms,X_test.drop(columns=['energy','weights']).values.T)
 
+    rmsebar_train.append(rmse_bar(yhat_train,y_train,w_train))
+    rmsebar_test.append(rmse_bar(yhat_test,y_test,w_test))
     r2_train.append(r2_score(yhat_train,y_train,w_train))
     r2_test.append(r2_score(yhat_test,y_test,w_test))
     rmse_train.append(mean_squared_error(y_train,yhat_train,w_train))
     rmse_test.append(mean_squared_error(y_test,yhat_test,w_test))
+
+  rmsebar_train=np.array(rmsebar_train)
+  rmsebar_test=np.array(rmsebar_test)
   r2_train=np.array(r2_train)
   r2_test=np.array(r2_test)
   rmse_train=np.array(rmse_train)
   rmse_test=np.array(rmse_test)
 
-  param_names=['R2cv_mu_train','R2cv_std_train','R2cv_mu_test','R2cv_std_test',
+  param_names=['RMSEbarcv_mu_train','RMSEbarcv_std_train','RMSEbarcv_mu_test','RMSEbarcv_std_test',
+  'R2cv_mu_train','R2cv_std_train','R2cv_mu_test','R2cv_std_test',
   'RMSEcv_mu_train','RMSEcv_std_train','RMSEcv_mu_test','RMSEcv_std_test']
-  params=[np.mean(r2_train),np.std(r2_train),np.mean(r2_test),np.std(r2_test),
+  params=[np.mean(rmsebar_train),np.std(rmsebar_train),np.mean(rmsebar_test),np.std(rmsebar_test),
+  np.mean(r2_train),np.std(r2_train),np.mean(r2_test),np.std(r2_test),
   np.mean(rmse_train),np.std(rmse_train),np.mean(rmse_test),np.std(rmse_test)]
+
+  print(params[2],params[3])
+  print(params[10],params[11])
+  print(params[6],params[7])
+  print('--------------------------###############')
+
   d=pd.DataFrame(data=np.array(params)[np.newaxis,:],columns=param_names,index=[0])
   return d
 
@@ -320,7 +336,7 @@ def av_ed_log(eig_df):
 #Plot regression parameters
 def plot_regr_log(save=False):
   full_df=pd.read_pickle('analysis/regr_log.pickle')
-  
+
   model=[]
   for i in range(16):
     model+=list(np.linspace(i,i+0.75,15))
@@ -397,7 +413,7 @@ def plot_ed_log(save=False):
   plt.clf()
   
   #normalize item number values to colormap
-  norm = matplotlib.colors.Normalize(vmin=0, vmax=3.75)
+  norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
   '''
   #FULL EIGENPROPERTIES and EIGENVALUES
   for model in np.arange(16):
@@ -430,8 +446,8 @@ def plot_ed_log(save=False):
     plt.clf()
   ''' 
   #SELECTED EIGENPROPERTIES and EIGENVALUES
-  model=0
-  for beta in np.arange(0,3.75,0.25):
+  model=10
+  for beta in [2.0]:
     z=0
     rgba_color = cm.Blues(norm(3.75-beta))
     rgba_color2 = cm.Oranges(norm(3.75-beta))
@@ -496,7 +512,7 @@ def plot_noiser2(save=True):
   r2_errs=[]
   for beta in np.arange(0,3.75,0.25):
     for model in range(16):
-      a=ed_df[(ed_df['beta']==beta)*(ed_df['model']==model)]
+      a=ed_df[(ed_df['beta']==beta)*(ed_df['model']==model)].iloc[[0,1,2,3,4,5,6,7,8,9,20,21,22,23,24,25,26,27,28,29]]
       b=r2_df[(r2_df['beta']==beta)*(r2_df['model']==model)]
       betas.append(beta)
       models.append(model)
@@ -512,26 +528,26 @@ def plot_noiser2(save=True):
   ret_df = pd.DataFrame(columns=['beta','model','R2cv_mu_test','R2cv_std_test','e_err','p_err'],
   data=np.array([betas,models,r2s,r2_errs,e_errs,p_errs]).T)
 
+  markers=['.','o','v','^','<','>','8','s','P','p','h','H','*','X','D','d']
   for error in ['e_err','p_err']:
-    norm = matplotlib.colors.Normalize(vmin=0, vmax=3.75)
+    gs = mpl.gridspec.GridSpec(1, 2,width_ratios=[15,1])
+    ax1 = plt.subplot(gs[0])
+    ax2 = plt.subplot(gs[1])
+    norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
+    
     for beta in np.arange(0,3.75,0.25):
-      rgba_color = cm.rainbow(norm(beta))
+      cmap = cm.nipy_spectral
       for model in range(16):
         pdf=ret_df[(ret_df['model']==model)*(ret_df['beta']==beta)]
-        plt.subplot(4,4,1+model)
-        plt.errorbar(pdf[error],pdf['R2cv_mu_test'],pdf['R2cv_std_test'],c=rgba_color,marker='o')
-        plt.ylim((0.90,1.0))
-        
-        if(error=='p_err'):
-          plt.xlim((0,100))
-          plt.axvline(40,ls='--',c='gray')
+        if(beta==0):
+          ax1.scatter(pdf[error].values,pdf['R2cv_mu_test'].values,c=cmap(norm(beta)),marker=markers[model],label='model '+str(model))
         else:
-          plt.xlim((0,20))
-          plt.axvline(5,ls='--',c='gray')
-        
-        plt.title(model)
-        plt.axhline(0.975,ls='--',c='gray')
-    plt.suptitle('R2cv_test vs '+error)
+          ax1.scatter(pdf[error].values,pdf['R2cv_mu_test'].values,c=cmap(norm(beta)),marker=markers[model])
+    
+    cb1 = mpl.colorbar.ColorbarBase(ax2,cmap=cmap, norm=norm,orientation='vertical')
+    ax1.legend(loc='best')
+    ax1.set_xlabel(error)
+    ax1.set_ylabel('5-fold CV R2 Mean')
     if(save): plt.savefig('analysis/r2vs'+error+'.pdf',bbox_inches='tight')
     else: plt.show()
     plt.clf()
@@ -541,10 +557,8 @@ def plot_noiser2(save=True):
 ######################################################################################
 #RUN
 def analyze(df,save=False):
-
   #LOG DATA COLLECTION
   #Generate all possible models
-  '''
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
   hopping=df[['mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
   y=df['energy']
@@ -565,25 +579,22 @@ def analyze(df,save=False):
   df2.to_pickle('analysis/ed_log.pickle')
   df3.to_pickle('analysis/av_ed_log.pickle')
   exit(0)
-  '''
 
   #LOG PLOTTING
   #plot_regr_log(save=True)
   #plot_oneparm_valid_log(save=True)
   #plot_ed_log(save=True) 
-  
+  #plot_noiser2(save=True)
+  #exit(0)
   '''
-  beta=0
-  model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']
+  beta=2.0
+  model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_ds','Jsd','Us']
   weights=np.exp(-beta*(df['energy']-min(df['energy'])))
   X=df[model+['energy','energy_err']+['Sz','basestate']]
   X=sm.add_constant(X)
   X['weights']=weights
-  plot_fit_log(X,save=True,fname='analysis/fit_0_sel2_log')
+  plot_fit_log(X,save=True,fname='analysis/fit_3_sel'+str(beta)+'_log')
   '''
-
-  plot_noiser2(save=False)
-
 if __name__=='__main__':
   #DATA COLLECTION
   #df=collect_df()
