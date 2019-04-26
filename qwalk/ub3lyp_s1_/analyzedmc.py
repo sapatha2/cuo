@@ -393,30 +393,10 @@ def plot_oneparm_valid_log(save=False):
 #Plot eigenvalues and eigenproperties
 def plot_ed_log(full_df,save=False):
   av_df=pd.read_pickle('analysis/av_ed_log.pickle')
-  
-  #EIGENVALUES ONLY
-  '''
-  z=0
-  for beta in np.arange(0,3.75,0.25):
-    av_df['eig'][av_df['beta']==beta]+=0.05*z
-    z+=1
-  g = sns.FacetGrid(av_df,col='model',col_wrap=4,hue='beta')
-  g.map(plt.errorbar, "eig", "energy", "energy_err",fmt='.').add_legend()
-  if(save): plt.savefig('analysis/ed_eig_log.pdf',bbox_inches='tight')
-  else: plt.show()
-  plt.clf()
-  '''
-  #EIGENVALUES ONLY
   g = sns.FacetGrid(av_df,col='model',col_wrap=4,hue='Sz')
-  '''
-  g.map(plt.errorbar, "eig", "energy", "energy_err",fmt='.').add_legend()
-  if(save): plt.savefig('analysis/ed_eig_Sz_log.pdf',bbox_inches='tight')
-  else: plt.show()
-  plt.clf()
-  '''
-
-  #normalize item number values to colormap
+  
   norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
+  '''
   #FULL EIGENPROPERTIES and EIGENVALUES
   for model in [0,2,3,8,14]: #np.arange(16):
     for beta in [2.0]:#np.arange(3.75,-0.25,-0.25):
@@ -466,37 +446,42 @@ def plot_ed_log(full_df,save=False):
         plt.ylabel('energy (eV)')
     plt.savefig('analysis/ed_'+str(model)+'_log.pdf',bbox_inches='tight')
     plt.clf()
-  
-  ''' 
-  #SELECTED EIGENPROPERTIES and EIGENVALUES
-  model=2
-  for beta in [2.25]:
-    z=0
-    rgba_color = cm.Blues(norm(3.75-beta))
-    rgba_color2 = cm.Oranges(norm(3.75-beta))
-    for parm in ['iao_n_3d','iao_n_2pz','iao_n_2ppi','iao_n_4s']:
-      z+=1
-      plt.subplot(220+z)
-
-      sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==0.5)]
-      x=sub_df[parm].values
-      xerr=sub_df[parm+'_err'].values
-      y=sub_df['energy'].values
-      yerr=sub_df['energy_err'].values
-      plt.errorbar(x,y,xerr=xerr,yerr=yerr,fmt='o',c=rgba_color,label='Sz=1/2')
-      
-      sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==1.5)].iloc[:13]
-      x=sub_df[parm].values
-      xerr=sub_df[parm+'_err'].values
-      y=sub_df['energy'].values
-      yerr=sub_df['energy_err'].values
-      plt.errorbar(x,y,xerr=xerr,yerr=yerr,fmt='s',c=rgba_color2,label='Sz=1/2')
-    
-      plt.xlabel(parm)
-      plt.ylabel('energy (eV)')
-    plt.savefig('analysis/ed_'+str(model)+'_sel'+str(beta)+'_log.pdf',bbox_inches='tight')
-    plt.clf()
   '''
+
+  #COMBINED
+  norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
+  #FULL EIGENPROPERTIES and EIGENVALUES
+  markers=['o','','s','','','','','','^']
+  for model in [0,2,8]: #np.arange(16):
+    for beta in [2.0]:#np.arange(3.75,-0.25,-0.25):
+      rgba_color = cm.Blues(norm(3.75-beta))
+      rgba_color2 = cm.Oranges(norm(3.75-beta))
+      z=0
+      for parm in ['iao_n_3d','iao_n_2pz','iao_n_2ppi','iao_n_4s',
+      'iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','iao_Jsd','iao_Us']:
+        z+=1
+        plt.subplot(2,5,0+z)
+
+        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==0.5)].iloc[:25]
+        x=sub_df[parm].values
+        xerr=sub_df[parm+'_err'].values
+        y=sub_df['energy'].values
+        yerr=sub_df['energy_err'].values
+        plt.errorbar(x,y,xerr=xerr,yerr=yerr,markeredgecolor='k',fmt=markers[model],c=rgba_color)
+       
+        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==1.5)].iloc[:15]
+        x=sub_df[parm].values
+        xerr=sub_df[parm+'_err'].values
+        y=sub_df['energy'].values
+        yerr=sub_df['energy_err'].values
+        plt.errorbar(x,y,xerr=xerr,yerr=yerr,markeredgecolor='k',fmt=markers[model],c=rgba_color2)
+       
+        plt.ylim((-0.2,4.5))
+        plt.xlabel(parm)
+        plt.ylabel('energy (eV)')
+  plt.savefig('analysis/ed_combined_log.pdf',bbox_inches='tight')
+  plt.clf()
+  
   return 0
 
 def plot_fit_log(X,save=True,fname=None):
@@ -642,29 +627,19 @@ def analyze(df,save=False):
   df3.to_pickle('analysis/av_ed_log.pickle')
   '''
 
-  sns.pairplot(df,vars=['mo_t_dz','mo_t_sz','mo_n_4s','mo_n_2pz'],hue='Sz')
-  plt.show()
-  exit(0)
-
   #LOG PLOTTING
   #plot_oneparm_valid_log(save=False)
   #plot_Xerr(df)
-  plot_regr_log(save=False)
-  #plot_ed_log(df,save=True) 
-  exit(0)
+  #plot_regr_log(save=False)
+  plot_ed_log(df,save=True) 
   
-  '''
   beta=2.0
   model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']
-  add=[[],['mo_t_dz'],['mo_t_sz'],['mo_t_dz','mo_t_sz'],['mo_t_dz','mo_t_sz','mo_t_ds']]
-  m=[0,1,2,5,11]
-  for i in range(len(add)):
-    weights=np.exp(-beta*(df['energy']-min(df['energy'])))
-    X=df[model+add[i]+['energy','energy_err']+['Sz','basestate']]
-    X=sm.add_constant(X)
-    X['weights']=weights
-    plot_fit_log(X,save=True,fname='analysis/fit_model'+str(m[i])+'_beta'+str(beta)+'_log')
-  '''
+  weights=np.exp(-beta*(df['energy']-min(df['energy'])))
+  X=df[model+['energy','energy_err']+['Sz','basestate']]
+  X=sm.add_constant(X)
+  X['weights']=weights
+  plot_fit_log(X,save=True,fname='analysis/regr_log')
 
 if __name__=='__main__':
   #DATA COLLECTION
