@@ -23,6 +23,7 @@ from matplotlib import cm
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from scipy.optimize import linear_sum_assignment
+import scipy 
 ######################################################################################
 #FROZEN METHODS
 #Collect df
@@ -254,7 +255,6 @@ def ed_log(model,exp_parms_list):
   print("ED LOG ~~~~~~~~~~~~~~~~~")
   full_df=None
   for exp_parms in exp_parms_list:
-    print("Run")
     #Figure out which parameters are in my list
     param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz',
     'mo_t_ds','mo_t_sz','Jsd','Us']
@@ -308,8 +308,7 @@ def ed_log(model,exp_parms_list):
     else: 
       o = full_df.drop(columns=['eig']).values
       s = d.values
-      cost = np.linalg.norm(o[:,np.newaxis,:] - s[np.newaxis,:,:],axis=-1)
-      assert(cost.all()>0)
+      cost = scipy.spatial.distance.cdist(o,s)
       row_ind, col_ind = linear_sum_assignment(cost)
       d['eig'] = col_ind
       
