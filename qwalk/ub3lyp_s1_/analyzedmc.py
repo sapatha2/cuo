@@ -254,6 +254,7 @@ def ed_log(model,exp_parms_list):
   print("ED LOG ~~~~~~~~~~~~~~~~~")
   full_df=None
   for exp_parms in exp_parms_list:
+    print("Run")
     #Figure out which parameters are in my list
     param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz',
     'mo_t_ds','mo_t_sz','Jsd','Us']
@@ -305,14 +306,13 @@ def ed_log(model,exp_parms_list):
       d['eig'] = np.arange(d.shape[0])
       full_df = d
     else: 
-      cost = np.zeros((d.shape[0],d.shape[0]))
-      for i in range(d.shape[0]):
-        for j in range(d.shape[0]):
-          c = (full_df.drop(columns=['eig']).iloc[i] - d.iloc[j])**2
-          cost[i,j]=c.sum() 
-      
+      o = full_df.drop(columns=['eig']).values
+      s = d.values
+      cost = np.linalg.norm(o[:,np.newaxis,:] - s[np.newaxis,:,:],axis=-1)
+      assert(cost.all()>0)
       row_ind, col_ind = linear_sum_assignment(cost)
       d['eig'] = col_ind
+      
       full_df = pd.concat((full_df,d),axis=0)
   return full_df
 
