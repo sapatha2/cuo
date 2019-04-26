@@ -311,7 +311,7 @@ def av_ed_log(eig_df):
   av_df = None
   for model in range(16):
     for beta in np.arange(0,3.75,0.25):
-      for eig in range(40):
+      for eig in range(max(eig_df['eig'])):
         sub_df = eig_df[(eig_df['model']==model)*(eig_df['eig']==eig)*(eig_df['beta']==beta)]
         data = sub_df.values 
         means = np.mean(data,axis=0)
@@ -331,9 +331,10 @@ def av_ed_log(eig_df):
 #Plot regression parameters
 def plot_regr_log(save=False):
   full_df=pd.read_pickle('analysis/regr_log.pickle')
- 
-  for model in [0,1,2,5,11]:
-    print(full_df[full_df['model']==model].iloc[0])
+
+  for model in [0,2,3,8,14]:
+    print(full_df[(full_df['model']==model)*(full_df['beta']==2.0)].iloc[0])
+  exit(0)
 
   model=[]
   for i in range(16):
@@ -392,6 +393,7 @@ def plot_oneparm_valid_log(save=False):
 #Plot eigenvalues and eigenproperties
 def plot_ed_log(full_df,save=False):
   av_df=pd.read_pickle('analysis/av_ed_log.pickle')
+  
   #EIGENVALUES ONLY
   '''
   z=0
@@ -416,7 +418,7 @@ def plot_ed_log(full_df,save=False):
   #normalize item number values to colormap
   norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
   #FULL EIGENPROPERTIES and EIGENVALUES
-  for model in [0,1,2,5,11]: #np.arange(16):
+  for model in [0,2,3,8,14]: #np.arange(16):
     for beta in [2.0]:#np.arange(3.75,-0.25,-0.25):
       rgba_color = cm.Blues(norm(3.75-beta))
       rgba_color2 = cm.Oranges(norm(3.75-beta))
@@ -424,23 +426,23 @@ def plot_ed_log(full_df,save=False):
       for parm in ['iao_n_3d','iao_n_2pz','iao_n_2ppi','iao_n_4s',
       'iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','iao_Jsd','iao_Us']:
         z+=1
-        plt.subplot(3,4,0+z)
+        plt.subplot(2,5,0+z)
 
-        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==0.5)]
+        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==0.5)].iloc[:25]
         x=sub_df[parm].values
         xerr=sub_df[parm+'_err'].values
         y=sub_df['energy'].values
         yerr=sub_df['energy_err'].values
-        plt.errorbar(x,y,xerr=xerr,yerr=yerr,fmt='o',c=rgba_color)
+        plt.errorbar(x,y,xerr=xerr,yerr=yerr,markeredgecolor='k',fmt='o',c=rgba_color)
        
-        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==1.5)].iloc[:13]
+        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==1.5)].iloc[:15]
         x=sub_df[parm].values
         xerr=sub_df[parm+'_err'].values
         y=sub_df['energy'].values
         yerr=sub_df['energy_err'].values
-        plt.errorbar(x,y,xerr=xerr,yerr=yerr,fmt='s',c=rgba_color2)
+        plt.errorbar(x,y,xerr=xerr,yerr=yerr,markeredgecolor='k',fmt='o',c=rgba_color2)
 
-        if(beta==1.75):
+        if(beta==2.0):
           p=parm
           if(parm=='iao_Jsd'): p = 'Jsd'
           if(parm=='iao_Us'):  p = 'Us'
@@ -451,14 +453,15 @@ def plot_ed_log(full_df,save=False):
           x = f_df[p].values
           y = f_df['energy'].values
           yerr = f_df['energy_err'].values
-          plt.errorbar(x,y,yerr,fmt='.',c=rgba_color,alpha=0.1)
+          plt.errorbar(x,y,yerr,fmt='.',c=rgba_color,alpha=0.2)
 
           f_df = full_df[full_df['Sz']==1.5]
           x = f_df[p].values
           y = f_df['energy'].values
           yerr = f_df['energy_err'].values
-          plt.errorbar(x,y,yerr,fmt='.',c=rgba_color2,alpha=0.1)
-        
+          plt.errorbar(x,y,yerr,fmt='.',c=rgba_color2,alpha=0.2)
+       
+        plt.ylim((-0.2,4.5))
         plt.xlabel(parm)
         plt.ylabel('energy (eV)')
     plt.savefig('analysis/ed_'+str(model)+'_log.pdf',bbox_inches='tight')
@@ -615,6 +618,7 @@ def plot_Xerr(df,save=True):
 ######################################################################################
 #RUN
 def analyze(df,save=False):
+  '''
   #LOG DATA COLLECTION
   #Generate all possible models
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
@@ -636,12 +640,18 @@ def analyze(df,save=False):
   df1.to_pickle('analysis/oneparm_log.pickle')
   df2.to_pickle('analysis/ed_log.pickle')
   df3.to_pickle('analysis/av_ed_log.pickle')
+  '''
+
+  sns.pairplot(df,vars=['mo_t_dz','mo_t_sz','mo_n_4s','mo_n_2pz'],hue='Sz')
+  plt.show()
+  exit(0)
 
   #LOG PLOTTING
   #plot_oneparm_valid_log(save=False)
   #plot_Xerr(df)
+  plot_regr_log(save=False)
   #plot_ed_log(df,save=True) 
-  #exit(0)
+  exit(0)
   
   '''
   beta=2.0
