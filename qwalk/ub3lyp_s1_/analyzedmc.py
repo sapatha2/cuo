@@ -451,8 +451,8 @@ def plot_ed_log(full_df,save=False):
   #COMBINED
   norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
   #FULL EIGENPROPERTIES and EIGENVALUES
-  markers=['o','','s','','','','','','^']
-  for model in [0,2,8]: #np.arange(16):
+  markers=['o','','s','<','','','','','^','','','','','','>']
+  for model in [0,2,3,8,14]: #np.arange(16):
     for beta in [2.0]:#np.arange(3.75,-0.25,-0.25):
       rgba_color = cm.Blues(norm(3.75-beta))
       rgba_color2 = cm.Oranges(norm(3.75-beta))
