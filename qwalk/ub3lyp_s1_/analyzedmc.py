@@ -22,7 +22,7 @@ from functools import reduce
 from matplotlib import cm
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-
+from scipy.optimize import linear_sum_assignment
 ######################################################################################
 #FROZEN METHODS
 #Collect df
@@ -264,11 +264,11 @@ def ed_log(model,exp_parms_list):
     
     norb=9
     nelec=(8,7)
-    nroots=40
+    nroots=25
     res1=ED(params,nroots,norb,nelec)
 
     nelec=(9,6)
-    nroots=40
+    nroots=15
     res3=ED(params,nroots,norb,nelec)
   
     E = res1[0]
@@ -300,10 +300,20 @@ def ed_log(model,exp_parms_list):
     'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz,'iao_Us':res3[4],'iao_Jsd':res3[5]})),axis=0)
 
     d['energy']-=min(d['energy'])
-    d['eig']=np.arange(d.shape[0])
 
-    if(full_df is None): full_df = d
-    else: full_df = pd.concat((full_df,d),axis=0)
+    if(full_df is None): 
+      d['eig'] = np.arange(d.shape[0])
+      full_df = d
+    else: 
+      cost = np.zeros((d.shape[0],d.shape[0]))
+      for i in range(d.shape[0]):
+        for j in range(d.shape[0]):
+          c = (full_df.drop(columns=['eig']).iloc[i] - d.iloc[j])**2
+          cost[i,j]=c.sum() 
+      
+      row_ind, col_ind = linear_sum_assignment(cost)
+      d['eig'] = col_ind
+      full_df = pd.concat((full_df,d),axis=0)
   return full_df
 
 #CIs and means for ED
@@ -603,7 +613,6 @@ def plot_Xerr(df,save=True):
 ######################################################################################
 #RUN
 def analyze(df,save=False):
-  '''
   #LOG DATA COLLECTION
   #Generate all possible models
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
@@ -625,8 +634,8 @@ def analyze(df,save=False):
   df1.to_pickle('analysis/oneparm_log.pickle')
   df2.to_pickle('analysis/ed_log.pickle')
   df3.to_pickle('analysis/av_ed_log.pickle')
-  '''
 
+  '''
   #LOG PLOTTING
   #plot_oneparm_valid_log(save=False)
   #plot_Xerr(df)
@@ -640,7 +649,7 @@ def analyze(df,save=False):
   X=sm.add_constant(X)
   X['weights']=weights
   plot_fit_log(X,save=True,fname='analysis/regr_log')
-
+  '''
 if __name__=='__main__':
   #DATA COLLECTION
   #df=collect_df()
