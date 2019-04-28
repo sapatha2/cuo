@@ -1,0 +1,35 @@
+import pandas as pd
+import numpy as np 
+import matplotlib.pyplot as plt 
+from sklearn.feature_selection import RFE
+import statsmodels.api as sm 
+from sklearn.linear_model import * #LinearRegression, _rescale_data
+######################################################################################
+#RUN
+def analyze(df,save=False):
+ 
+  #BIGGEST MODEL
+  beta=2.0
+  y=df['energy']
+  X=df[['mo_n_3d','mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz','Jsd','Us']]
+  X=sm.add_constant(X)
+  sample_weight = np.exp(-beta*(y - min(y)))
+  
+  reg=LinearRegression()
+  for n in np.arange(len(list(X)),0,-1):
+    print('N Parameters: '+str(n))
+    selector=RFE(reg,n_features_to_select=n,step=1)
+    selector=selector.fit(X,y)
+    print(selector.ranking_)
+    print(np.array(list(X))[selector.support_])
+
+if __name__=='__main__':
+  #DATA COLLECTION
+  #df=collect_df()
+  #df=format_df(df)
+  #df.to_pickle('formatted_gosling.pickle')
+  #exit(0)
+
+  #DATA ANALYSIS
+  df=pd.read_pickle('formatted_gosling.pickle')
+  analyze(df)
