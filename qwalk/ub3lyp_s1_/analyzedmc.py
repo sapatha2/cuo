@@ -358,7 +358,7 @@ def sort_eigs(eig_df):
 def plot_regr_log(save=False):
   full_df=pd.read_pickle('analysis/regr_log.pickle')
 
-  for model in [0,2,3,8,14]:
+  for model in [0]:
     print(full_df[(full_df['model']==model)*(full_df['beta']==2.0)].iloc[0])
   exit(0)
 
@@ -563,15 +563,15 @@ def plot_fit_log(X,save=True,fname=None):
   else: plt.show()
   plt.close()  
 
-def calc_density(df,dE):
+def calc_density(df):
   density=np.zeros(df.shape[0])
-  dE = 0.1 #eV
+  #dE = 0.1 #eV
+  dE = np.mean(df['energy_err'])
   for p in range(df.shape[0]):
     density[p] = np.sum((df['energy']<(df['energy'].iloc[p] + dE))&(df['energy']>(df['energy'].iloc[p] - dE)))
   df['density']=density
 
   return df
-
 
 def plot_noiser2(save=False):
   ed_df=pd.read_pickle('analysis/av_ed_log.pickle')
@@ -588,7 +588,7 @@ def plot_noiser2(save=False):
   for beta in np.arange(0,3.75,0.25):
     for model in range(32):
       a=ed_df[(ed_df['beta']==beta)&(ed_df['model']==model)]
-      a=calc_density(a,dE=0.1)
+      a=calc_density(a)
       b=r2_df[(r2_df['beta']==beta)&(r2_df['model']==model)]
       betas.append(beta)
       models.append(model)
@@ -695,12 +695,13 @@ def analyze(df,save=False):
   #av_df = av_ed_log(pd.read_pickle('analysis/ed_log.pickle'))
   #av_df.to_pickle('analysis/av_ed_log.pickle')
   #plot_ed_log(df,save=True)
-  #plot_noiser2(save=True)
+  plot_noiser2(save=True)
+  #plot_regr_log()
 
   ed_df=pd.read_pickle('analysis/av_ed_log.pickle')
   for spin in [0.5,1.5]:
     a=ed_df[(ed_df['beta']==2.0)&(ed_df['model']==0)&(ed_df['Sz']==spin)]
-    a=calc_density(a,dE=0.1)
+    a=calc_density(a)
     plt.errorbar(a['energy'],a['density'],xerr=a['energy_err'],fmt='o-',label=str(spin))
   plt.xlabel('Eigenvalue')
   plt.ylabel('N states')
