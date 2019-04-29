@@ -306,51 +306,51 @@ def ed_log(model,exp_parms_list):
     d['energy']-=min(d['energy'])
     d['index']=np.arange(d.shape[0])
 
-    if(full_df is None): 
-      d['eig'] = np.arange(d.shape[0])
-      full_df = d
-    else: 
-      #Separate by spin or else they'll mix
-      d['eig']=-1
-      add=0
-      for Sz in [0.5,1.5]:
-        s=d[d['Sz']==Sz].drop(columns=['eig','Sz']).values[:,:]
-        o=full_df[full_df['Sz']==Sz].drop(columns=['eig','Sz']).values[:s.shape[0],:]
-        o=preprocessing.scale(o) #Scaled unit variance and zero mean, normalized vector space
-        s=preprocessing.scale(s)
-  
-        cost = scipy.spatial.distance.cdist(o,s)
-        assert(cost.shape[0]==s.shape[0])
-        assert(cost.shape[1]==s.shape[0])
-        row_ind, col_ind = linear_sum_assignment(cost)
-        
-        d['eig'][d['Sz']==Sz] = col_ind + add
-        add += s.shape[0]
-      full_df = pd.concat((full_df,d),axis=0)
+    if(full_df is None): full_df = d
+    else: full_df = pd.concat((full_df,d),axis=0)
   return full_df
 
 #CIs and means for ED
-def av_ed_log(eig_df):
+def av_ed_log(eig_df,has_eig=False):
   av_df = None
-  eig_df['index']=eig_df.index.values
-
-  for model in range(16):
+  if(not has_eig): eig_df['eig']=eig_df['index']
+  for model in range(32):
     for beta in np.arange(0,3.75,0.25):
-      for Sz in [0.5,1.5]:
-        for eig in range(max(eig_df[eig_df['Sz']==Sz]['index'])):
-          sub_df = eig_df[(eig_df['Sz']==Sz)*(eig_df['model']==model)*(eig_df['index']==eig)*(eig_df['beta']==beta)]
-          data = sub_df.values
-          means = np.mean(data,axis=0)
-          u = np.percentile(data,97.5,axis=0)
-          l = np.percentile(data,2.5,axis=0)
-          err = (u - l)/2
+      for eig in range(max(eig_df['eig'])):
+        sub_df = eig_df[(eig_df['model']==model) & (eig_df['eig']==eig) & (eig_df['beta']==beta)]
+        data = sub_df.values
+        means = np.mean(data,axis=0)
+        u = np.percentile(data,97.5,axis=0)
+        l = np.percentile(data,2.5,axis=0)
+        err = (u - l)/2
 
-          d=pd.DataFrame(data=np.array(list(means) + list(err))[:,np.newaxis].T,
-          columns=list(sub_df) + [x+'_err' for x in list(sub_df)])
-    
-          if(av_df is None): av_df = d
-          else: av_df = pd.concat((av_df,d),axis=0)
+        d=pd.DataFrame(data=np.array(list(means) + list(err))[:,np.newaxis].T,
+        columns=list(sub_df) + [x+'_err' for x in list(sub_df)])
+  
+        if(av_df is None): av_df = d
+        else: av_df = pd.concat((av_df,d),axis=0)
   return av_df
+
+def sort_eigs(eig_df):
+  '''
+  #Separate by spin or else they'll mix
+  d['eig']=-1
+  add=0
+  for Sz in [0.5,1.5]:
+    s=d[d['Sz']==Sz].drop(columns=['eig','Sz']).values[:,:]
+    o=full_df[full_df['Sz']==Sz].drop(columns=['eig','Sz']).values[:s.shape[0],:]
+    o=preprocessing.scale(o) #Scaled unit variance and zero mean, normalized vector space
+    s=preprocessing.scale(s)
+
+    cost = scipy.spatial.distance.cdist(o,s)
+    assert(cost.shape[0]==s.shape[0])
+    assert(cost.shape[1]==s.shape[0])
+    row_ind, col_ind = linear_sum_assignment(cost)
+    
+    d['eig'][d['Sz']==Sz] = col_ind + add
+    add += s.shape[0]
+  '''
+  return eig_df
 
 ######################################################################################
 #LOG METHODS (PLOTS) 
@@ -378,9 +378,9 @@ def plot_regr_log(save=False):
 
 #Plot single parameter goodness of fit 
 def plot_oneparm_valid_log(save=False):
-  full_df=pd.read_pickle('analysis/oneparm_log_noJ.pickle')
+  full_df=pd.read_pickle('analysis/oneparm_log.pickle')
   model=[]
-  for i in range(16):
+  for i in range(32):
     model+=list(np.linspace(i,i+0.75,15))
   full_df['model']=model
  
@@ -418,14 +418,14 @@ def plot_oneparm_valid_log(save=False):
 
 #Plot eigenvalues and eigenproperties
 def plot_ed_log(full_df,save=False):
-  av_df=pd.read_pickle('analysis/av_ed_log_noJ.pickle')
+  av_df=pd.read_pickle('analysis/av_ed_log.pickle')
   g = sns.FacetGrid(av_df,col='model',col_wrap=4,hue='Sz')
   #print(av_df)
   #exit(0)
 
   norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
   #FULL EIGENPROPERTIES and EIGENVALUES
-  for model in np.arange(16): #[0,2,3,8,14]: #np.arange(16):
+  for model in np.arange(32): #[0,2,3,8,14]: #np.arange(16):
     for beta in [2.0]:#np.arange(3.75,-0.25,-0.25):
       rgba_color = cm.Blues(norm(3.75-beta))
       rgba_color2 = cm.Oranges(norm(3.75-beta))
@@ -454,14 +454,14 @@ def plot_ed_log(full_df,save=False):
           yerr = f_df['energy_err'].values
           plt.errorbar(x,y,yerr,fmt='.',c=rgba_color2,alpha=0.2)
 
-        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==0.5)]
+        sub_df = av_df[(av_df['model']==model)&(av_df['beta']==beta)&(av_df['Sz']==0.5)]
         x=sub_df[parm].values
         xerr=sub_df[parm+'_err'].values
         y=sub_df['energy'].values
         yerr=sub_df['energy_err'].values
         plt.errorbar(x,y,xerr=xerr,yerr=yerr,markeredgecolor='k',fmt='o',c=rgba_color)
        
-        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==1.5)]
+        sub_df = av_df[(av_df['model']==model)&(av_df['beta']==beta)&(av_df['Sz']==1.5)]
         x=sub_df[parm].values
         xerr=sub_df[parm+'_err'].values
         y=sub_df['energy'].values
@@ -471,7 +471,7 @@ def plot_ed_log(full_df,save=False):
         plt.ylim((-0.2,4.5))
         plt.xlabel(parm)
         plt.ylabel('energy (eV)')
-    if(save): plt.savefig('analysis/ed_'+str(model)+'_log_noJ.pdf',bbox_inches='tight')
+    if(save): plt.savefig('analysis/ed_'+str(model)+'_log.pdf',bbox_inches='tight')
     else: plt.show()
     plt.clf()
   '''
@@ -563,9 +563,19 @@ def plot_fit_log(X,save=True,fname=None):
   else: plt.show()
   plt.close()  
 
+def calc_density(df,dE):
+  density=np.zeros(df.shape[0])
+  dE = 0.1 #eV
+  for p in range(df.shape[0]):
+    density[p] = np.sum((df['energy']<(df['energy'].iloc[p] + dE))&(df['energy']>(df['energy'].iloc[p] - dE)))
+  df['density']=density
+
+  return df
+
+
 def plot_noiser2(save=False):
-  ed_df=pd.read_pickle('analysis/av_ed_log_noJ.pickle')
-  r2_df=pd.read_pickle('analysis/oneparm_log_noJ.pickle')
+  ed_df=pd.read_pickle('analysis/av_ed_log.pickle')
+  r2_df=pd.read_pickle('analysis/oneparm_log.pickle')
 
   betas=[]
   models=[]
@@ -576,55 +586,52 @@ def plot_noiser2(save=False):
   rmsebars=[]
   rmsebar_errs=[]
   for beta in np.arange(0,3.75,0.25):
-    for model in range(16):
-      a=ed_df[(ed_df['beta']==beta)*(ed_df['model']==model)]
-      b=r2_df[(r2_df['beta']==beta)*(r2_df['model']==model)]
+    for model in range(32):
+      a=ed_df[(ed_df['beta']==beta)&(ed_df['model']==model)]
+      a=calc_density(a,dE=0.1)
+      b=r2_df[(r2_df['beta']==beta)&(r2_df['model']==model)]
       betas.append(beta)
       models.append(model)
       r2s.append(b['R2cv_mu_test'])
       r2_errs.append(b['R2cv_std_test'])
       rmsebars.append(b['RMSEbarcv_mu_test'])
       rmsebar_errs.append(b['RMSEbarcv_std_test'])
-      e_errs.append(np.sum(a['energy_err'].values))
+      e_errs.append(np.sum(a['energy_err'].values/a['density'].values))
       p_err=0
       for col in ['iao_n_3d', 'iao_n_2pz', 'iao_n_2ppi', 'iao_n_4s',
       'iao_t_pi', 'iao_t_ds', 'iao_t_dz', 'iao_t_sz', 'iao_Us', 'iao_Jsd']:
-        p_err += np.sum(a[col+'_err'].values)
+        p_err += np.sum(a[col+'_err'].values/a['density'].values)
       p_errs.append(p_err)
 
   ret_df = pd.DataFrame(columns=['beta','model','R2cv_mu_test','R2cv_std_test','RMSEbarcv_mu_test','RMSEbarcv_std_test',
   'e_err','p_err'],
   data=np.array([betas,models,r2s,r2_errs,rmsebars,rmsebar_errs,e_errs,p_errs]).T)
 
-  markers=['.','o','v','^','<','>','8','s','P','p','h','H','*','X','D','d']
-  for error in ['e_err','p_err']:
-    gs = mpl.gridspec.GridSpec(1, 2,width_ratios=[15,1])
-    ax1 = plt.subplot(gs[0])
-    ax2 = plt.subplot(gs[1])
-    norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
-    
-    for beta in [2.0]:
-      #cmap = cm.nipy_spectral
-      for model in range(16):
-        pdf=ret_df[(ret_df['model']==model)*(ret_df['beta']==beta)]
-        ax1.errorbar(pdf[error].values,pdf['R2cv_mu_test'].values,pdf['R2cv_std_test'].values,c='k',marker=markers[model],
-        label='model '+str(model))#cmap(norm(beta)),marker=markers[model],label='model '+str(model))
-        
-        #ax1.errorbar(pdf[error].values,pdf['RMSbarcv_mu_test'].values,pdf['RMSEbarcv_std_test'].values,c='k',marker=markers[model],
-        #label='model '+str(model))#cmap(norm(beta)),marker=markers[model],label='model '+str(model))
-    '''
-    for model in np.arange(16):
-      pdf=ret_df[(ret_df['model']==model)]
-      ax1.plot(pdf[error].values,pdf['RMSEbarcv_mu_test'].values,c='gray',ls='--')
-    '''
+  markers=['.','o','v','^','<','>','8','s','P','p','h','H','*','X','D','d']*2
+  gs = mpl.gridspec.GridSpec(1, 1)
+  ax1 = plt.subplot(gs[0])
+  for beta in [2.0]:
+    for model in range(32):
+      pdf=ret_df[(ret_df['model']==model)&(ret_df['beta']==beta)]
+      if(model < 16):
+        ax1.errorbar(pdf['e_err'].values,pdf['p_err'].values,c='k',marker=markers[model],
+        label='model '+str(model))
+      else: 
+        ax1.errorbar(pdf['e_err'].values,pdf['p_err'].values,c='r',marker=markers[model],
+        label='model '+str(model))
+  '''
+  for model in np.arange(16):
+    pdf=ret_df[(ret_df['model']==model)]
+    ax1.plot(pdf[error].values,pdf['RMSEbarcv_mu_test'].values,c='gray',ls='--')
+  '''
 
-    #cb1 = mpl.colorbar.ColorbarBase(ax2,cmap=cmap, norm=norm,orientation='vertical')
-    ax1.legend(loc='best')
-    ax1.set_xlabel(error)
-    ax1.set_ylabel('5-fold CV RMSE bar')
-    if(save): plt.savefig('analysis/rmsebarvs'+error+'.pdf',bbox_inches='tight')
-    else: plt.show()
-    plt.clf()
+  #cb1 = mpl.colorbar.ColorbarBase(ax2,cmap=cmap, norm=norm,orientation='vertical')
+  ax1.legend(loc='best')
+  ax1.set_xlabel('e_err')
+  ax1.set_ylabel('p_err')
+  if(save): plt.savefig('analysis/evsp_err.pdf',bbox_inches='tight')
+  else: plt.show()
+  plt.clf()
 
 def plot_Xerr(df,save=True):
   ed_df=pd.read_pickle('analysis/av_ed_log.pickle')
@@ -662,6 +669,7 @@ def plot_Xerr(df,save=True):
 def analyze(df,save=False):
   #LOG DATA COLLECTION
   #Generate all possible models
+  '''
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Us']]
   hopping=df[['Jsd','mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
   y=df['energy']
@@ -682,12 +690,64 @@ def analyze(df,save=False):
   df2.to_pickle('analysis/ed_log.pickle')
   #df3.to_pickle('analysis/av_ed_log.pickle')
   exit(0)
+  '''
+ 
+  #av_df = av_ed_log(pd.read_pickle('analysis/ed_log.pickle'))
+  #av_df.to_pickle('analysis/av_ed_log.pickle')
+  #plot_ed_log(df,save=True)
+  #plot_noiser2(save=True)
+
+  ed_df=pd.read_pickle('analysis/av_ed_log.pickle')
+  for spin in [0.5,1.5]:
+    a=ed_df[(ed_df['beta']==2.0)&(ed_df['model']==0)&(ed_df['Sz']==spin)]
+    a=calc_density(a,dE=0.1)
+    plt.errorbar(a['energy'],a['density'],xerr=a['energy_err'],fmt='o-',label=str(spin))
+  plt.xlabel('Eigenvalue')
+  plt.ylabel('N states')
+  plt.show()
+  exit(0)
+
+
+  '''
+  av_df = pd.read_pickle('analysis/ed_log.pickle')
+  df0 = pd.read_pickle('analysis/regr_log.pickle')
+
+  #COMBINED
+  norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
+  #FULL EIGENPROPERTIES and EIGENVALUES
+  for model in np.arange(32):
+    print(df0[df0['model']==model].iloc[0])
+    for beta in [2.0]:
+      rgba_color = cm.Blues(norm(3.75-beta))
+      rgba_color2 = cm.Oranges(norm(3.75-beta))
+      z=0
+      for parm in ['iao_n_3d','iao_n_2pz','iao_n_2ppi','iao_n_4s',
+      'iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','iao_Jsd','iao_Us']:
+        z+=1
+        plt.subplot(2,5,0+z)
+
+        sub_df = av_df[(av_df['model']==model)&(av_df['beta']==beta)&(av_df['Sz']==0.5)]
+        x=sub_df[parm].values
+        y=sub_df['energy'].values
+        plt.errorbar(x,y,markeredgecolor='k',fmt='o',c=rgba_color)
+       
+        sub_df = av_df[(av_df['model']==model)&(av_df['beta']==beta)&(av_df['Sz']==1.5)]
+        x=sub_df[parm].values
+        y=sub_df['energy'].values
+        plt.errorbar(x,y,markeredgecolor='k',fmt='o',c=rgba_color2)
+       
+        plt.ylim((-0.2,4.5))
+        plt.xlabel(parm)
+        plt.ylabel('energy (eV)')
+    plt.show()
+    plt.clf()
+  '''
 
   #df = pd.read_pickle('analysis/ed_log.pickle')
   #df=pd.read_pickle('analysis/av_ed_log.pickle')
   #print(df)
   #exit(0)
-
+  
   #av_ed_log(pd.read_pickle('analysis/ed_log.pickle')).to_pickle('analysis/av_ed_log.pickle')
   #plot_noiser2(save=False)
 
