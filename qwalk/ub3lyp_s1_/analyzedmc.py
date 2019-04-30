@@ -691,7 +691,8 @@ def analyze(df,save=False):
   #df3.to_pickle('analysis/av_ed_log.pickle')
   exit(0)
   '''
- 
+
+  '''
   #av_df = av_ed_log(pd.read_pickle('analysis/ed_log.pickle'))
   #av_df.to_pickle('analysis/av_ed_log.pickle')
   #plot_ed_log(df,save=True)
@@ -707,65 +708,16 @@ def analyze(df,save=False):
   plt.ylabel('N states')
   plt.show()
   exit(0)
-
-
-  '''
-  av_df = pd.read_pickle('analysis/ed_log.pickle')
-  df0 = pd.read_pickle('analysis/regr_log.pickle')
-
-  #COMBINED
-  norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
-  #FULL EIGENPROPERTIES and EIGENVALUES
-  for model in np.arange(32):
-    print(df0[df0['model']==model].iloc[0])
-    for beta in [2.0]:
-      rgba_color = cm.Blues(norm(3.75-beta))
-      rgba_color2 = cm.Oranges(norm(3.75-beta))
-      z=0
-      for parm in ['iao_n_3d','iao_n_2pz','iao_n_2ppi','iao_n_4s',
-      'iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','iao_Jsd','iao_Us']:
-        z+=1
-        plt.subplot(2,5,0+z)
-
-        sub_df = av_df[(av_df['model']==model)&(av_df['beta']==beta)&(av_df['Sz']==0.5)]
-        x=sub_df[parm].values
-        y=sub_df['energy'].values
-        plt.errorbar(x,y,markeredgecolor='k',fmt='o',c=rgba_color)
-       
-        sub_df = av_df[(av_df['model']==model)&(av_df['beta']==beta)&(av_df['Sz']==1.5)]
-        x=sub_df[parm].values
-        y=sub_df['energy'].values
-        plt.errorbar(x,y,markeredgecolor='k',fmt='o',c=rgba_color2)
-       
-        plt.ylim((-0.2,4.5))
-        plt.xlabel(parm)
-        plt.ylabel('energy (eV)')
-    plt.show()
-    plt.clf()
   '''
 
-  #df = pd.read_pickle('analysis/ed_log.pickle')
-  #df=pd.read_pickle('analysis/av_ed_log.pickle')
-  #print(df)
-  #exit(0)
-  
-  #av_ed_log(pd.read_pickle('analysis/ed_log.pickle')).to_pickle('analysis/av_ed_log.pickle')
-  #plot_noiser2(save=False)
-
-  #LOG PLOTTING
-  #plot_oneparm_valid_log(save=False)
-  #plot_Xerr(df)
-  #plot_regr_log(save=False)
-  #plot_ed_log(df,save=True) 
-  '''
   beta=2.0
-  model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']
+  model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','Us']
   weights=np.exp(-beta*(df['energy']-min(df['energy'])))
   X=df[model+['energy','energy_err']+['Sz','basestate']]
   X=sm.add_constant(X)
   X['weights']=weights
   plot_fit_log(X,save=True,fname='analysis/regr_log')
-  '''
+
 if __name__=='__main__':
   #DATA COLLECTION
   #df=collect_df()
@@ -776,3 +728,15 @@ if __name__=='__main__':
   #DATA ANALYSIS
   df=pd.read_pickle('formatted_gosling.pickle')
   analyze(df)
+
+  '''
+  df2=pd.read_pickle('analysis/ed_log.pickle')
+  bs_index = []
+  for i in range(100): 
+    bs_index += [i]*40 
+  bs_index*=15*32
+  print(len(bs_index))
+  df2['bs_index'] = bs_index
+  print(df2)
+  df2.to_csv('analysis/ed_log.csv')
+  '''
