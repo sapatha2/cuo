@@ -176,7 +176,7 @@ def main_log(df,model_list,betas=np.arange(0,3.75,0.25)):
 #Log cost function regression
 def regr_log(X,model):
   print("REGR LOG ~~~~~~~~~~~~~~~~~")
-  exp_parms_list, yhat, yerr_u, yerr_l = log_fit_bootstrap(X,n=100)
+  exp_parms_list, yhat, yerr_u, yerr_l = log_fit_bootstrap(X,n=50)
 
   param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz',
   'mo_t_ds','mo_t_sz','Jsd','Us']
@@ -219,7 +219,7 @@ def oneparm_valid_log(X,ncv,model):
   evals=[]
   for train_index,test_index in kf.split(X):
     X_train,X_test=X.iloc[train_index],X.iloc[test_index]
-    exp_parms, yhat, yerr_u, yerr_l = log_fit_bootstrap(X_train,n=100)
+    exp_parms, yhat, yerr_u, yerr_l = log_fit_bootstrap(X_train,n=50)
     exp_parms = np.mean(exp_parms,axis=0)
 
     y_train = X_train['energy']
@@ -257,7 +257,9 @@ def oneparm_valid_log(X,ncv,model):
 def ed_log(model,exp_parms_list):
   print("ED LOG ~~~~~~~~~~~~~~~~~")
   full_df=None
+  zz=-1
   for exp_parms in exp_parms_list:
+    zz+=1
     #Figure out which parameters are in my list
     param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz',
     'mo_t_ds','mo_t_sz','Jsd','Us']
@@ -268,15 +270,16 @@ def ed_log(model,exp_parms_list):
     
     norb=9
     nelec=(8,7)
-    nroots=25
+    nroots=30
     res1=ED(params,nroots,norb,nelec)
 
     nelec=(9,6)
-    nroots=15
+    nroots=30
     res3=ED(params,nroots,norb,nelec)
   
     E = res1[0]
     Sz = np.ones(len(E))*0.5
+    '''
     dm = res1[2] + res1[3]
     n_3d = dm[:,0,0]+dm[:,1,1]+dm[:,2,2]+dm[:,3,3]+dm[:,6,6]
     n_2ppi = dm[:,4,4]+dm[:,5,5]
@@ -288,9 +291,15 @@ def ed_log(model,exp_parms_list):
     t_sz = 2*dm[:,7,8]
     d = pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3d':n_3d,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s,
     'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz,'iao_Us':res1[4],'iao_Jsd':res1[5]})
-
+    '''
+    d = pd.DataFrame({'energy':E,'Sz':Sz})
+    ci=np.array(res1[1])
+    ci=np.reshape(ci,(ci.shape[0],ci.shape[1]*ci.shape[2]))
+    d['ci']=list(ci)
+  
     E = res3[0]
     Sz = np.ones(len(E))*1.5
+    '''
     dm = res3[2] + res3[3]
     n_3d = dm[:,0,0]+dm[:,1,1]+dm[:,2,2]+dm[:,3,3]+dm[:,6,6]
     n_2ppi = dm[:,4,4]+dm[:,5,5]
@@ -300,16 +309,34 @@ def ed_log(model,exp_parms_list):
     t_ds = 2*dm[:,6,8]
     t_dz = 2*dm[:,6,7]
     t_sz = 2*dm[:,7,8]
-    d = pd.concat((d,pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3d':n_3d,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s,
-    'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz,'iao_Us':res3[4],'iao_Jsd':res3[5]})),axis=0)
+    d2 =pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3d':n_3d,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s,
+    'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz,'iao_Us':res3[4],'iao_Jsd':res3[5]})
+    '''
+    d2 = pd.DataFrame({'energy':E,'Sz':Sz})
+    ci=np.array(res3[1])
+    ci=np.reshape(ci,(ci.shape[0],ci.shape[1]*ci.shape[2]))
+    d2['ci']=list(ci)
 
+    d=pd.concat((d,d2),axis=0)
     d['energy']-=min(d['energy'])
-    d['index']=np.arange(d.shape[0])
+    d['bs_index']=zz
 
     if(full_df is None): full_df = d
     else: full_df = pd.concat((full_df,d),axis=0)
   return full_df
 
+
+
+
+
+
+
+
+
+
+
+######################################################################################
+#LOG METHODS
 #CIs and means for ED
 def av_ed_log(eig_df,has_eig=False):
   av_df = None
@@ -358,9 +385,16 @@ def sort_eigs(eig_df):
 def plot_regr_log(save=False):
   full_df=pd.read_pickle('analysis/regr_log.pickle')
 
-  for model in [0]:
-    print(full_df[(full_df['model']==model)*(full_df['beta']==2.0)].iloc[0])
+  for model in [0,1,4,8,3,7]:
+    s = full_df[full_df['model']==model]
+    print(s.iloc[0])
+  #s = full_df[full_df['mo_t_pi']!=0]
+  #print(set(s['model']))
   exit(0)
+
+  #for model in [0]:
+  #  print(full_df[(full_df['model']==model)*(full_df['beta']==2.0)].iloc[0])
+  #exit(0)
 
   model=[]
   for i in range(16):
@@ -383,7 +417,8 @@ def plot_oneparm_valid_log(save=False):
   for i in range(32):
     model+=list(np.linspace(i,i+0.75,15))
   full_df['model']=model
- 
+
+  '''
   g = sns.FacetGrid(full_df,hue='beta')
   g.map(plt.errorbar, "model", "R2cv_mu_train", "R2cv_std_train",fmt='.').add_legend()
   plt.xlabel('Model, eV')
@@ -415,13 +450,70 @@ def plot_oneparm_valid_log(save=False):
   if(save): plt.savefig('analysis/oneparm_test_rmse.pdf',bbox_inches='tight')
   else: plt.show()
   plt.close()
+  '''
+  
+  tpi=[3, 7, 10, 13, 14, 16, 19, 20, 22, 23, 25, 26, 27, 29, 30, 31]
+  pi=[]
+  for i in range(32): 
+    if(i in tpi): pi+=[1]*15
+    else: pi+=[0]*15
+  full_df['pi']=pi
+  g = sns.FacetGrid(full_df,hue='pi')
+  g.map(plt.errorbar, "model", "R2cv_mu_test", "R2cv_std_test",fmt='.').add_legend()
+  plt.xlabel('Model, eV')
+  plt.ylabel('R2cv_test, eV')
+  if(save): plt.savefig('analysis/oneparm_test_r2.pdf',bbox_inches='tight')
+  else: plt.show()
+  plt.close()
 
 #Plot eigenvalues and eigenproperties
 def plot_ed_log(full_df,save=False):
   av_df=pd.read_pickle('analysis/av_ed_log.pickle')
-  g = sns.FacetGrid(av_df,col='model',col_wrap=4,hue='Sz')
+  #g = sns.FacetGrid(av_df,col='model',col_wrap=4,hue='Sz')
   #print(av_df)
   #exit(0)
+  zz=0
+  tpi=[3, 7, 10, 13, 14, 16, 19, 20, 22, 23, 25, 26, 27, 29, 30, 31]
+  beta=2.0
+ 
+  '''
+  errs=[]
+  for model in np.arange(32):
+      sub_df = av_df[(av_df['model']==model)&(av_df['beta']==beta)]
+      sub_df = sub_df.sort_values(by=['energy'])
+      sub_df = calc_density(sub_df)
+      err = np.sum(sub_df['energy_err'])
+      errs.append(err)
+  ind=np.argsort(errs)
+  plt.plot(np.array(errs)[ind],'bo')
+  plt.xticks(np.arange(len(errs)),ind)
+  plt.show()
+  exit(0)
+  '''
+
+  c={0.5:'b',1.5:'r'}
+  zz=0
+  for model in [0,1,3,4,7,8]:
+    zz+=1
+    plt.subplot(2,3,zz)
+    sub_df = av_df[(av_df['model']==model)&(av_df['beta']==beta)]
+    sub_df = sub_df.sort_values(by=['energy'])
+    sub_df = calc_density(sub_df,dE=1e-3)
+
+
+    if(model in tpi): 
+      for spin in [0.5,1.5]:
+        plt.errorbar(np.arange(sub_df[sub_df['Sz']==spin].shape[0]),sub_df[sub_df['Sz']==spin]['energy'],sub_df[sub_df['Sz']==spin]['energy_err'],fmt='^'+c[spin])
+      #plt.errorbar(sub_df['density'],sub_df['energy'],sub_df['energy_err'],fmt='o--')
+      #plt.errorbar(sub_df['density'],sub_df['energy'],sub_df['energy_err'],fmt='o--')
+      plt.ylim((0,4))
+    else: 
+      for spin in [0.5,1.5]:
+        plt.errorbar(np.arange(sub_df[sub_df['Sz']==spin].shape[0]),sub_df[sub_df['Sz']==spin]['energy'],sub_df[sub_df['Sz']==spin]['energy_err'],fmt='.'+c[spin])
+      #plt.errorbar(sub_df['density'],sub_df['energy'],sub_df['energy_err'],fmt='o--')
+      plt.ylim((0,4))
+  plt.show()
+  exit(0)
 
   norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
   #FULL EIGENPROPERTIES and EIGENVALUES
@@ -563,10 +655,10 @@ def plot_fit_log(X,save=True,fname=None):
   else: plt.show()
   plt.close()  
 
-def calc_density(df):
+def calc_density(df,dE):
   density=np.zeros(df.shape[0])
   #dE = 0.1 #eV
-  dE = np.mean(df['energy_err'])
+  #dE = np.mean(df['energy_err'])
   for p in range(df.shape[0]):
     density[p] = np.sum((df['energy']<(df['energy'].iloc[p] + dE))&(df['energy']>(df['energy'].iloc[p] - dE)))
   df['density']=density
@@ -664,12 +756,32 @@ def plot_Xerr(df,save=True):
     z+=1
   plt.show()
 
+def compare_spectrum():
+  beta = 2.0
+  bs_index = []
+  for i in range(100): 
+    bs_index += [i]*40 
+  bs_index*=15*32
+  
+  df = pd.read_pickle('analysis/ed_log.pickle')
+  df['bs_index'] = bs_index
+  df=df[df['beta']==beta]
+  models = [0,1,3,4,7,8]
+  z=(df['model']==0)
+  for i in models:
+    z+=(df['model']==i)
+  df=df[z]
+  
+  g=sns.FacetGrid(df, col='model', col_wrap = 3, hue='Sz')
+  g=g.map(plt.errorbar,"index","energy",fmt='.')
+  plt.show()
+
 ######################################################################################
 #RUN
 def analyze(df,save=False):
   #LOG DATA COLLECTION
-  #Generate all possible models
   '''
+  #Generate all possible models
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Us']]
   hopping=df[['Jsd','mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
   y=df['energy']
@@ -680,44 +792,36 @@ def analyze(df,save=False):
     model_list+=[list(X)+list(m) for m in models]
   print(len(model_list))
 
-  df0,df1,df2=main_log(df,model_list)
-  #df3=av_ed_log(df2)
-  print(df0)
-  print(df1)
+  df0,df1,df2=main_log(df,model_list,betas=[2.0])
+  #print(df0)
+  #print(df1)
   print(df2)
-  df0.to_pickle('analysis/regr_log.pickle')
-  df1.to_pickle('analysis/oneparm_log.pickle')
+  #df0.to_pickle('analysis/regr_log.pickle')
+  #df1.to_pickle('analysis/oneparm_log.pickle')
   df2.to_pickle('analysis/ed_log.pickle')
-  #df3.to_pickle('analysis/av_ed_log.pickle')
   exit(0)
   '''
 
-  '''
-  #av_df = av_ed_log(pd.read_pickle('analysis/ed_log.pickle'))
-  #av_df.to_pickle('analysis/av_ed_log.pickle')
-  #plot_ed_log(df,save=True)
-  plot_noiser2(save=True)
-  #plot_regr_log()
+  df2 = pd.read_pickle('analysis/ed_log.pickle')
+  df2 = df2[(df2['model']==0)&(df2['beta']==2.0)]
 
-  ed_df=pd.read_pickle('analysis/av_ed_log.pickle')
-  for spin in [0.5,1.5]:
-    a=ed_df[(ed_df['beta']==2.0)&(ed_df['model']==0)&(ed_df['Sz']==spin)]
-    a=calc_density(a)
-    plt.errorbar(a['energy'],a['density'],xerr=a['energy_err'],fmt='o-',label=str(spin))
-  plt.xlabel('Eigenvalue')
-  plt.ylabel('N states')
-  plt.show()
-  exit(0)
-  '''
+  m = {0.5:18, 1.5:13}
+  for j in range(2,max(df2['bs_index'])):
+    for Sz in [0.5,1.5]:
+      a = df2[(df2['bs_index']==0)&(df2['Sz']==Sz)].iloc[:m[Sz]]
+      amat = np.array(list(a['ci']))
 
-  beta=2.0
-  model=['mo_n_4s','mo_n_2ppi','mo_n_2pz','Us']
-  weights=np.exp(-beta*(df['energy']-min(df['energy'])))
-  X=df[model+['energy','energy_err']+['Sz','basestate']]
-  X=sm.add_constant(X)
-  X['weights']=weights
-  plot_fit_log(X,save=True,fname='analysis/regr_log')
-
+      b = df2[(df2['bs_index']==j)&(df2['Sz']==Sz)].iloc[:m[Sz]]
+      bmat = np.array(list(b['ci']))
+    
+      cost = -1.*np.dot(amat,bmat.T)**2
+      row_ind, col_ind = linear_sum_assignment(cost)
+      bmat = bmat[col_ind,:]
+      
+      abdot = np.dot(amat,bmat.T)
+      plt.matshow(abdot,vmax=1, vmin=-1,cmap=plt.cm.bwr)
+      plt.show()
+    exit(0)
 if __name__=='__main__':
   #DATA COLLECTION
   #df=collect_df()
@@ -728,15 +832,3 @@ if __name__=='__main__':
   #DATA ANALYSIS
   df=pd.read_pickle('formatted_gosling.pickle')
   analyze(df)
-
-  '''
-  df2=pd.read_pickle('analysis/ed_log.pickle')
-  bs_index = []
-  for i in range(100): 
-    bs_index += [i]*40 
-  bs_index*=15*32
-  print(len(bs_index))
-  df2['bs_index'] = bs_index
-  print(df2)
-  df2.to_csv('analysis/ed_log.csv')
-  '''

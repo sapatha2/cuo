@@ -96,6 +96,9 @@ def ED(parms, nroots, norb, nelec):
   eri = (eri_aa, eri_ab, eri_bb)
 
   e, ci = fci.direct_uhf.kernel(h1, eri, norb, nelec, nroots=nroots)
+  return e, ci
+
+  '''
   #Generate vector of number occupations 
   #['del','del','yz','xz','x','y','z2','z','s']
   dm_u = []
@@ -114,3 +117,4 @@ def ED(parms, nroots, norb, nelec):
              0.5*(dm2[1][1][i,8,8,i] + dm2[1][1][8,i,i,8])
     sigJ.append(Jsd) #Jsd parameter sum
   return e, ci, np.array(dm_u), np.array(dm_d), sigU, sigJ
+  '''
