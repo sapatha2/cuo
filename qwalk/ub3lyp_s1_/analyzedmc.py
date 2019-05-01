@@ -24,6 +24,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from scipy.optimize import linear_sum_assignment
 import scipy 
+from find_connect import  *
 pd.options.mode.chained_assignment = None  # default='warn'
 
 ######################################################################################
@@ -805,23 +806,53 @@ def analyze(df,save=False):
   df2 = pd.read_pickle('analysis/ed_log.pickle')
   df2 = df2[(df2['model']==0)&(df2['beta']==2.0)]
 
-  m = {0.5:18, 1.5:13}
+  #m = {0.5:18, 1.5:13}
   for j in range(2,max(df2['bs_index'])):
     for Sz in [0.5,1.5]:
-      a = df2[(df2['bs_index']==0)&(df2['Sz']==Sz)].iloc[:m[Sz]]
+      a = df2[(df2['bs_index']==0)&(df2['Sz']==Sz)]#.iloc[:m[Sz]]
       amat = np.array(list(a['ci']))
 
-      b = df2[(df2['bs_index']==j)&(df2['Sz']==Sz)].iloc[:m[Sz]]
+      b = df2[(df2['bs_index']==j)&(df2['Sz']==Sz)]#.iloc[:m[Sz]]
       bmat = np.array(list(b['ci']))
-    
+  
+      #Apply permutation to pair up non degenerate states
       cost = -1.*np.dot(amat,bmat.T)**2
       row_ind, col_ind = linear_sum_assignment(cost)
       bmat = bmat[col_ind,:]
-      
+     
       abdot = np.dot(amat,bmat.T)
       plt.matshow(abdot,vmax=1, vmin=-1,cmap=plt.cm.bwr)
       plt.show()
-    exit(0)
+      exit(0)
+
+      '''
+      connected_sets, home_node = find_connected_sets(ovlp)
+      print(connected_sets)
+      print(home_node)
+      exit(0)
+      '''
+
+      '''
+      ovlp -= np.identity(ovlp.shape[0])
+      ovlp = np.abs(np.around(ovlp,2))
+
+      sub_ind = np.where(ovlp > 0)
+      print(sub_ind)
+      exit(0)
+
+      plt.matshow(ovlp,vmax=1, vmin=-1,cmap=plt.cm.bwr)
+      plt.show()
+      exit(0)
+      
+      #Diagonalization (needs to be done in detail, manually for now!)
+      sub_ind = np.arange(9,13) #HOW TO IDENTIFY THE SUB INDICES?
+      degen_a = len(set(np.around(a['energy'].iloc[row_ind[sub_ind]],6)))
+      degen_b = len(set(np.around(b['energy'].iloc[col_ind[sub_ind]],6)))
+      if((degen_a == 1)&(degen_b ==1)): 
+        bmat[row_ind[sub_ind],:] = amat[row_ind[sub_ind],:]
+      
+      #Final check
+      '''
 if __name__=='__main__':
   #DATA COLLECTION
   #df=collect_df()
