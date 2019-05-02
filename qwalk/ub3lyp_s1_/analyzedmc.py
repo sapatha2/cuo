@@ -803,11 +803,14 @@ def analyze(df,save=False):
   exit(0)
   '''
 
+  #Sort/group eigenvalues
+  '''
   df2 = pd.read_pickle('analysis/ed_log.pickle')
   df2 = df2[(df2['model']==0)&(df2['beta']==2.0)]
+  df3 = None
 
   #m = {0.5:18, 1.5:13}
-  for j in range(2,max(df2['bs_index'])):
+  for j in range(max(df2['bs_index'])):
     for Sz in [0.5,1.5]:
       a = df2[(df2['bs_index']==0)&(df2['Sz']==Sz)]#.iloc[:m[Sz]]
       amat = np.array(list(a['ci']))
@@ -819,40 +822,51 @@ def analyze(df,save=False):
       cost = -1.*np.dot(amat,bmat.T)**2
       row_ind, col_ind = linear_sum_assignment(cost)
       bmat = bmat[col_ind,:]
-     
+   
+      #Gotta do some extra work for the degenerate states
+      #Get connected groups
       abdot = np.dot(amat,bmat.T)
-      plt.matshow(abdot,vmax=1, vmin=-1,cmap=plt.cm.bwr)
-      plt.show()
-      exit(0)
-
-      '''
-      connected_sets, home_node = find_connected_sets(ovlp)
-      print(connected_sets)
-      print(home_node)
-      exit(0)
-      '''
-
-      '''
-      ovlp -= np.identity(ovlp.shape[0])
-      ovlp = np.abs(np.around(ovlp,2))
-
-      sub_ind = np.where(ovlp > 0)
-      print(sub_ind)
-      exit(0)
-
-      plt.matshow(ovlp,vmax=1, vmin=-1,cmap=plt.cm.bwr)
-      plt.show()
-      exit(0)
+      mask = (abdot**2 > 1e-5)
+      connected_sets, home_nodes = find_connected_sets(mask)
+     
+      #Loop connected groups to see which ones correspond to degenerate states
+      for i in connected_sets:
+        len_check = False
+        sub_ind = None
+        sum_check = False
+        eig_check = False
+        #Check length as criteria for degeneracy
+        if(len(connected_sets[i])>1):
+          sub_ind=list(connected_sets[i])
+          len_check = True
+        
+        #Check that the degenerate space is actually spanned properly
+        if(len_check):
+          sub_mat = abdot[sub_ind][:,sub_ind]**2
+          sum_1 = np.around(sub_mat.sum(axis=0),2)
+          sum_2 = np.around(sub_mat.sum(axis=1),2)
+          if(((sum_1 - 1).sum() == 0 ) & ((sum_2 - 1).sum()==0)): sum_check = True
+        
+        #Check that the eigenvalues are actually degenerate
+        if(sum_check):
+          degen_a = len(set(np.around(a['energy'].iloc[row_ind[sub_ind]],6)))
+          degen_b = len(set(np.around(b['energy'].iloc[col_ind[sub_ind]],6)))
+          if((degen_a == 1)&(degen_b ==1)): eig_check = True
+        
+        #If all checks prevail, then finally assign the elements to be identical
+        if(eig_check): bmat[row_ind[sub_ind],:] = amat[row_ind[sub_ind],:]
       
-      #Diagonalization (needs to be done in detail, manually for now!)
-      sub_ind = np.arange(9,13) #HOW TO IDENTIFY THE SUB INDICES?
-      degen_a = len(set(np.around(a['energy'].iloc[row_ind[sub_ind]],6)))
-      degen_b = len(set(np.around(b['energy'].iloc[col_ind[sub_ind]],6)))
-      if((degen_a == 1)&(degen_b ==1)): 
-        bmat[row_ind[sub_ind],:] = amat[row_ind[sub_ind],:]
-      
-      #Final check
-      '''
+      #We finally have bmat ordered correctly and everything 
+      dtmp = pd.DataFrame({'energy':b['energy'].values[col_ind],'Sz':b['Sz'].values,'bs_index':b['bs_index'].values})
+      dtmp['ci']=list(bmat)
+      if(df3 is None): df3 = dtmp
+      else: df3 = pd.concat((df3,dtmp),axis=0)
+  ''' 
+  
+  df3.to_pickle('analysis/sorted_ed_log.pickle')
+  
+
+
 if __name__=='__main__':
   #DATA COLLECTION
   #df=collect_df()
