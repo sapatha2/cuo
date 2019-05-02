@@ -341,12 +341,11 @@ def ed_log(model,exp_parms_list):
 #CIs and means for ED
 def av_ed_log(eig_df,has_eig=False):
   av_df = None
-  if(not has_eig): eig_df['eig']=eig_df['index']
   for model in range(32):
     for beta in np.arange(0,3.75,0.25):
-      for eig in range(max(eig_df['eig'])):
-        sub_df = eig_df[(eig_df['model']==model) & (eig_df['eig']==eig) & (eig_df['beta']==beta)]
-        data = sub_df.values
+      for ind in range(max(eig_df['bs_index'])):
+        sub_df = eig_df[(eig_df['model']==model) & (eig_df['bs_index']==ind) & (eig_df['beta']==beta)]
+        data = sub_df['energy'].values
         means = np.mean(data,axis=0)
         u = np.percentile(data,97.5,axis=0)
         l = np.percentile(data,2.5,axis=0)
@@ -781,8 +780,8 @@ def compare_spectrum():
 #RUN
 def analyze(df,save=False):
   #LOG DATA COLLECTION
-  '''
   #Generate all possible models
+  '''
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Us']]
   hopping=df[['Jsd','mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
   y=df['energy']
@@ -803,68 +802,95 @@ def analyze(df,save=False):
   exit(0)
   '''
 
-  #Sort/group eigenvalues
   '''
-  df2 = pd.read_pickle('analysis/ed_log.pickle')
-  df2 = df2[(df2['model']==0)&(df2['beta']==2.0)]
+  #Sort/group eigenvalues
+  df = pd.read_pickle('analysis/ed_log.pickle')
   df3 = None
+  for model in range(32):
+    df2 = df[(df['model']==model)]
+    for j in range(max(df2['bs_index'])+1):
+      offset = 0
+      for Sz in [0.5,1.5]:
+        a = df2[(df2['bs_index']==0)&(df2['Sz']==Sz)]#.iloc[:m[Sz]]
+        amat = np.array(list(a['ci']))
 
-  #m = {0.5:18, 1.5:13}
-  for j in range(max(df2['bs_index'])):
-    for Sz in [0.5,1.5]:
-      a = df2[(df2['bs_index']==0)&(df2['Sz']==Sz)]#.iloc[:m[Sz]]
-      amat = np.array(list(a['ci']))
-
-      b = df2[(df2['bs_index']==j)&(df2['Sz']==Sz)]#.iloc[:m[Sz]]
-      bmat = np.array(list(b['ci']))
-  
-      #Apply permutation to pair up non degenerate states
-      cost = -1.*np.dot(amat,bmat.T)**2
-      row_ind, col_ind = linear_sum_assignment(cost)
-      bmat = bmat[col_ind,:]
-   
-      #Gotta do some extra work for the degenerate states
-      #Get connected groups
-      abdot = np.dot(amat,bmat.T)
-      mask = (abdot**2 > 1e-5)
-      connected_sets, home_nodes = find_connected_sets(mask)
+        b = df2[(df2['bs_index']==j)&(df2['Sz']==Sz)]#.iloc[:m[Sz]]
+        bmat = np.array(list(b['ci']))
+    
+        #Apply permutation to pair up non degenerate states
+        cost = -1.*np.dot(amat,bmat.T)**2
+        row_ind, col_ind = linear_sum_assignment(cost)
+        bmat = bmat[col_ind,:]
      
-      #Loop connected groups to see which ones correspond to degenerate states
-      for i in connected_sets:
-        len_check = False
-        sub_ind = None
-        sum_check = False
-        eig_check = False
-        #Check length as criteria for degeneracy
-        if(len(connected_sets[i])>1):
-          sub_ind=list(connected_sets[i])
-          len_check = True
+        #Gotta do some extra work for the degenerate states
+        #Get connected groups
+        abdot = np.dot(amat,bmat.T)
+        mask = (abdot**2 > 1e-5)
+        connected_sets, home_nodes = find_connected_sets(mask)
+       
+        #Loop connected groups to see which ones correspond to degenerate states
+        for i in connected_sets:
+          len_check = False
+          sub_ind = None
+          sum_check = False
+          eig_check = False
+          #Check length as criteria for degeneracy
+          if(len(connected_sets[i])>1):
+            sub_ind=list(connected_sets[i])
+            len_check = True
+          
+          #Check that the degenerate space is actually spanned properly
+          if(len_check):
+            sub_mat = abdot[sub_ind][:,sub_ind]**2
+            sum_1 = np.around(sub_mat.sum(axis=0),2)
+            sum_2 = np.around(sub_mat.sum(axis=1),2)
+            if(((sum_1 - 1).sum() == 0 ) & ((sum_2 - 1).sum()==0)): sum_check = True
+          
+          #Check that the eigenvalues are actually degenerate
+          if(sum_check):
+            degen_a = len(set(np.around(a['energy'].iloc[row_ind[sub_ind]],6)))
+            degen_b = len(set(np.around(b['energy'].iloc[col_ind[sub_ind]],6)))
+            if((degen_a == 1)&(degen_b ==1)): eig_check = True
+          
+          #If all checks prevail, then finally assign the elements to be identical
+          if(eig_check): bmat[row_ind[sub_ind],:] = amat[row_ind[sub_ind],:]
         
-        #Check that the degenerate space is actually spanned properly
-        if(len_check):
-          sub_mat = abdot[sub_ind][:,sub_ind]**2
-          sum_1 = np.around(sub_mat.sum(axis=0),2)
-          sum_2 = np.around(sub_mat.sum(axis=1),2)
-          if(((sum_1 - 1).sum() == 0 ) & ((sum_2 - 1).sum()==0)): sum_check = True
-        
-        #Check that the eigenvalues are actually degenerate
-        if(sum_check):
-          degen_a = len(set(np.around(a['energy'].iloc[row_ind[sub_ind]],6)))
-          degen_b = len(set(np.around(b['energy'].iloc[col_ind[sub_ind]],6)))
-          if((degen_a == 1)&(degen_b ==1)): eig_check = True
-        
-        #If all checks prevail, then finally assign the elements to be identical
-        if(eig_check): bmat[row_ind[sub_ind],:] = amat[row_ind[sub_ind],:]
-      
-      #We finally have bmat ordered correctly and everything 
-      dtmp = pd.DataFrame({'energy':b['energy'].values[col_ind],'Sz':b['Sz'].values,'bs_index':b['bs_index'].values})
-      dtmp['ci']=list(bmat)
-      if(df3 is None): df3 = dtmp
-      else: df3 = pd.concat((df3,dtmp),axis=0)
-  ''' 
-  
+        #We finally have bmat ordered correctly and everything 
+        dtmp = pd.DataFrame({'energy':b['energy'].values[col_ind],'Sz':b['Sz'].values,'bs_index':b['bs_index'].values})
+        dtmp['ci']=list(bmat)
+        dtmp['eig']=np.arange(dtmp.shape[0]) + offset
+        dtmp['model']=b['model'].values
+        offset += dtmp.shape[0]
+        if(df3 is None): df3 = dtmp
+        else: df3 = pd.concat((df3,dtmp),axis=0)
   df3.to_pickle('analysis/sorted_ed_log.pickle')
+  exit(0)
+  '''
+
+  df3 = pd.read_pickle('analysis/ed_log.pickle')
+  model=31
+
+  df3 = df3[df3['model']==model]
+  df3['eig']=list(np.arange(60))*50
+  for eig in range(max(df3['eig'])):
+    energy = df3[df3['eig']==eig]['energy']
+    mu = np.mean(energy,axis=0)
+    u = np.percentile(energy,97.5,axis=0)
+    l = np.percentile(energy,2.5,axis=0)
+    err = (u - l)/2
+    plt.errorbar(eig,mu,err,fmt='bo')
+
+  df3 = pd.read_pickle('analysis/sorted_ed_log.pickle')
+  df3 = df3[df3['model']==model]
+  for eig in range(max(df3['eig'])):
+    energy = df3[df3['eig']==eig]['energy']
+    mu = np.mean(energy,axis=0)
+    u = np.percentile(energy,97.5,axis=0)
+    l = np.percentile(energy,2.5,axis=0)
+    err = (u - l)/2
+    plt.errorbar(eig+0.3,mu,err,fmt='g.')
   
+  plt.show()
 
 
 if __name__=='__main__':
