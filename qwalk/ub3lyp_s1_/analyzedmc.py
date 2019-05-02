@@ -471,12 +471,13 @@ def plot_ed_log(save=False):
   #FULL EIGENPROPERTIES and EIGENVALUES
   
   beta=2.0
-  #av_df = pd.read_pickle('analysis/av_sorted_ed_log_d.pickle')
-  av_df = pd.read_pickle('analysis/av_ed_log_d.pickle')
+  av_df = pd.read_pickle('analysis/av_sorted_ed_log_d.pickle')
+  #av_df = pd.read_pickle('analysis/av_ed_log_d.pickle')
 
   ## TO GET NICE FORMATTING
   g = sns.FacetGrid(av_df,col='model',col_wrap=3,hue='Sz')
 
+  '''
   for model in np.arange(32):
     rgba_color = cm.Blues(norm(3.75-beta))
     rgba_color2 = cm.Oranges(norm(3.75-beta))
@@ -487,7 +488,6 @@ def plot_ed_log(save=False):
       z+=1
       ax = axes[z//6,z%6]
 
-      '''
       if(beta==2.0):
         p=parm
         if(parm=='iao_Jsd'): p = 'Jsd'
@@ -506,7 +506,6 @@ def plot_ed_log(save=False):
         y = f_df['energy'].values
         yerr = f_df['energy_err'].values
         plt.errorbar(x,y,yerr,fmt='.',c=rgba_color2,alpha=0.2)
-      '''
 
       sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==0.5)]
       x=sub_df[parm].values
@@ -530,68 +529,36 @@ def plot_ed_log(save=False):
     else: plt.show()
     plt.clf()
   '''
-  av_df = pd.read_pickle('analysis/ed_log.pickle')
-  beta=1.0
-  for model in [0,4]: 
-    z=0
-    for parm in ['iao_n_3d','iao_n_2pz','iao_n_2ppi','iao_n_4s',
+  
+  fig, axes = plt.subplots(nrows=2,ncols=6,sharey=True,figsize=(12,6))
+  for model in [2,13,14,12,25,5,29,0,1,3,9,22]:
+    rgba_color = cm.Blues(norm(3.75-beta))
+    rgba_color2 = cm.Oranges(norm(3.75-beta))
+    z=-1
+    for parm in ['iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2pz','iao_n_2ppi','iao_n_4s',
     'iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','iao_Jsd','iao_Us']:
       z+=1
-      plt.subplot(2,5,0+z)
-      sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)]
-      sns.scatterplot(x=parm,y='energy',data=sub_df,hue='Sz')
-    plt.show()
-  '''
-  '''
-      sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==1.5)]
+      ax = axes[z//6,z%6]
+
+      sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==0.5)]
       x=sub_df[parm].values
+      xerr=sub_df[parm+'_err'].values
       y=sub_df['energy'].values
-      plt.errorbar(x,y,markeredgecolor='k',fmt='.',c=rgba_color2)
+      yerr=sub_df['energy_err'].values
+      ax.errorbar(x,y,xerr=xerr,yerr=yerr,markeredgecolor='k',fmt='o',c=rgba_color)
+     
+      sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==1.5)]
+      x=sub_df[parm].values
+      xerr=sub_df[parm+'_err'].values
+      y=sub_df['energy'].values
+      yerr=sub_df['energy_err'].values
+      ax.errorbar(x,y,xerr=xerr,yerr=yerr,markeredgecolor='k',fmt='o',c=rgba_color2)
       
-      plt.ylim((-0.2,4.5))
-      plt.xlabel(parm)
-      plt.ylabel('energy (eV)')
-  if(save): plt.savefig('analysis/ed_'+str(model)+'_full_log.pdf',bbox_inches='tight')
-  else: plt.show()
-  '''
-
-  '''
-
-  #COMBINED
-  norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
-  #FULL EIGENPROPERTIES and EIGENVALUES
-  markers=['o','','s','<','','','','','^','','','','','','>']
-  for model in np.arange(16): #[0,2,3,8,14]: #np.arange(16):
-    for beta in [2.0]:#np.arange(3.75,-0.25,-0.25):
-      rgba_color = cm.Blues(norm(3.75-beta))
-      rgba_color2 = cm.Oranges(norm(3.75-beta))
-      z=0
-      for parm in ['iao_n_3d','iao_n_2pz','iao_n_2ppi','iao_n_4s',
-      'iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','iao_Jsd','iao_Us']:
-        z+=1
-        plt.subplot(2,5,0+z)
-
-        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==0.5)].iloc[:25]
-        x=sub_df[parm].values
-        xerr=sub_df[parm+'_err'].values
-        y=sub_df['energy'].values
-        yerr=sub_df['energy_err'].values
-        plt.errorbar(x,y,xerr=xerr,yerr=yerr,markeredgecolor='k',fmt=markers[model],c=rgba_color)
-       
-        sub_df = av_df[(av_df['model']==model)*(av_df['beta']==beta)*(av_df['Sz']==1.5)].iloc[:15]
-        x=sub_df[parm].values
-        xerr=sub_df[parm+'_err'].values
-        y=sub_df['energy'].values
-        yerr=sub_df['energy_err'].values
-        plt.errorbar(x,y,xerr=xerr,yerr=yerr,markeredgecolor='k',fmt=markers[model],c=rgba_color2)
-       
-        plt.ylim((-0.2,4.5))
-        plt.xlabel(parm)
-        plt.ylabel('energy (eV)')
-  plt.savefig('analysis/ed_combined_log.pdf',bbox_inches='tight')
+      ax.set_ylim((-0.2,2.5))
+      ax.set_xlabel(parm)
+      ax.set_ylabel('energy (eV)')
+  plt.show()
   plt.clf()
-  '''
-  return 0
 
 def plot_fit_log(X,save=True,fname=None):
   print("PLOT FIT ~~~~~~~~~~~~~~~~~")
@@ -620,10 +587,9 @@ def plot_fit_log(X,save=True,fname=None):
 
 def calc_density(df,dE):
   density=np.zeros(df.shape[0])
-  #dE = 0.1 #eV
-  #dE = np.mean(df['energy_err'])
+  df['energy']=np.around(df['energy'],3)
   for p in range(df.shape[0]):
-    density[p] = np.sum((df['energy']<(df['energy'].iloc[p] + dE))&(df['energy']>(df['energy'].iloc[p] - dE)))
+    density[p] = np.sum((df['energy']<=(df['energy'].iloc[p] + dE))&(df['energy']>=(df['energy'].iloc[p] - dE)))
   df['density']=density
 
   return df
@@ -743,10 +709,10 @@ def compare_spectrum():
 #RUN
 def analyze(df,save=False):
   #LOG DATA COLLECTION
-  #Generate all possible models
   '''
-  X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Us']]
-  hopping=df[['Jsd','mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
+  #Generate all possible models
+  X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
+  hopping=df[['mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
   y=df['energy']
   model_list=[list(X)]
   for n in range(1,hopping.shape[1]+1):
@@ -756,10 +722,10 @@ def analyze(df,save=False):
   print(len(model_list))
 
   df0,df1,df2=main_log(df,model_list,betas=[2.0])
-  #print(df0)
+  print(df0)
   #print(df1)
   print(df2)
-  #df0.to_pickle('analysis/regr_log.pickle')
+  df0.to_pickle('analysis/regr_log.pickle')
   #df1.to_pickle('analysis/oneparm_log.pickle')
   df2.to_pickle('analysis/ed_log.pickle')
   exit(0)
@@ -769,7 +735,7 @@ def analyze(df,save=False):
   #Sort/group eigenvalues
   df = pd.read_pickle('analysis/ed_log.pickle')
   df3 = None
-  for model in range(32):
+  for model in range(16):
     df2 = df[(df['model']==model)]
     for j in range(max(df2['bs_index'])+1):
       offset = 0
@@ -831,38 +797,12 @@ def analyze(df,save=False):
   '''
 
   '''
-  df3 = pd.read_pickle('analysis/ed_log.pickle')
-  model=31
-
-  df3 = df3[df3['model']==model]
-  df3['eig']=list(np.arange(60))*50
-  for eig in range(max(df3['eig'])):
-    energy = df3[df3['eig']==eig]['energy']
-    mu = np.mean(energy,axis=0)
-    u = np.percentile(energy,97.5,axis=0)
-    l = np.percentile(energy,2.5,axis=0)
-    err = (u - l)/2
-    plt.errorbar(eig,mu,err,fmt='bo')
-
-  df3 = pd.read_pickle('analysis/sorted_ed_log.pickle')
-  df3 = df3[df3['model']==model]
-  for eig in range(max(df3['eig'])):
-    energy = df3[df3['eig']==eig]['energy']
-    mu = np.mean(energy,axis=0)
-    u = np.percentile(energy,97.5,axis=0)
-    l = np.percentile(energy,2.5,axis=0)
-    err = (u - l)/2
-    plt.errorbar(eig+0.3,mu,err,fmt='g.')
-  
-  plt.show()
-  '''
-
-  '''
+  #Calculate descriptors after sorting
   from pyscf import gto, scf, ao2mo, cc, fci, mcscf, lib
   import scipy as sp 
 
-  df3 = pd.read_pickle('analysis/sorted_ed_log.pickle')
-  #df3 = pd.read_pickle('analysis/ed_log.pickle')
+  #df3 = pd.read_pickle('analysis/sorted_ed_log.pickle')
+  df3 = pd.read_pickle('analysis/ed_log.pickle')
   df4 = None
   mol = gto.Mole()
   cis = fci.direct_uhf.FCISolver(mol)
@@ -923,13 +863,14 @@ def analyze(df,save=False):
   df3['iao_Us']=sigUs
   df3['iao_Jsd']=sigJsd
 
-  df3.to_pickle('analysis/sorted_ed_log_d.pickle')
-  #df3.to_pickle('analysis/ed_log_d.pickle')
+  #df3.to_pickle('analysis/sorted_ed_log_d.pickle')
+  df3.to_pickle('analysis/ed_log_d.pickle')
   print(df3)
   exit(0)
   '''
 
-  '''
+  ''' 
+  #Average everything
   df3 = pd.read_pickle('analysis/sorted_ed_log_d.pickle')
   av_df3 = av_ed_log(df3.drop(columns=['ci']))
   av_df3.to_pickle('analysis/av_sorted_ed_log_d.pickle')
@@ -942,7 +883,36 @@ def analyze(df,save=False):
   exit(0)
   '''
   
-  plot_ed_log(save=True)
+  #Check to see which models have non zero elements
+  dfz = pd.read_pickle('analysis/regr_log.pickle')
+  dfz = dfz[dfz['beta']==2.0]
+  ind = np.unique(dfz[dfz['Jsd']!=0]['model'])
+  print(dfz.iloc[ind])
+  exit(0)
+ 
+  df = pd.read_pickle('analysis/sorted_ed_log.pickle')
+  for j in [2,6,10,12,17,22,27,28]:
+    print(j,'----------')
+    for model in [2,6,10,12,17,22,27,28]:
+      print(model,'========')
+      for Sz in [0.5,1.5]:
+        a = df[(df['model']==j)&(df['Sz']==Sz)]#.iloc[:m[Sz]]
+        amat = np.array(list(a['ci']))[np.arange(30),:]
+
+        b = df[(df['model']==model)&(df['Sz']==Sz)]#.iloc[:m[Sz]]
+        bmat = np.array(list(b['ci']))[np.arange(30),:]
+    
+        #Apply permutation to pair up non degenerate states
+        ovlp = np.dot(amat,bmat.T)
+        cost = -1*ovlp
+        row_ind, col_ind = linear_sum_assignment(cost)
+        bmat = bmat[col_ind,:]
+        ovlp = np.dot(amat,bmat.T)**2
+        
+        print(np.sum(np.sum(ovlp - np.identity(ovlp.shape[0]))))
+
+        #plt.matshow(ovlp,vmin=-1,vmax=1,cmap=plt.cm.bwr)
+        #plt.show()
 
 if __name__=='__main__':
   #DATA COLLECTION
