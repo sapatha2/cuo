@@ -466,19 +466,18 @@ def plot_oneparm_valid_log(save=False):
   plt.close()
 
 #Plot eigenvalues and eigenproperties
-def plot_ed_log(save=False):
+def plot_ed_log(save=True):
   norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
   #FULL EIGENPROPERTIES and EIGENVALUES
   
   beta=2.0
-  av_df = pd.read_pickle('analysis/av_sorted_ed_log_d.pickle')
-  #av_df = pd.read_pickle('analysis/av_ed_log_d.pickle')
+  #av_df = pd.read_pickle('analysis/av_sorted_ed_log_d.pickle')
+  av_df = pd.read_pickle('analysis/av_ed_log_d.pickle')
 
   ## TO GET NICE FORMATTING
   g = sns.FacetGrid(av_df,col='model',col_wrap=3,hue='Sz')
 
-  '''
-  for model in np.arange(32):
+  for model in np.arange(16):
     rgba_color = cm.Blues(norm(3.75-beta))
     rgba_color2 = cm.Oranges(norm(3.75-beta))
     z=-1
@@ -488,6 +487,7 @@ def plot_ed_log(save=False):
       z+=1
       ax = axes[z//6,z%6]
 
+      '''
       if(beta==2.0):
         p=parm
         if(parm=='iao_Jsd'): p = 'Jsd'
@@ -506,6 +506,7 @@ def plot_ed_log(save=False):
         y = f_df['energy'].values
         yerr = f_df['energy_err'].values
         plt.errorbar(x,y,yerr,fmt='.',c=rgba_color2,alpha=0.2)
+      '''
 
       sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==0.5)]
       x=sub_df[parm].values
@@ -528,8 +529,8 @@ def plot_ed_log(save=False):
     if(save): plt.savefig('analysis/ed_'+str(model)+'_log.pdf',bbox_inches='tight')
     else: plt.show()
     plt.clf()
-  '''
   
+  '''
   fig, axes = plt.subplots(nrows=2,ncols=6,sharey=True,figsize=(12,6))
   for model in [2,13,14,12,25,5,29,0,1,3,9,22]:
     rgba_color = cm.Blues(norm(3.75-beta))
@@ -559,6 +560,7 @@ def plot_ed_log(save=False):
       ax.set_ylabel('energy (eV)')
   plt.show()
   plt.clf()
+  '''
 
 def plot_fit_log(X,save=True,fname=None):
   print("PLOT FIT ~~~~~~~~~~~~~~~~~")
@@ -730,7 +732,7 @@ def analyze(df,save=False):
   df2.to_pickle('analysis/ed_log.pickle')
   exit(0)
   '''
-
+ 
   '''
   #Sort/group eigenvalues
   df = pd.read_pickle('analysis/ed_log.pickle')
@@ -783,7 +785,12 @@ def analyze(df,save=False):
           
           #If all checks prevail, then finally assign the elements to be identical
           if(eig_check): bmat[row_ind[sub_ind],:] = amat[row_ind[sub_ind],:]
-        
+       
+        #Make sure that we have orthogonal columns and rows
+        diff = np.dot(bmat,bmat.T) - np.identity(bmat.shape[0])
+        if(abs(np.sum(diff)) > 1e-5):
+          print(np.sum(diff),model, Sz)
+
         #We finally have bmat ordered correctly and everything 
         dtmp = pd.DataFrame({'energy':b['energy'].values[col_ind],'Sz':b['Sz'].values,'bs_index':b['bs_index'].values})
         dtmp['ci']=list(bmat)
@@ -796,8 +803,8 @@ def analyze(df,save=False):
   exit(0)
   '''
 
-  '''
   #Calculate descriptors after sorting
+  '''
   from pyscf import gto, scf, ao2mo, cc, fci, mcscf, lib
   import scipy as sp 
 
@@ -869,8 +876,8 @@ def analyze(df,save=False):
   exit(0)
   '''
 
-  ''' 
   #Average everything
+  ''' 
   df3 = pd.read_pickle('analysis/sorted_ed_log_d.pickle')
   av_df3 = av_ed_log(df3.drop(columns=['ci']))
   av_df3.to_pickle('analysis/av_sorted_ed_log_d.pickle')
@@ -883,17 +890,23 @@ def analyze(df,save=False):
   exit(0)
   '''
   
+  #Plot ED
+  #plot_ed_log()
+
   #Check to see which models have non zero elements
   dfz = pd.read_pickle('analysis/regr_log.pickle')
   dfz = dfz[dfz['beta']==2.0]
   ind = np.unique(dfz[dfz['Jsd']!=0]['model'])
   print(dfz.iloc[ind])
+  print(dfz.iloc[[2,3]])
   exit(0)
- 
+
+  #Compare eigenstates between models
+  '''
   df = pd.read_pickle('analysis/sorted_ed_log.pickle')
-  for j in [2,6,10,12,17,22,27,28]:
+  for j in [0]:
     print(j,'----------')
-    for model in [2,6,10,12,17,22,27,28]:
+    for model in [2,3]: #ind:
       print(model,'========')
       for Sz in [0.5,1.5]:
         a = df[(df['model']==j)&(df['Sz']==Sz)]#.iloc[:m[Sz]]
@@ -903,16 +916,24 @@ def analyze(df,save=False):
         bmat = np.array(list(b['ci']))[np.arange(30),:]
     
         #Apply permutation to pair up non degenerate states
-        ovlp = np.dot(amat,bmat.T)
+        ovlp = np.dot(amat,bmat.T)**2
         cost = -1*ovlp
         row_ind, col_ind = linear_sum_assignment(cost)
         bmat = bmat[col_ind,:]
-        ovlp = np.dot(amat,bmat.T)**2
+        ovlp = np.dot(amat,bmat.T)
         
-        print(np.sum(np.sum(ovlp - np.identity(ovlp.shape[0]))))
+        plt.matshow(ovlp,vmin=-1,vmax=1,cmap=plt.cm.bwr)
+        plt.xticks(np.arange(30),col_ind)
+        plt.yticks(np.arange(30),row_ind)
+        plt.show()
+  '''
+  
+  df = pd.read_pickle('analysis/av_sorted_ed_log_d.pickle')
+  a = df[(df['model']==0)&(df['Sz']==0.5)]
+  b = df[(df['model']==0)&(df['Sz']==1.5)]
+  print(a[['energy','iao_n_3dd','iao_n_3dz2','iao_n_3dpi','iao_n_2ppi','iao_n_2pz','iao_n_4s']].iloc[:11])
+  print(b[['energy','iao_n_3dd','iao_n_3dz2','iao_n_3dpi','iao_n_2ppi','iao_n_2pz','iao_n_4s']].iloc[:11])
 
-        #plt.matshow(ovlp,vmin=-1,vmax=1,cmap=plt.cm.bwr)
-        #plt.show()
 
 if __name__=='__main__':
   #DATA COLLECTION
