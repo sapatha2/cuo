@@ -466,102 +466,66 @@ def plot_oneparm_valid_log(save=False):
   plt.close()
 
 #Plot eigenvalues and eigenproperties
-def plot_ed_log(full_df,save=False):
-  av_df=pd.read_pickle('analysis/av_ed_log.pickle')
-  #g = sns.FacetGrid(av_df,col='model',col_wrap=4,hue='Sz')
-  #print(av_df)
-  #exit(0)
-  zz=0
-  tpi=[3, 7, 10, 13, 14, 16, 19, 20, 22, 23, 25, 26, 27, 29, 30, 31]
-  beta=2.0
- 
-  '''
-  errs=[]
-  for model in np.arange(32):
-      sub_df = av_df[(av_df['model']==model)&(av_df['beta']==beta)]
-      sub_df = sub_df.sort_values(by=['energy'])
-      sub_df = calc_density(sub_df)
-      err = np.sum(sub_df['energy_err'])
-      errs.append(err)
-  ind=np.argsort(errs)
-  plt.plot(np.array(errs)[ind],'bo')
-  plt.xticks(np.arange(len(errs)),ind)
-  plt.show()
-  exit(0)
-  '''
-
-  c={0.5:'b',1.5:'r'}
-  zz=0
-  for model in [0,1,3,4,7,8]:
-    zz+=1
-    plt.subplot(2,3,zz)
-    sub_df = av_df[(av_df['model']==model)&(av_df['beta']==beta)]
-    sub_df = sub_df.sort_values(by=['energy'])
-    sub_df = calc_density(sub_df,dE=1e-3)
-
-
-    if(model in tpi): 
-      for spin in [0.5,1.5]:
-        plt.errorbar(np.arange(sub_df[sub_df['Sz']==spin].shape[0]),sub_df[sub_df['Sz']==spin]['energy'],sub_df[sub_df['Sz']==spin]['energy_err'],fmt='^'+c[spin])
-      #plt.errorbar(sub_df['density'],sub_df['energy'],sub_df['energy_err'],fmt='o--')
-      #plt.errorbar(sub_df['density'],sub_df['energy'],sub_df['energy_err'],fmt='o--')
-      plt.ylim((0,4))
-    else: 
-      for spin in [0.5,1.5]:
-        plt.errorbar(np.arange(sub_df[sub_df['Sz']==spin].shape[0]),sub_df[sub_df['Sz']==spin]['energy'],sub_df[sub_df['Sz']==spin]['energy_err'],fmt='.'+c[spin])
-      #plt.errorbar(sub_df['density'],sub_df['energy'],sub_df['energy_err'],fmt='o--')
-      plt.ylim((0,4))
-  plt.show()
-  exit(0)
-
+def plot_ed_log(save=False):
   norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
   #FULL EIGENPROPERTIES and EIGENVALUES
-  for model in np.arange(32): #[0,2,3,8,14]: #np.arange(16):
-    for beta in [2.0]:#np.arange(3.75,-0.25,-0.25):
-      rgba_color = cm.Blues(norm(3.75-beta))
-      rgba_color2 = cm.Oranges(norm(3.75-beta))
-      z=0
-      for parm in ['iao_n_3d','iao_n_2pz','iao_n_2ppi','iao_n_4s',
-      'iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','iao_Jsd','iao_Us']:
-        z+=1
-        plt.subplot(2,5,0+z)
+  
+  beta=2.0
+  #av_df = pd.read_pickle('analysis/av_sorted_ed_log_d.pickle')
+  av_df = pd.read_pickle('analysis/av_ed_log_d.pickle')
 
-        if(beta==2.0):
-          p=parm
-          if(parm=='iao_Jsd'): p = 'Jsd'
-          if(parm=='iao_Us'):  p = 'Us'
-          
-          full_df['energy']-=min(full_df['energy'])
+  ## TO GET NICE FORMATTING
+  g = sns.FacetGrid(av_df,col='model',col_wrap=3,hue='Sz')
 
-          f_df = full_df[full_df['Sz']==0.5]
-          x = f_df[p].values
-          y = f_df['energy'].values
-          yerr = f_df['energy_err'].values
-          plt.errorbar(x,y,yerr,fmt='.',c=rgba_color,alpha=0.2)
+  for model in np.arange(32):
+    rgba_color = cm.Blues(norm(3.75-beta))
+    rgba_color2 = cm.Oranges(norm(3.75-beta))
+    z=-1
+    fig, axes = plt.subplots(nrows=2,ncols=6,sharey=True,figsize=(12,6))
+    for parm in ['iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2pz','iao_n_2ppi','iao_n_4s',
+    'iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','iao_Jsd','iao_Us']:
+      z+=1
+      ax = axes[z//6,z%6]
 
-          f_df = full_df[full_df['Sz']==1.5]
-          x = f_df[p].values
-          y = f_df['energy'].values
-          yerr = f_df['energy_err'].values
-          plt.errorbar(x,y,yerr,fmt='.',c=rgba_color2,alpha=0.2)
-
-        sub_df = av_df[(av_df['model']==model)&(av_df['beta']==beta)&(av_df['Sz']==0.5)]
-        x=sub_df[parm].values
-        xerr=sub_df[parm+'_err'].values
-        y=sub_df['energy'].values
-        yerr=sub_df['energy_err'].values
-        plt.errorbar(x,y,xerr=xerr,yerr=yerr,markeredgecolor='k',fmt='o',c=rgba_color)
-       
-        sub_df = av_df[(av_df['model']==model)&(av_df['beta']==beta)&(av_df['Sz']==1.5)]
-        x=sub_df[parm].values
-        xerr=sub_df[parm+'_err'].values
-        y=sub_df['energy'].values
-        yerr=sub_df['energy_err'].values
-        plt.errorbar(x,y,xerr=xerr,yerr=yerr,markeredgecolor='k',fmt='o',c=rgba_color2)
+      '''
+      if(beta==2.0):
+        p=parm
+        if(parm=='iao_Jsd'): p = 'Jsd'
+        if(parm=='iao_Us'):  p = 'Us'
         
-        plt.ylim((-0.2,4.5))
-        plt.xlabel(parm)
-        plt.ylabel('energy (eV)')
+        full_df['energy']-=min(full_df['energy'])
+
+        f_df = full_df[full_df['Sz']==0.5]
+        x = f_df[p].values
+        y = f_df['energy'].values
+        yerr = f_df['energy_err'].values
+        plt.errorbar(x,y,yerr,fmt='.',c=rgba_color,alpha=0.2)
+
+        f_df = full_df[full_df['Sz']==1.5]
+        x = f_df[p].values
+        y = f_df['energy'].values
+        yerr = f_df['energy_err'].values
+        plt.errorbar(x,y,yerr,fmt='.',c=rgba_color2,alpha=0.2)
+      '''
+
+      sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==0.5)]
+      x=sub_df[parm].values
+      xerr=sub_df[parm+'_err'].values
+      y=sub_df['energy'].values
+      yerr=sub_df['energy_err'].values
+      ax.errorbar(x,y,xerr=xerr,yerr=yerr,markeredgecolor='k',fmt='o',c=rgba_color)
+     
+      sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==1.5)]
+      x=sub_df[parm].values
+      xerr=sub_df[parm+'_err'].values
+      y=sub_df['energy'].values
+      yerr=sub_df['energy_err'].values
+      ax.errorbar(x,y,xerr=xerr,yerr=yerr,markeredgecolor='k',fmt='o',c=rgba_color2)
+      
+      ax.set_ylim((-0.2,2.5))
+      ax.set_xlabel(parm)
+      ax.set_ylabel('energy (eV)')
+    #if(save): plt.savefig('analysis/sorted_ed_'+str(model)+'_log.pdf',bbox_inches='tight')
     if(save): plt.savefig('analysis/ed_'+str(model)+'_log.pdf',bbox_inches='tight')
     else: plt.show()
     plt.clf()
@@ -892,13 +856,13 @@ def analyze(df,save=False):
   
   plt.show()
   '''
- 
+
   '''
   from pyscf import gto, scf, ao2mo, cc, fci, mcscf, lib
   import scipy as sp 
 
-  #df3 = pd.read_pickle('analysis/sorted_ed_log.pickle')
-  df3 = pd.read_pickle('analysis/ed_log.pickle')
+  df3 = pd.read_pickle('analysis/sorted_ed_log.pickle')
+  #df3 = pd.read_pickle('analysis/ed_log.pickle')
   df4 = None
   mol = gto.Mole()
   cis = fci.direct_uhf.FCISolver(mol)
@@ -948,7 +912,7 @@ def analyze(df,save=False):
   
   df3['iao_n_3dz2']=sigNdz2
   df3['iao_n_3dpi']=sigNdpi
-  df3['iao_n_3dz2']=sigNdz2
+  df3['iao_n_3dd']=sigNdd
   df3['iao_n_2pz']=sigN2pz
   df3['iao_n_2ppi']=sigN2ppi
   df3['iao_n_4s']=sigN4s
@@ -959,8 +923,8 @@ def analyze(df,save=False):
   df3['iao_Us']=sigUs
   df3['iao_Jsd']=sigJsd
 
-  #df3.to_pickle('analysis/sorted_ed_log_d.pickle')
-  df3.to_pickle('analysis/ed_log_d.pickle')
+  df3.to_pickle('analysis/sorted_ed_log_d.pickle')
+  #df3.to_pickle('analysis/ed_log_d.pickle')
   print(df3)
   exit(0)
   '''
@@ -977,6 +941,8 @@ def analyze(df,save=False):
   av_df3.to_pickle('analysis/av_ed_log_d.pickle')
   exit(0)
   '''
+  
+  plot_ed_log(save=True)
 
 if __name__=='__main__':
   #DATA COLLECTION
