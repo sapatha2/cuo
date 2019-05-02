@@ -13,3 +13,5 @@ outputs/
 *.pdf
 *.synctex.gz
 *ed_log.pickle
+*ed_log_d.pickle
+*sorted_ed_log_d.pickle

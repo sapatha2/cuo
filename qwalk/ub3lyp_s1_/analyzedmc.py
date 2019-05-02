@@ -290,8 +290,8 @@ def ed_log(model,exp_parms_list):
     t_ds = 2*dm[:,6,8]
     t_dz = 2*dm[:,6,7]
     t_sz = 2*dm[:,7,8]
-    d = pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3d':n_3d,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s,
-    'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz,'iao_Us':res1[4],'iao_Jsd':res1[5]})
+    d = pd.dataframe({'energy':e,'sz':sz,'iao_n_3d':n_3d,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s,
+    'iao_t_pi':t_pi,'iao_t_ds':t_ds,'iao_t_dz':t_dz,'iao_t_sz':t_sz,'iao_us':res1[4],'iao_jsd':res1[5]})
     '''
     d = pd.DataFrame({'energy':E,'Sz':Sz})
     ci=np.array(res1[1])
@@ -341,21 +341,20 @@ def ed_log(model,exp_parms_list):
 #CIs and means for ED
 def av_ed_log(eig_df,has_eig=False):
   av_df = None
-  for model in range(32):
-    for beta in np.arange(0,3.75,0.25):
-      for ind in range(max(eig_df['bs_index'])):
-        sub_df = eig_df[(eig_df['model']==model) & (eig_df['bs_index']==ind) & (eig_df['beta']==beta)]
-        data = sub_df['energy'].values
-        means = np.mean(data,axis=0)
-        u = np.percentile(data,97.5,axis=0)
-        l = np.percentile(data,2.5,axis=0)
-        err = (u - l)/2
+  for model in range(max(eig_df['model'])+1):
+    for eig in range(max(eig_df['eig'])+1):
+      sub_df = eig_df[(eig_df['model']==model) & (eig_df['eig']==eig)]
+      data = sub_df.values
+      means = np.mean(data,axis=0)
+      u = np.percentile(data,97.5,axis=0)
+      l = np.percentile(data,2.5,axis=0)
+      err = (u - l)/2
 
-        d=pd.DataFrame(data=np.array(list(means) + list(err))[:,np.newaxis].T,
-        columns=list(sub_df) + [x+'_err' for x in list(sub_df)])
-  
-        if(av_df is None): av_df = d
-        else: av_df = pd.concat((av_df,d),axis=0)
+      d=pd.DataFrame(data=np.array(list(means) + list(err))[:,np.newaxis].T,
+      columns=list(sub_df) + [x+'_err' for x in list(sub_df)])
+
+      if(av_df is None): av_df = d
+      else: av_df = pd.concat((av_df,d),axis=0)
   return av_df
 
 def sort_eigs(eig_df):
@@ -867,6 +866,7 @@ def analyze(df,save=False):
   exit(0)
   '''
 
+  '''
   df3 = pd.read_pickle('analysis/ed_log.pickle')
   model=31
 
@@ -891,7 +891,92 @@ def analyze(df,save=False):
     plt.errorbar(eig+0.3,mu,err,fmt='g.')
   
   plt.show()
+  '''
+ 
+  '''
+  from pyscf import gto, scf, ao2mo, cc, fci, mcscf, lib
+  import scipy as sp 
 
+  #df3 = pd.read_pickle('analysis/sorted_ed_log.pickle')
+  df3 = pd.read_pickle('analysis/ed_log.pickle')
+  df4 = None
+  mol = gto.Mole()
+  cis = fci.direct_uhf.FCISolver(mol)
+
+  sigUs = []
+  sigJsd = []
+  sigNdz2 = []
+  sigNdpi = []
+  sigNdd =[]
+  sigN2pz = []
+  sigN2ppi = []
+  sigN4s = []
+  sigTpi = []
+  sigTds = []
+  sigTdz = []
+  sigTsz = []
+
+  for i in range(df3.shape[0]):
+    ci = df3['ci'].iloc[i]
+    norb=9
+    nelec=(8,7)
+    if(df3['Sz'].iloc[i]==1.5): nelec=(9,6)   
+    ci = ci.reshape((sp.misc.comb(norb,nelec[0],exact=True),sp.misc.comb(norb,nelec[1],exact=True)))
+    dm2=cis.make_rdm12s(ci,norb,nelec)
+    
+    #Parameters
+    sigUs.append(dm2[1][1][8,8,8,8])
+    
+    Jsd = 0
+    for i in [0,1,2,3,6]:
+      Jsd += 0.25*(dm2[1][0][8,8,i,i] + dm2[1][2][8,8,i,i] - dm2[1][1][8,8,i,i] - dm2[1][1][i,i,8,8])-\
+             0.5*(dm2[1][1][i,8,8,i] + dm2[1][1][8,i,i,8]) 
+    sigJsd.append(Jsd)
+  
+    dm = dm2[0][0] + dm2[0][1]
+    
+    sigNdz2.append(dm[6,6])
+    sigNdpi.append(dm[2,2]+dm[3,3])
+    sigNdd.append(dm[0,0]+dm[1,1])
+    sigN2pz.append(dm[7,7])
+    sigN2ppi.append(dm[4,4]+dm[5,5])
+    sigN4s.append(dm[8,8])
+    sigTpi.append(2*(dm[3,4]+dm[2,5]))
+    sigTds.append(2*dm[6,8])
+    sigTdz.append(2*dm[6,7])
+    sigTsz.append(2*dm[7,8])
+  
+  df3['iao_n_3dz2']=sigNdz2
+  df3['iao_n_3dpi']=sigNdpi
+  df3['iao_n_3dz2']=sigNdz2
+  df3['iao_n_2pz']=sigN2pz
+  df3['iao_n_2ppi']=sigN2ppi
+  df3['iao_n_4s']=sigN4s
+  df3['iao_t_pi']=sigTpi
+  df3['iao_t_ds']=sigTds
+  df3['iao_t_dz']=sigTdz
+  df3['iao_t_sz']=sigTsz
+  df3['iao_Us']=sigUs
+  df3['iao_Jsd']=sigJsd
+
+  #df3.to_pickle('analysis/sorted_ed_log_d.pickle')
+  df3.to_pickle('analysis/ed_log_d.pickle')
+  print(df3)
+  exit(0)
+  '''
+
+  '''
+  df3 = pd.read_pickle('analysis/sorted_ed_log_d.pickle')
+  av_df3 = av_ed_log(df3.drop(columns=['ci']))
+  av_df3.to_pickle('analysis/av_sorted_ed_log_d.pickle')
+
+  dd = pd.read_pickle('analysis/sorted_ed_log_d.pickle')
+  df3 = pd.read_pickle('analysis/ed_log_d.pickle')
+  df3['eig'] = dd['eig']
+  av_df3 = av_ed_log(df3.drop(columns=['ci']))
+  av_df3.to_pickle('analysis/av_ed_log_d.pickle')
+  exit(0)
+  '''
 
 if __name__=='__main__':
   #DATA COLLECTION
