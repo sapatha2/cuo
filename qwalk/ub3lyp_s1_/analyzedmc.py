@@ -471,8 +471,8 @@ def plot_ed_log(save=True):
   #FULL EIGENPROPERTIES and EIGENVALUES
   
   beta=2.0
-  #av_df = pd.read_pickle('analysis/av_sorted_ed_log_d.pickle')
-  av_df = pd.read_pickle('analysis/av_ed_log_d.pickle')
+  av_df = pd.read_pickle('analysis/av_sorted_ed_log_d.pickle')
+  #av_df = pd.read_pickle('analysis/av_ed_log_d.pickle')
 
   ## TO GET NICE FORMATTING
   g = sns.FacetGrid(av_df,col='model',col_wrap=3,hue='Sz')
@@ -525,8 +525,8 @@ def plot_ed_log(save=True):
       ax.set_ylim((-0.2,2.5))
       ax.set_xlabel(parm)
       ax.set_ylabel('energy (eV)')
-    #if(save): plt.savefig('analysis/sorted_ed_'+str(model)+'_log.pdf',bbox_inches='tight')
-    if(save): plt.savefig('analysis/ed_'+str(model)+'_log.pdf',bbox_inches='tight')
+    if(save): plt.savefig('analysis/sorted_ed_'+str(model)+'_log.pdf',bbox_inches='tight')
+    #if(save): plt.savefig('analysis/ed_'+str(model)+'_log.pdf',bbox_inches='tight')
     else: plt.show()
     plt.clf()
   
@@ -732,17 +732,17 @@ def analyze(df,save=False):
   df2.to_pickle('analysis/ed_log.pickle')
   exit(0)
   '''
- 
+
   '''
   #Sort/group eigenvalues
   df = pd.read_pickle('analysis/ed_log.pickle')
   df3 = None
   for model in range(16):
     df2 = df[(df['model']==model)]
-    for j in range(max(df2['bs_index'])+1):
+    for j in range(2,max(df2['bs_index'])+1):
       offset = 0
       for Sz in [0.5,1.5]:
-        a = df2[(df2['bs_index']==0)&(df2['Sz']==Sz)]#.iloc[:m[Sz]]
+        a = df2[(df2['bs_index']==1)&(df2['Sz']==Sz)]#.iloc[:m[Sz]]
         amat = np.array(list(a['ci']))
 
         b = df2[(df2['bs_index']==j)&(df2['Sz']==Sz)]#.iloc[:m[Sz]]
@@ -751,8 +751,17 @@ def analyze(df,save=False):
         #Apply permutation to pair up non degenerate states
         cost = -1.*np.dot(amat,bmat.T)**2
         row_ind, col_ind = linear_sum_assignment(cost)
+        
+        ovlp = np.dot(amat,bmat.T)
+        plt.matshow(ovlp,vmin=-1,vmax=1,cmap=plt.cm.bwr)
+        plt.show()
+
         bmat = bmat[col_ind,:]
-     
+    
+        ovlp = np.dot(amat,bmat.T)
+        plt.matshow(ovlp,vmin=-1,vmax=1,cmap=plt.cm.bwr)
+        plt.show()
+
         #Gotta do some extra work for the degenerate states
         #Get connected groups
         abdot = np.dot(amat,bmat.T)
@@ -785,7 +794,12 @@ def analyze(df,save=False):
           
           #If all checks prevail, then finally assign the elements to be identical
           if(eig_check): bmat[row_ind[sub_ind],:] = amat[row_ind[sub_ind],:]
-       
+      
+        ovlp = np.dot(amat,bmat.T)
+        plt.matshow(ovlp,vmin=-1,vmax=1,cmap=plt.cm.bwr)
+        plt.show()
+        exit(0)
+
         #Make sure that we have orthogonal columns and rows
         diff = np.dot(bmat,bmat.T) - np.identity(bmat.shape[0])
         if(abs(np.sum(diff)) > 1e-5):
@@ -892,14 +906,29 @@ def analyze(df,save=False):
   
   #Plot ED
   #plot_ed_log()
+  #exit(0)
 
   #Check to see which models have non zero elements
+  '''
   dfz = pd.read_pickle('analysis/regr_log.pickle')
   dfz = dfz[dfz['beta']==2.0]
   ind = np.unique(dfz[dfz['Jsd']!=0]['model'])
   print(dfz.iloc[ind])
   print(dfz.iloc[[2,3]])
   exit(0)
+  '''
+
+  #Compare spectra between models 
+  '''
+  df = pd.read_pickle('analysis/av_sorted_ed_log_d.pickle')
+  for j in [0,2,3]:
+    sub_df = df[df['model']==j]
+    sub_df = sub_df.sort_values(by='energy').iloc[:20]
+    plt.errorbar(np.zeros(sub_df.shape[0])+j,sub_df['energy'],sub_df['energy_err'],fmt='.')
+  plt.xlabel('Model')
+  plt.ylabel('Eigenvalues')
+  plt.show()
+  '''
 
   #Compare eigenstates between models
   '''
@@ -909,10 +938,10 @@ def analyze(df,save=False):
     for model in [2,3]: #ind:
       print(model,'========')
       for Sz in [0.5,1.5]:
-        a = df[(df['model']==j)&(df['Sz']==Sz)]#.iloc[:m[Sz]]
+        a = df[(df['model']==j)&(df['Sz']==Sz)]
         amat = np.array(list(a['ci']))[np.arange(30),:]
 
-        b = df[(df['model']==model)&(df['Sz']==Sz)]#.iloc[:m[Sz]]
+        b = df[(df['model']==model)&(df['Sz']==Sz)]
         bmat = np.array(list(b['ci']))[np.arange(30),:]
     
         #Apply permutation to pair up non degenerate states
@@ -922,19 +951,30 @@ def analyze(df,save=False):
         bmat = bmat[col_ind,:]
         ovlp = np.dot(amat,bmat.T)
         
-        plt.matshow(ovlp,vmin=-1,vmax=1,cmap=plt.cm.bwr)
-        plt.xticks(np.arange(30),col_ind)
-        plt.yticks(np.arange(30),row_ind)
+        plt.matshow(ovlp[:20,:20],vmin=-1,vmax=1,cmap=plt.cm.bwr)
+        plt.xticks(np.arange(20),col_ind[:20])
+        plt.yticks(np.arange(20),row_ind[:20])
+        plt.xlabel('Model '+str(model))
+        plt.ylabel('Model 0')
         plt.show()
-  '''
-  
+  exit(0)
+
   df = pd.read_pickle('analysis/av_sorted_ed_log_d.pickle')
   a = df[(df['model']==0)&(df['Sz']==0.5)]
   b = df[(df['model']==0)&(df['Sz']==1.5)]
   print(a[['energy','iao_n_3dd','iao_n_3dz2','iao_n_3dpi','iao_n_2ppi','iao_n_2pz','iao_n_4s']].iloc[:11])
   print(b[['energy','iao_n_3dd','iao_n_3dz2','iao_n_3dpi','iao_n_2ppi','iao_n_2pz','iao_n_4s']].iloc[:11])
-
-
+  '''
+  
+  #X=df[['mo_n_2pz','mo_n_2ppi','mo_n_4s','Jsd','Us','mo_t_pi']]
+  #y=df['energy']
+  #X=sm.add_constant(X)
+  #ols=sm.OLS(y,X).fit()
+  #df['resid']=df['energy']-ols.predict()
+  #sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz'],hue='basestate',markers=['o']+['.']*11)
+  #plt.show()
+  sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz','iao_t_ds','iao_t_dz'],hue='basestate',markers=['o']+['.']*11)
+  plt.show()
 if __name__=='__main__':
   #DATA COLLECTION
   #df=collect_df()
