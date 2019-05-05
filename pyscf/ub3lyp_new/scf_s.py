@@ -5,182 +5,83 @@ from pyscf.scf import ROHF,ROKS,UHF,UKS, addons
 import numpy as np
 import pandas as pd
 
+S=1
+symm_dict = [
+#{'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(z,z -> pi, s)
+{'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(z,z -> pi, s)
+#{'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(z,z -> pi, s)
+
+{'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(dz2 -> pi)
+]
+
+chk0 = [
+#'../ub3lyp_full/Cuvtz_r1.725_s1_UB3LYP_0.chk', #E = -213.439445239291  <S^2> = 0.78520818  2S+1 = 2.0349036 
+'../ub3lyp_full/Cuvtz_r1.725_s1_UB3LYP_3.chk', #E = -213.459052532939  <S^2> = 1.3510888  2S+1 = 2.5306828
+#'../ub3lyp_full/Cuvtz_r1.725_s1_UB3LYP_4.chk', #E = -213.440520116249  <S^2> = 0.99639784  2S+1 = 2.2328438
+
+'../ub3lyp_full/Cuvtz_r1.725_s1_UB3LYP_0.chk', #E = -213.476203175783  <S^2> = 1.1669561  2S+1 = 2.3807193
+]
+
+excit = []
+
 df=json.load(open("trail.json"))
-charge=0
-######################################################################
-'''
-S=1
-symm_dict=[
-#4s1 states-----------------------------------------------------------
-#3d10 sector
-{'A1':(5,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #GS 
-{'A1':(6,5),'E1x':(3,3),'E1y':(2,2),'E2x':(1,1),'E2y':(1,1)}, #(pi -> s)  
-{'A1':(6,5),'E1x':(3,2),'E1y':(2,3),'E2x':(1,1),'E2y':(1,1)}, #(pi -> s) 
-{'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(z -> pi)
-{'A1':(6,4),'E1x':(3,3),'E1y':(2,3),'E2x':(1,1),'E2y':(1,1)}, #(z -> s) 
-
-#3d9 sector
-{'A1':(5,5),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,0)}, #(dd -> pi) 
-{'A1':(6,5),'E1x':(3,3),'E1y':(2,3),'E2x':(1,1),'E2y':(1,0)}, #(dd -> s) -- Spin pairs 
-{'A1':(6,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(0,1)}, #(dd -> s) -- 
-{'A1':(5,6),'E1x':(3,3),'E1y':(3,1),'E2x':(1,1),'E2y':(1,1)}, #(dpi -> s)
-{'A1':(6,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(0,1)}, #(dd,z -> pi,s)
-
-#4s2 states-----------------------------------------------------------
-#3d10 sector
-{'A1':(6,6),'E1x':(3,2),'E1y':(2,2),'E2x':(1,1),'E2y':(1,1)}, #(2*pi -> 2*s)
-
-#3d9 sector 
-{'A1':(6,6),'E1x':(3,3),'E1y':(2,2),'E2x':(1,1),'E2y':(1,0)}, #(dd,pi -> s,s)
-{'A1':(6,6),'E1x':(3,3),'E1y':(2,1),'E2x':(1,1),'E2y':(1,1)}, #(dpi,pi -> s,s)
-{'A1':(6,6),'E1x':(3,2),'E1y':(2,3),'E2x':(1,1),'E2y':(1,0)}, #(dd,pi -> s,s)
-{'A1':(6,6),'E1x':(3,1),'E1y':(2,3),'E2x':(1,1),'E2y':(1,1)}, #(dpi,pi-> s,s)
-{'A1':(6,6),'E1x':(3,2),'E1y':(3,2),'E2x':(1,1),'E2y':(0,1)}, #(dd,pi -> s,s)
-]
-'''
-'''
-#MIRROR (FOR IAOS)
-S=1
-symm_dict=[
-#4s1 states-----------------------------------------------------------
-#3d10 sector
-{'A1':(5,5),'E1x':(3,2),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #GS 
-{'A1':(6,5),'E1x':(2,2),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(pi -> s)  
-{'A1':(6,5),'E1x':(2,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #(pi -> s) 
-{'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(z -> pi)
-{'A1':(6,4),'E1x':(2,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(z -> s) 
-
-#3d9 sector
-{'A1':(5,5),'E1x':(3,3),'E1y':(3,3),'E2x':(1,0),'E2y':(1,1)}, #(dd -> pi) 
-{'A1':(6,5),'E1x':(2,3),'E1y':(3,3),'E2x':(1,0),'E2y':(1,1)}, #(dd -> s) -- Spin pairs 
-{'A1':(6,5),'E1x':(3,2),'E1y':(3,3),'E2x':(0,1),'E2y':(1,1)}, #(dd -> s) -- 
-{'A1':(5,6),'E1x':(3,1),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(dpi -> s)
-{'A1':(6,4),'E1x':(3,3),'E1y':(3,3),'E2x':(0,1),'E2y':(1,1)}, #(dd,z -> pi,s)
-
-#4s2 states-----------------------------------------------------------
-#3d10 sector
-{'A1':(6,6),'E1x':(2,2),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #(2*pi -> 2*s)
-
-#3d9 sector
-{'A1':(6,6),'E1x':(2,2),'E1y':(3,3),'E2x':(1,0),'E2y':(1,1)}, #(dd,pi -> s,s)
-{'A1':(6,6),'E1x':(2,1),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(dpi,pi -> s,s)
-{'A1':(6,6),'E1x':(2,3),'E1y':(3,2),'E2x':(1,0),'E2y':(1,1)}, #(dd,pi -> s,s)
-{'A1':(6,6),'E1x':(2,3),'E1y':(3,1),'E2x':(1,1),'E2y':(1,1)}, #(dpi,pi-> s,s)
-{'A1':(6,6),'E1x':(3,2),'E1y':(3,2),'E2x':(0,1),'E2y':(1,1)}, #(dd,pi -> s,s)
-]
-'''
-######################################################################
-S=3
-symm_dict=[
-#4s1 states-----------------------------------------------------------
-#3d10 sector
-{'A1':(6,5),'E1x':(3,2),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #dn - 2pz occupied
-{'A1':(6,4),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #dn - 2ppi occupied
-#3d9 sector
-{'A1':(6,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,0)}, #delta, dn - pz, px
-{'A1':(6,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,0)}, #delta, dn - px, py
-{'A1':(6,5),'E1x':(3,3),'E1y':(3,1),'E2x':(1,1),'E2y':(1,1)}, #pi, dn - pz, px
-{'A1':(6,3),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #dz2, dn - px, py
-
-#4s2 states-----------------------------------------------------------
-#3d9 sector
-{'A1':(6,6),'E1x':(3,2),'E1y':(3,2),'E2x':(1,1),'E2y':(1,0)}, 
-{'A1':(6,6),'E1x':(3,2),'E1y':(3,1),'E2x':(1,1),'E2y':(1,1)}, 
-]
-
-'''
-#MIRROR (FOR IAOS)
-S=3
-symm_dict=[
-#4s1 states-----------------------------------------------------------
-#3d10 sector
-{'A1':(6,5),'E1x':(3,2),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #dn - 2pz occupied
-{'A1':(6,4),'E1x':(3,2),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #dn - 2ppi occupied
-#3d9 sector
-{'A1':(6,5),'E1x':(3,2),'E1y':(3,3),'E2x':(1,0),'E2y':(1,1)}, #delta, dn - pz, px
-{'A1':(6,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,0),'E2y':(1,1)}, #delta, dn - px, py
-{'A1':(6,5),'E1x':(3,1),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #pi, dn - pz, px
-{'A1':(6,3),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #dz2, dn - px, py
-
-#4s2 states-----------------------------------------------------------
-#3d9 sector
-{'A1':(6,6),'E1x':(3,2),'E1y':(3,2),'E2x':(1,1),'E2y':(1,0)}, 
-{'A1':(6,6),'E1x':(3,2),'E1y':(3,1),'E2x':(1,1),'E2y':(1,1)}, 
-]
-'''
-######################################################################
-
+r = 1.725 
+xc = 'B3LYP'
 datacsv={}
-
 for nm in['run','method','basis','pseudopotential','bond-length','S','E','conv']:
   datacsv[nm]=[]
 
-for run in np.arange(6,8):
-  for r in [1.725]:
-    for method in ['UB3LYP']:
-      for basis in ['vdz','vtz']:
-        for el in ['Cu']:
-          molname=el+'O'
-          mol=gto.Mole()
+basis='vtz'
 
-          mol.ecp={}
-          mol.basis={}
-          for e in [el,'O']:
-            mol.ecp[e]=gto.basis.parse_ecp(df[e]['ecp'])
-            mol.basis[e]=gto.basis.parse(df[e][basis])
-          mol.charge=charge
-          mol.spin=S
-          mol.build(atom="%s 0. 0. 0.; O 0. 0. %g"%(el,r),verbose=4,symmetry=True)
-         
-          if("U" in method): 
-            if("HF" in method): 
-              m=UHF(mol)
-            else:
-              m=UKS(mol)
-              m.xc=method[1:]
-          else: 
-            if(method=="ROHF"):
-              m=ROHF(mol)
-            else:
-              m=ROKS(mol)
-              m.xc=method
+for run in range(len(chk0)):
+  run=0
+  mol=gto.Mole()
+  mol.ecp={}
+  mol.basis={}
+  for e in ['Cu','O']:
+    mol.ecp[e]=gto.basis.parse_ecp(df[e]['ecp'])
+    mol.basis[e]=gto.basis.parse(df[e][basis])
+  mol.charge = 0
+  mol.spin = S
+  mol.build(atom="Cu 0. 0. 0.; O 0. 0. %g"%(r), verbose=4, symmetry=True)
 
-          if basis=='vdz':
-            #m=m.newton()
-            m.chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+"mirror.chk"
-            m.irrep_nelec = symm_dict[run]
-            m.max_cycle=100
-            m = addons.remove_linear_dep_(m)
-            m.conv_tol=1e-5
-            m.diis=scf.ADIIS()
-            total_energy=m.kernel()
-            
-            #Compute the Mulliken orbital occupancies...
-            m.analyze()
-            #m.stability(external=True)
-            assert(np.sum(m.mo_occ)==25)
-          
-          #Once we get past the vdz basis, just read-in the existingmirror.chk file...
-          else:
-            dm=m.from_chk(el+'vdz'+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+"mirror.chk")
-            m.chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+"mirror.chk"
-            m.irrep_nelec = symm_dict[run]
-            m.max_cycle=100
-            m = addons.remove_linear_dep_(m)
-            m.conv_tol=1e-5
-            m.diis=scf.ADIIS()
-            total_energy=m.kernel(dm)
+  m = UKS(mol)
+  m.xc = xc
 
-            m.analyze()
-            #m.stability(external=True)
-            assert(np.sum(m.mo_occ)==25)
+  m.irrep_nelec = symm_dict[run]
+  m.max_cycle = 100
+  m = addons.remove_linear_dep_(m)
+  m.conv_tol = 1e-5
+  #m.diis = scf.ADIIS()
 
-          datacsv['run'].append(run)
-          datacsv['bond-length'].append(r)
-          datacsv['S'].append(S)
-          datacsv['method'].append(method)
-          datacsv['basis'].append(basis)
-          datacsv['pseudopotential'].append('trail')
-          datacsv['E'].append(total_energy)
-          datacsv['conv'].append(m.converged)
-          pd.DataFrame(datacsv).to_csv("cuo_do.csv",index=False)
+  #MOM deltaSCF
+  mo0 = scf.chkfile.load(chk0,'scf/mo_coeff')
+  occ = scf.chkfile.load(chk0,'scf/mo_occ')
+
+  #---------------
+  #State 1: pz, pz -> pi, 4s using |GS> 
+  #occ[0][11]=0
+  #occ[0][13]=1
+  #occ[1][10]=0
+  #occ[1][12]=1
+
+  #MAP excitations
+  #---------------
+
+  dm = m.make_rdm1(mo0, occ)
+  m = scf.addons.mom_occ(m, mo0, occ)
+  m.chkfile='Cuvtz_r1.725_s1_UB3LYP_'+str(run)+'MOM.chk'
+
+  total_energy = m.kernel(dm)
+  m.analyze()
+  assert(np.sum(m.mo_occ)==25)
+
+  datacsv['run'].append(run)
+  datacsv['bond-length'].append(r)
+  datacsv['S'].append(S)
+  datacsv['method'].append('UB3LYP')
+  datacsv['basis'].append(basis)
+  datacsv['pseudopotential'].append('trail')
+  datacsv['E'].append(total_energy)
+  datacsv['conv'].append(m.converged)
+  pd.DataFrame(datacsv).to_csv("cuo_MOM.csv",index=False)

@@ -1,0 +1,58 @@
+jastrow2
+group {
+  optimizebasis
+  eebasis {
+    ee
+    cutoff_cusp
+    gamma 24.0
+    cusp 1.0
+    cutoff 7.5
+  }
+  eebasis {
+    ee
+    cutoff_cusp
+    gamma 24.0
+    cusp 1.0
+    cutoff 7.5
+  }
+  twobody_spin {
+    freeze
+    like_coefficients { 0.25 0.0 }
+    unlike_coefficients { 0.0 0.5 }
+  }
+}
+group {
+  optimizebasis
+  eibasis {
+    Cu
+    polypade
+    beta0 0.2
+    nfunc 4
+    rcut 7.5
+  }
+  eibasis {
+    O
+    polypade
+    beta0 0.2
+    nfunc 4
+    rcut 7.5
+  }
+  onebody {
+    coefficients { Cu 0.0 0.0 0.0 0.0 }
+    coefficients { O 0.0 0.0 0.0 0.0 }
+  }
+threebody {
+    coefficients { Cu 0. 0. 0. 0.  0. 0. 0. 0.  0. 0. 0. 0.  }
+    coefficients { O 0. 0. 0. 0.  0. 0. 0. 0.  0. 0. 0. 0.  }
+}
+  eebasis {
+    ee
+    polypade
+    beta0 0.5
+    nfunc 3
+    rcut 7.5
+  }
+  twobody {
+    coefficients { 0.0 0.0 0.0 }
+  }
+}
