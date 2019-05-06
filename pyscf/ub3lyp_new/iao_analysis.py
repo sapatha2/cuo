@@ -81,5 +81,6 @@ for chkfile in chkfiles:
   tds.append( 2*dm[0,3])
   
 df = pd.DataFrame({'ns':ns,'nd':nd,'npi':npi,'nz':nz,'tpi':tpi,'tsz':tsz,'tdz':tdz,'tds':tds,'ind':np.arange(len(tds))})
-sns.pairplot(df,vars=['tpi','tsz','tds','tdz'],hue='ind',markers=['.']*17+['o']*3)
+#sns.pairplot(df,vars=['tpi','tsz','tds','tdz'],hue='ind',markers=['.']*17+['o']*3)
+sns.pairplot(df,vars=['nd','nz','npi','ns'],hue='ind',markers=['.']*17+['o']*3)
 plt.show()
