@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pyscf2qwalk import print_qwalk_mol
 from functools import reduce 
+import seaborn as sns 
 
 #MO basis 
 '''
@@ -16,6 +17,8 @@ m=ROKS(mol)
 m.__dict__.update(lib.chkfile.load(chkfile, 'scf'))
 a=m.mo_coeff[:,:14]
 '''
+
+#IAO basis
 a = pd.read_pickle('../ub3lyp_full/b3lyp_iao_b.pickle')
 
 charge=0
@@ -24,10 +27,22 @@ r=1.725
 method='UB3LYP'
 basis='vtz'
 el='Cu'
- 
-for chkfile in ['Cuvtz_r1.725_s1_UB3LYP_11.chk',
+
+chkfiles = ['../ub3lyp_full/Cuvtz_r1.725_s1_UB3LYP_'+str(i)+'.chk' for i in range(11)]
+chkfiles += ['Cuvtz_r1.725_s1_UB3LYP_11.chk',
 'Cuvtz_r1.725_s1_UB3LYP_12.chk','Cuvtz_r1.725_s1_UB3LYP_13.chk',
-'Cuvtz_r1.725_s1_UB3LYP_14.chk']:
+'Cuvtz_r1.725_s1_UB3LYP_14.chk']
+
+zz=0
+ns=[]
+nd=[]
+npi=[]
+nz=[]
+tpi=[]
+tsz=[]
+tdz=[]
+tds=[]
+for chkfile in chkfiles:
   mol=lib.chkfile.load_mol(chkfile)
   m=UKS(mol)
   m.__dict__.update(lib.chkfile.load(chkfile, 'scf'))
@@ -42,7 +57,6 @@ for chkfile in ['Cuvtz_r1.725_s1_UB3LYP_11.chk',
   M=reduce(np.dot,(a.T,s,M))
   dm_d=np.dot(M,M.T)
 
-
   #MOs
   #labels=['dx','dy','dz','dd','dd','px','py','pz','4s']
   #dm_u = dm_u[5:][:,5:]
@@ -53,14 +67,18 @@ for chkfile in ['Cuvtz_r1.725_s1_UB3LYP_11.chk',
   ind=[1,5,6,7,8,9,11,12,13]
   dm_u = dm_u[ind][:,ind]
   dm_d = dm_d[ind][:,ind]
+  dm = dm_u + dm_d
+  print(np.diag(dm))
 
-  #IAOs
-  plt.matshow(dm_u,vmin=-1,vmax=1,cmap=plt.cm.bwr)
-  plt.xticks(np.arange(len(labels)),labels)
-  plt.yticks(np.arange(len(labels)),labels)
-  plt.show()
-
-  plt.matshow(dm_d,vmin=-1,vmax=1,cmap=plt.cm.bwr)
-  plt.xticks(np.arange(len(labels)),labels)
-  plt.yticks(np.arange(len(labels)),labels)
-  plt.show()
+  ns.append( dm[0,0])
+  nd.append( np.sum(dm[[1,2,3,4,5],[1,2,3,4,5]]))
+  npi.append( dm[6,6]+dm[7,7])
+  nz.append( dm[8,8])
+  tpi.append( 2*(dm[2,7] + dm[4,6]))
+  tsz.append( 2*dm[0,8])
+  tdz.append( 2*dm[3,8])
+  tds.append( 2*dm[0,3])
+  
+df = pd.DataFrame({'ns':ns,'nd':nd,'npi':npi,'nz':nz,'tpi':tpi,'tsz':tsz,'tdz':tdz,'tds':tds,'ind':np.arange(len(tds))})
+sns.pairplot(df,vars=['tpi','tsz','tds','tdz'],hue='ind',markers=['.']*11+['o']*4)
+plt.show()
