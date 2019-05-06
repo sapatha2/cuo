@@ -982,6 +982,13 @@ if __name__=='__main__':
   #df.to_pickle('formatted_gosling.pickle')
   #exit(0)
 
+  ''' 
+  d=(pd.read_pickle('analysis/regr_log.pickle'))
+  for i in range(16):
+    print(d[d['model']==i].iloc[0])
+  
+  exit(0)
+  '''
   #DATA ANALYSIS
   df=pd.read_pickle('formatted_gosling.pickle')
   analyze(df)

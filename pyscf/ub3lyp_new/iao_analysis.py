@@ -29,9 +29,10 @@ basis='vtz'
 el='Cu'
 
 chkfiles = ['../ub3lyp_full/Cuvtz_r1.725_s1_UB3LYP_'+str(i)+'.chk' for i in range(11)]
+chkfiles += ['../ub3lyp_full/Cuvtz_r1.725_s3_UB3LYP_'+str(i)+'.chk' for i in range(6)]
 chkfiles += ['Cuvtz_r1.725_s1_UB3LYP_11.chk',
-'Cuvtz_r1.725_s1_UB3LYP_12.chk','Cuvtz_r1.725_s1_UB3LYP_13.chk',
-'Cuvtz_r1.725_s1_UB3LYP_14.chk']
+'Cuvtz_r1.725_s1_UB3LYP_12.chk',
+'Cuvtz_r1.725_s3_UB3LYP_13.chk']
 
 zz=0
 ns=[]
@@ -68,7 +69,7 @@ for chkfile in chkfiles:
   dm_u = dm_u[ind][:,ind]
   dm_d = dm_d[ind][:,ind]
   dm = dm_u + dm_d
-  print(np.diag(dm))
+  print(np.trace(dm))
 
   ns.append( dm[0,0])
   nd.append( np.sum(dm[[1,2,3,4,5],[1,2,3,4,5]]))
@@ -80,5 +81,5 @@ for chkfile in chkfiles:
   tds.append( 2*dm[0,3])
   
 df = pd.DataFrame({'ns':ns,'nd':nd,'npi':npi,'nz':nz,'tpi':tpi,'tsz':tsz,'tdz':tdz,'tds':tds,'ind':np.arange(len(tds))})
-sns.pairplot(df,vars=['tpi','tsz','tds','tdz'],hue='ind',markers=['.']*11+['o']*4)
+sns.pairplot(df,vars=['tpi','tsz','tds','tdz'],hue='ind',markers=['.']*17+['o']*3)
 plt.show()

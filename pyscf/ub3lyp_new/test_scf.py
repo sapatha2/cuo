@@ -41,6 +41,7 @@ for nm in['run','method','basis','pseudopotential','bond-length','S','E','conv']
 #Dn: 5 [dx dy dd dd px py dz pz 4s] 
 #|5 3/2>
 
+'''
 S=[1,1,1,3]
 
 chk0=[
@@ -56,8 +57,23 @@ excit_list = [
 [[1,5,12]],             #(dz -> py)                  [4s up, dz dn, pz dn]
 [[1,10,12]],             #(dz -> 4s)               
 ]# Build this
+'''
 
-for run in [3]:#np.arange(4):
+S=[1,1,3]
+
+chk0=[
+'../ub3lyp_full/Cu'+str(basis)+'_r1.725_s1_UB3LYP_0.chk',
+'../ub3lyp_full/Cu'+str(basis)+'_r1.725_s1_UB3LYP_0.chk',
+'../ub3lyp_full/Cu'+str(basis)+'_r1.725_s3_UB3LYP_5.chk',
+]
+
+excit_list = [
+[[1,10,12],[0,11,13]],
+[[1,7,12]],             
+[[1,10,12]],            
+]# Build this
+
+for run in np.arange(3):
   mol=gto.Mole()
   mol.ecp={}
   mol.basis={}
@@ -88,7 +104,7 @@ for run in [3]:#np.arange(4):
   else: 
     dm=m.from_chk(chk0)
 
-  m.chkfile='Cuvtz_r1.725_s1_UB3LYP_'+str(run+11)+'.chk'
+  m.chkfile='Cuvtz_r1.725_s'+str(S[run])+'_UB3LYP_'+str(run+11)+'.chk'
 
   total_energy = m.kernel(dm)
   m.analyze()
