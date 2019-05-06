@@ -1,0 +1,9 @@
+method {
+  vmc
+  nblock 2000
+}
+
+include gs1.sys
+trialfunc {
+  include gs1.slater 
+}

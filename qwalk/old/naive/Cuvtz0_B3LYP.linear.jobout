@@ -1,0 +1,52 @@
+----------------------------------------
+Begin Torque Prologue (Sun Jul 29 20:20:05 2018)
+Job ID:           7426338.cc-mgmt1.campuscluster.illinois.edu
+Username:         sapatha2
+Group:            wagner
+Job Name:         Cuvtz0_B3LYP.linear
+Limits:           nodes=1,walltime=08:00:00,neednodes=1
+Job Queue:        wagner
+Account:          wagner
+Nodes:            golub052
+End Torque Prologue
+----------------------------------------
+----------------------------------------
+Begin Torque Epilogue (Mon Jul 30 04:20:22 2018)
+Job ID:           7426338.cc-mgmt1.campuscluster.illinois.edu
+Username:         sapatha2
+Group:            wagner
+Job Name:         Cuvtz0_B3LYP.linear
+Session:          838
+Limits:           nodes=1,walltime=08:00:00,neednodes=1
+Resources:        cput=127:46:09,vmem=5020296kb,walltime=08:00:16,mem=1133852kb,energy_used=0
+Job Queue:        wagner
+Account:          wagner
+Nodes:            golub052
+End Torque Epilogue
+----------------------------------------
+----------------------------------------
+Begin Torque Prologue (Mon Jul 30 11:29:27 2018)
+Job ID:           7426932.cc-mgmt1.campuscluster.illinois.edu
+Username:         sapatha2
+Group:            wagner
+Job Name:         Cuvtz0_B3LYP.linear
+Limits:           nodes=1,walltime=08:00:00,neednodes=1
+Job Queue:        wagner
+Account:          wagner
+Nodes:            golub049
+End Torque Prologue
+----------------------------------------
+----------------------------------------
+Begin Torque Epilogue (Mon Jul 30 16:09:00 2018)
+Job ID:           7426932.cc-mgmt1.campuscluster.illinois.edu
+Username:         sapatha2
+Group:            wagner
+Job Name:         Cuvtz0_B3LYP.linear
+Session:          80351
+Limits:           nodes=1,walltime=08:00:00,neednodes=1
+Resources:        cput=74:17:30,vmem=5144240kb,walltime=04:39:33,mem=1206640kb,energy_used=0
+Job Queue:        wagner
+Account:          wagner
+Nodes:            golub049
+End Torque Epilogue
+----------------------------------------

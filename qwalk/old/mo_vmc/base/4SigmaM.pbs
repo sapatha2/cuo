@@ -1,0 +1,11 @@
+#!/bin/bash 
+#PBS -q wagner
+#PBS -l nodes=1,flags=allprocs
+#PBS -l walltime=00:30:00 
+#PBS -N 4SigmaM
+#PBS -e 4SigmaM.perr 
+#PBS -o 4SigmaM.pout 
+module load openmpi/3.1.1-gcc-7.2.0
+module load intel/18.0
+cd $PBS_O_WORKDIR
+mpiexec ../../../../mainline/bin/qwalk 4SigmaM.vmc &> 4SigmaM.vmc.out

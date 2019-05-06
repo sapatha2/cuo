@@ -1,0 +1,13 @@
+method { 
+  dmc 
+  ##nblock
+  ##timestep
+}
+
+##include sys 
+
+trialfunc {
+  slater-jastrow
+  ##wf1 { include slater } 
+  wf2 { include Cuvtz0_B3LYP.optjast3 }
+}

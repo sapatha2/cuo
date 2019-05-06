@@ -1,0 +1,11 @@
+#!/bin/bash
+#PBS -q low
+#PBS -l nodes=2:ppn=32:xe
+#PBS -l walltime=04:00:00
+#PBS -N 4Phi_s_Ndet10_gsw0.7_3
+#PBS -e 4Phi_s_Ndet10_gsw0.7_3.perr
+#PBS -o 4Phi_s_Ndet10_gsw0.7_3.pout
+mkdir -p /scratch/sciteam/$USER/cuo/qwalk/vmc/run1s
+cd /scratch/sciteam/$USER/cuo/qwalk/vmc/run1s
+cp -u /u/sciteam/$USER/cuo/qwalk/vmc/run1s/* .
+aprun -n 64 /u/sciteam/$USER/fork/bin/qwalk 4Phi_s_Ndet10_gsw0.7_3.vmc &> 4Phi_s_Ndet10_gsw0.7_3.vmc.out

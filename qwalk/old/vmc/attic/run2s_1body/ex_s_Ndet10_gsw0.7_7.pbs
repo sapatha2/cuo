@@ -1,0 +1,11 @@
+#!/bin/bash
+#PBS -q low
+#PBS -l nodes=2:ppn=32:xe
+#PBS -l walltime=01:00:00
+#PBS -N ex_s_Ndet10_gsw0.7_7
+#PBS -e ex_s_Ndet10_gsw0.7_7.perr
+#PBS -o ex_s_Ndet10_gsw0.7_7.pout
+mkdir -p /scratch/sciteam/$USER/cuo/qwalk/vmc/run2s/
+cd /scratch/sciteam/$USER/cuo/qwalk/vmc/run2s/
+cp -u /u/sciteam/$USER/cuo/qwalk/vmc/run2s//* .
+aprun -n 64 /u/sciteam/$USER/fork/bin/qwalk ex_s_Ndet10_gsw0.7_7.vmc &> ex_s_Ndet10_gsw0.7_7.vmc.out

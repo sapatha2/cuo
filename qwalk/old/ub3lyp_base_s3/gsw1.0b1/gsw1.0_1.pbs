@@ -1,0 +1,11 @@
+#!/bin/bash
+#PBS -q low
+#PBS -l nodes=1:ppn=32:xe
+#PBS -l walltime=04:00:00
+#PBS -N gsw1.0_1
+#PBS -e gsw1.0_1.perr
+#PBS -o gsw1.0_1.pout
+mkdir -p /scratch/sciteam/$USER/cuo/qwalk/ub3lyp_base_s3/gsw1.0b1/
+cd /scratch/sciteam/$USER/cuo/qwalk/ub3lyp_base_s3/gsw1.0b1/
+cp -u /u/sciteam/$USER/cuo/qwalk/ub3lyp_base_s3/gsw1.0b1/* .
+aprun -n 32 /u/sciteam/$USER/fork/bin/qwalk gsw1.0_1.vmc &> gsw1.0_1.vmc.out

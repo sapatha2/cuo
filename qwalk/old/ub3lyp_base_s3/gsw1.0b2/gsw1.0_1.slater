@@ -1,0 +1,17 @@
+SLATER
+ORBITALS  {
+  MAGNIFY 1.0
+  NMO 168
+  ORBFILE all_hispin.orb
+  INCLUDE all_hispin.basis
+  CENTERS { USEGLOBAL }
+}
+
+DETWT { 
+  1 
+}
+STATES {
+  29 30 31 32 33 34 35 36 37 38 39 40 41 42
+  113 114 115 116 117 118 119 120 121 122 123
+
+}

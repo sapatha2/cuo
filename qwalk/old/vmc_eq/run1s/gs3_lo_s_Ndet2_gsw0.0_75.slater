@@ -1,0 +1,16 @@
+SLATER
+ORBITALS  {
+  MAGNIFY 1.0
+  NMO 14
+  ORBFILE gs3_lo.orb
+  INCLUDE gs3_lo.basis
+  CENTERS { USEGLOBAL }
+}
+
+DETWT { 
+  -1.0 
+}
+STATES {
+  1 2 3 4 5 6 7 8 9 10 11 13 14
+  1 2 3 4 5 6 7 8 9 10 11 12
+}

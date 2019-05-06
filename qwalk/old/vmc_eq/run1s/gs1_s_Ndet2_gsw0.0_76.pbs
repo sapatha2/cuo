@@ -1,0 +1,11 @@
+#!/bin/bash
+#PBS -q secondary
+#PBS -l nodes=1,flags=allprocs
+#PBS -l walltime=00:30:00
+#PBS -N gs1_s_Ndet2_gsw0.0_76
+#PBS -e gs1_s_Ndet2_gsw0.0_76.perr
+#PBS -o gs1_s_Ndet2_gsw0.0_76.pout
+module load openmpi/3.1.1-gcc-7.2.0
+module load intel/18.0
+cd ${PBS_O_WORKDIR}/run1s/ 
+mpiexec ../../../../mainline/bin/qwalk gs1_s_Ndet2_gsw0.0_76.vmc &> gs1_s_Ndet2_gsw0.0_76.vmc.out
