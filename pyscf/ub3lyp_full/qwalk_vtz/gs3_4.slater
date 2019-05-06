@@ -1,0 +1,16 @@
+SLATER
+  ORBITALS  { 
+  MAGNIFY 1.0 
+  NMO 144 
+  ORBFILE qwalk_vtz/gs3_4.orb
+  INCLUDE qwalk_vtz/gs3_4.basis
+  CENTERS { USEGLOBAL }
+  }
+
+  DETWT { 1.0 }
+  STATES {
+  #Spin up orbitals 
+  1 2 3 4 5 6 7 8 9 10 11 12 13 14 
+  #Spin down orbitals 
+  134 135 136 137 138 139 140 141 142 143 144 
+  }

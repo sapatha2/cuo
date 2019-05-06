@@ -1,0 +1,18 @@
+SLATER
+ORBITALS  {
+  MAGNIFY 1.0
+  NMO 168
+  ORBFILE all_hispin.orb
+  INCLUDE all_hispin.basis
+  CENTERS { USEGLOBAL }
+}
+
+SHERMAN_MORRISON_UPDATES 
+DETWT { 
+  1 
+}
+STATES {
+  1 2 3 4 5 6 7 8 9 10 11 12 13 14
+  85 86 87 88 89 90 91 92 93 94 95
+
+}

@@ -1,0 +1,11 @@
+#!/bin/bash
+#PBS -q low
+#PBS -l nodes=8:ppn=32:xe
+#PBS -l walltime=02:00:00
+#PBS -N gsw0.2_3
+#PBS -e gsw0.2_3.perr
+#PBS -o gsw0.2_3.pout
+mkdir -p /scratch/sciteam/$USER/cuo/qwalk/ub3lyp_s1_/gsw0.2b5/
+cd /scratch/sciteam/$USER/cuo/qwalk/ub3lyp_s1_/gsw0.2b5/
+cp -u /u/sciteam/$USER/cuo/qwalk/ub3lyp_s1_/gsw0.2b5/* .
+aprun -n 256 /u/sciteam/$USER/fork/bin/qwalk gsw0.2_3.dmc &> gsw0.2_3.dmc.out

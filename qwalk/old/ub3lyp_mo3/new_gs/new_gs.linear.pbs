@@ -1,0 +1,10 @@
+#!/bin/bash 
+#PBS -q low 
+#PBS -l nodes=8:ppn=32:xe 
+#PBS -l walltime=02:00:00 
+#PBS -N linear
+#PBS -e linear.perr 
+#PBS -o linear.pout 
+cd /scratch/sciteam/$USER/cuo/qwalk/ub3lyp_mo3/
+cp -u /u/sciteam/$USER/cuo/qwalk/ub3lyp_mo3/new_gs/* .
+aprun -n 256 /u/sciteam/$USER/fork/bin/qwalk new_gs.linear &> new_gs.linear.out

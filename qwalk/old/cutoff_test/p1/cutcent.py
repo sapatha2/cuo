@@ -1,0 +1,76 @@
+import numpy as np
+import matplotlib.pyplot as plt 
+from sklearn import linear_model
+from sklearn.metrics import r2_score 
+from numpy.polynomial.polynomial import polyfit
+
+cut=[0,0.25,0.5,0.60,0.65,0.7,0.725,0.75,0.855,1.0,1.185,1.275,1.35,1.5,2.0,2.5,3.0]
+
+y=[-0.26131729381499985,
+-0.2615203487999996,
+-0.2613831642500004,
+-0.26130268779999827,
+-0.2612151221499986,
+-0.2610368513500027,
+-0.2609798726999996,
+-0.2609777766499998,
+-0.2598543379026741,
+-0.2557322993999997,
+-0.2476259048677235,
+-0.24246448764397843,
+-0.23774176683992815,
+-0.2280340521708321,
+-0.1944339603528687,
+-0.16611247956736916,
+-0.14383988150894847]
+
+yerr=[
+0.00011773923688251095,
+0.00011771148811897526,
+0.00011848052474297507,
+0.00011812237277196461,
+0.00011642056783069769,
+0.00011726326010482222,
+0.00011679205009767541,
+0.00011720872941439025,
+0.0001189674443812986,
+0.00011598027675388498,
+0.00011669985839427388,
+0.0001127752584691596,
+0.00011143088731661186,
+0.00010559100317204669,
+9.302647908095519e-05,
+8.330677013976669e-05,
+7.718968734072832e-05]
+
+dropped=np.array([0,91,5191,37641,95057,213380,418165,418165,1192706,3524323,7681667,10372517,12538187,18185196,34586996,47923750,55560483])
+blocks=np.array([20000,20000,20000,20000,20000,20000,20000,20000,18967,20000,18900,19100,18854,19762,19725,19601,18609])
+droppedcent=dropped/(blocks*64)
+
+#plt.plot(cut,droppedcent,'o-')
+
+#Linear
+plt.ylabel("dPsi/dp")
+plt.xlabel("% configs dropped")
+plt.errorbar(droppedcent,y,yerr=yerr,fmt='o')
+plt.plot(droppedcent[8],y[8],'sg')
+print(cut[8])
+'''
+regr=linear_model.LinearRegression()
+regr.fit(droppedcent[9:,np.newaxis],y[9:])
+ypred=regr.predict(droppedcent[:,np.newaxis])
+plt.plot(droppedcent,ypred,'-')
+'''
+
+#Polynomial fit 
+'''
+yq=y[:6]
+xq=droppedcent[:6]
+xpred=np.linspace(min(xq),max(xq),100)
+c=polyfit(xq,yq,2,w=1/np.array(yerr[:6])**2)
+plt.errorbar(xq,yq,yerr=yerr[:6],fmt='o')
+plt.plot(xpred,c[0]+ c[1]*xpred + c[2]*xpred**2,label=str(c[2])+'x^2+'+str(c[1])+'x+'+str(c[0]))
+plt.legend(loc=2)
+'''
+
+plt.show()
