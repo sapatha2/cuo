@@ -31,7 +31,8 @@ pd.options.mode.chained_assignment = None  # default='warn'
 def collect_df():
   df=None
   for basestate in range(13):
-    for gsw in np.arange(0.1,1.1,0.1):
+    #for gsw in np.arange(0.1,1.1,0.1):
+    for gsw in [1.0]:
       f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
       small_df=pd.read_pickle(f)
 
@@ -42,7 +43,8 @@ def collect_df():
       else: df = pd.concat((df,small_df),axis=0,sort=True)
 
   for basestate in range(7):
-    for gsw in np.arange(0.1,1.1,0.1):
+    #for gsw in np.arange(0.1,1.1,0.1):
+    for gsw in [1.0]:
       f='../ub3lyp_3/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
       small_df=pd.read_pickle(f)
     
@@ -972,7 +974,7 @@ def analyze(df,save=False):
   #sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz'],hue='basestate',markers=['o']+['.']*11)
   #plt.show()
 
-  sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz','iao_t_ds','iao_t_dz'],hue='basestate',markers=['o']+['.']*20)
+  sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz','iao_t_ds','iao_t_dz'])#,hue='basestate',markers=['o']+['.']*20)
   plt.show()
 if __name__=='__main__':
   #DATA COLLECTION
