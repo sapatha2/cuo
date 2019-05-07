@@ -300,10 +300,13 @@ def analyze(df,save=False):
 if __name__=='__main__':
   df=collect_df()
   df=format_df(df)
-  '''
   ind=np.argsort(df['energy'][df['basestate']==-1])
-  df=df[df['basestate']==-1].iloc[[0,1,2,3,4,10,11,12]].sort_values(by=['energy'])
+  df=df[df['basestate']==-1]
+  
+  
+  sns.pairplot(df,vars=['energy','mo_t_pi','iao_t_pi'])
+  plt.show()
+
   print(df[['energy','mo_n_2pz','mo_n_2ppi','mo_n_3d','mo_n_4s','Sz','Jsd','Us']])
   exit(0)
-  '''
   analyze(df,save=False)

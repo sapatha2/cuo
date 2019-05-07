@@ -48,7 +48,7 @@ def collect_df():
       f='../ub3lyp_s3/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
       small_df=pd.read_pickle(f)
     
-      small_df['basestate']=basestate
+      small_df['basestate']=basestate+11
       if(gsw==1.0): small_df['basestate']=-1
       small_df['Sz']=1.5
       df = pd.concat((df,small_df),axis=0,sort=True)
@@ -88,12 +88,12 @@ def format_df_iao(df):
   df['beta']=-1000
   #LOAD IN IAOS
   act_iao=[5,9,6,8,11,12,7,13,1]
-  iao=np.load('../../pyscf/ub3lyp_full/b3lyp_iao_b.pickle')
+  iao=np.load('../../../pyscf/ub3lyp_full/b3lyp_iao_b.pickle')
   iao=iao[:,act_iao]
   
   #LOAD IN MOS
   act_mo=[5,6,7,8,9,10,11,12,13]
-  chkfile='../../pyscf/chk/Cuvtz_r1.725_s1_B3LYP_1.chk'
+  chkfile='../../../pyscf/chk/Cuvtz_r1.725_s1_B3LYP_1.chk'
   mol=lib.chkfile.load_mol(chkfile)
   m=ROKS(mol)
   m.__dict__.update(lib.chkfile.load(chkfile, 'scf'))
@@ -971,17 +971,19 @@ def analyze(df,save=False):
   #X=sm.add_constant(X)
   #ols=sm.OLS(y,X).fit()
   #df['resid']=df['energy']-ols.predict()
-  #sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz'],hue='basestate',markers=['o']+['.']*11)
+  #sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz'],hue='basestate',markers=['o']+['.']*17)
   #plt.show()
-  sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz','iao_t_ds','iao_t_dz'],hue='basestate',markers=['o']+['.']*11)
+
+  sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz','iao_t_ds','iao_t_dz'],hue='basestate',markers=['o']+['.']*17)
   plt.show()
 if __name__=='__main__':
   #DATA COLLECTION
-  #df=collect_df()
-  #df=format_df(df)
-  #df.to_pickle('formatted_gosling.pickle')
-  #exit(0)
-
+  '''
+  df=collect_df()
+  df=format_df(df)
+  df.to_pickle('formatted_gosling.pickle')
+  exit(0)
+  '''
   ''' 
   d=(pd.read_pickle('analysis/regr_log.pickle'))
   for i in range(16):

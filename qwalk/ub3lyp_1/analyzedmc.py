@@ -11,10 +11,9 @@ from statsmodels.sandbox.regression.predstd import wls_prediction_std
 from sklearn.model_selection import KFold
 from scipy import stats
 from ed import ED
-from roks_model import ED_roks
-from uks_model import ED_uks
+#from roks_model import ED_roks
+#from uks_model import ED_uks
 import itertools
-from expectile import expectile_fit
 from log import log_fit,log_fit_bootstrap, rmse_bar
 from pyscf import gto, scf, ao2mo, cc, fci, mcscf, lib
 from pyscf.scf import ROKS
@@ -24,7 +23,6 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from scipy.optimize import linear_sum_assignment
 import scipy 
-from find_connect import  *
 pd.options.mode.chained_assignment = None  # default='warn'
 
 ######################################################################################
@@ -48,7 +46,7 @@ def collect_df():
       f='../ub3lyp_3/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
       small_df=pd.read_pickle(f)
     
-      small_df['basestate']=basestate
+      small_df['basestate']=basestate+13
       if(gsw==1.0): small_df['basestate']=-1
       small_df['Sz']=1.5
       df = pd.concat((df,small_df),axis=0,sort=True)
@@ -974,16 +972,17 @@ def analyze(df,save=False):
   #sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz'],hue='basestate',markers=['o']+['.']*11)
   #plt.show()
 
-  df=df[df['basestate']==-1]
-  sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz','iao_t_ds','iao_t_dz'],hue='basestate',markers=['o']+['.']*11)
+  sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz','iao_t_ds','iao_t_dz'],hue='basestate',markers=['o']+['.']*20)
   plt.show()
 if __name__=='__main__':
   #DATA COLLECTION
+  '''
   df=collect_df()
   df=format_df(df)
   df.to_pickle('formatted_gosling.pickle')
   exit(0)
-
+  
+  '''
   ''' 
   d=(pd.read_pickle('analysis/regr_log.pickle'))
   for i in range(16):
