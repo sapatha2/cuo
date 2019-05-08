@@ -352,12 +352,11 @@ def av_ed_log(eig_df,has_eig=False):
       sub_df = eig_df[(eig_df['model']==model) & (eig_df['eig']==eig)]
       data = sub_df.values
       means = np.mean(data,axis=0)
-      u = np.percentile(data,97.5,axis=0)
-      l = np.percentile(data,2.5,axis=0)
-      err = (u - l)/2
+      u = np.percentile(data,97.5,axis=0) - means
+      l = means - np.percentile(data,2.5,axis=0)
 
-      d=pd.DataFrame(data=np.array(list(means) + list(err))[:,np.newaxis].T,
-      columns=list(sub_df) + [x+'_err' for x in list(sub_df)])
+      d=pd.DataFrame(data=np.array(list(means) + list(u)+list(l))[:,np.newaxis].T,
+      columns=list(sub_df) + [x+'_u' for x in list(sub_df)] + [x+'_l' for x in list(sub_df)])
 
       if(av_df is None): av_df = d
       else: av_df = pd.concat((av_df,d),axis=0)
@@ -482,7 +481,8 @@ def plot_ed_log(full_df,save=True):
 
   ## TO GET NICE FORMATTING
   g = sns.FacetGrid(av_df,col='model',col_wrap=3,hue='Sz')
-
+  limits = [(0.5,2.5),(2.5,4.5),(1.5,4.5),(0.5,2.5),(1.5,4.5),(0,1.5),
+  (-0.5,1.5),(-1.5,1.5),(-1.5,1.5),(-1.5,1.5),(-1,1),(-0.5,1.0)]
   for model in np.arange(16):
     rgba_color = cm.Blues(norm(3.75-beta))
     rgba_color2 = cm.Oranges(norm(3.75-beta))
@@ -514,21 +514,26 @@ def plot_ed_log(full_df,save=True):
 
       sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==0.5)]
       x=sub_df[parm].values
-      xerr=sub_df[parm+'_err'].values
+      xerr_u=sub_df[parm+'_u'].values
+      xerr_d=sub_df[parm+'_l'].values
       y=sub_df['energy'].values
-      yerr=sub_df['energy_err'].values
-      ax.errorbar(x,y,xerr=xerr,yerr=yerr,markeredgecolor='k',fmt='o',c=rgba_color)
+      yerr_u=sub_df['energy_u'].values
+      yerr_d=sub_df['energy_l'].values
+      ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color)
      
       sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==1.5)&(av_df['energy']<=4.5)]
       x=sub_df[parm].values
-      xerr=sub_df[parm+'_err'].values
+      xerr_u=sub_df[parm+'_u'].values
+      xerr_d=sub_df[parm+'_l'].values 
       y=sub_df['energy'].values
-      yerr=sub_df['energy_err'].values
-      ax.errorbar(x,y,xerr=xerr,yerr=yerr,markeredgecolor='k',fmt='o',c=rgba_color2)
+      yerr_u=sub_df['energy_u'].values
+      yerr_d=sub_df['energy_l'].values
+      ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color2)
       
       ax.set_ylim((-0.2,6.0))
       ax.set_xlabel(parm)
       ax.set_ylabel('energy (eV)')
+      ax.set_xlim(limits[z])
     if(save): plt.savefig('analysis/sorted_ed_'+str(model)+'_log.pdf',bbox_inches='tight')
     #if(save): plt.savefig('analysis/ed_'+str(model)+'_log.pdf',bbox_inches='tight')
     else: plt.show()
@@ -742,14 +747,14 @@ def analyze(df,save=False):
   print(df2)
   exit(0)
   '''
-
+  
   '''
   #Sort/group eigenvalues
   df = pd.read_pickle('analysis/ed_log.pickle')
   df3 = None
   for model in range(16):
     df2 = df[(df['model']==model)]
-    for j in range(max(df2['bs_index'])+1):
+    for j in range(1,max(df2['bs_index'])+1):
       offset = 0
       for Sz in [0.5,1.5]:
         a = df2[(df2['bs_index']==0)&(df2['Sz']==Sz)]#.iloc[:m[Sz]]
@@ -788,32 +793,25 @@ def analyze(df,save=False):
           if(len(connected_sets[i])>1):
             sub_ind=list(connected_sets[i])
             len_check = True
-          
-          #Check that the degenerate space is actually spanned properly
+
           if(len_check):
-            sub_mat = abdot[sub_ind][:,sub_ind]**2
-            sum_1 = np.around(sub_mat.sum(axis=0),2)
-            sum_2 = np.around(sub_mat.sum(axis=1),2)
-            if(((sum_1 - 1).sum() == 0 ) & ((sum_2 - 1).sum()==0)): sum_check = True
-          
-          #Check that the eigenvalues are actually degenerate
-          if(sum_check):
             degen_a = len(set(np.around(a['energy'].iloc[row_ind[sub_ind]],6)))
             degen_b = len(set(np.around(b['energy'].iloc[col_ind[sub_ind]],6)))
             if((degen_a == 1)&(degen_b ==1)): eig_check = True
-          
-          #If all checks prevail, then finally assign the elements to be identical
-          if(eig_check): bmat[row_ind[sub_ind],:] = amat[row_ind[sub_ind],:]
-      
+
+          #Check that the degenerate space is actually spanned properly
+          if(eig_check):
+            sub_mat = abdot[sub_ind][:,sub_ind]
+            bmat[row_ind[sub_ind],:]=np.dot(sub_mat,bmat[row_ind[sub_ind],:])
         #ovlp = np.dot(amat,bmat.T)
         #plt.matshow(ovlp,vmin=-1,vmax=1,cmap=plt.cm.bwr)
         #plt.show()
         #exit(0)
-
+      
         #Make sure that we have orthogonal columns and rows
-        diff = np.dot(bmat,bmat.T) - np.identity(bmat.shape[0])
-        if(abs(np.sum(diff)) > 1e-5):
-          print(np.sum(diff),model, Sz)
+        #diff = np.dot(bmat,bmat.T) - np.identity(bmat.shape[0])
+        #if(abs(np.sum(diff)) > 1e-1):
+        #  print(np.sum(diff),model, Sz)
 
         #We finally have bmat ordered correctly and everything 
         dtmp = pd.DataFrame({'energy':b['energy'].values[col_ind],'Sz':b['Sz'].values,'bs_index':b['bs_index'].values})
@@ -907,8 +905,8 @@ def analyze(df,save=False):
   '''
 
   #Plot ED
-  #plot_ed_log(df)
-  #exit(0)
+  plot_ed_log(df)
+  exit(0)
 
   #Check to see which models have non zero elements
   dfz = pd.read_pickle('analysis/regr_log.pickle')
