@@ -5,36 +5,75 @@ from pyscf.scf import ROHF,ROKS,UHF,UKS, addons
 import numpy as np
 import pandas as pd
 
-S=1
-symm_dict = [
-#{'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(z,z -> pi, s)
-{'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(z,z -> pi, s)
-#{'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(z,z -> pi, s)
-
-{'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(dz2 -> pi)
-]
-
-chk0 = [
-#'../ub3lyp_full/Cuvtz_r1.725_s1_UB3LYP_0.chk', #E = -213.439445239291  <S^2> = 0.78520818  2S+1 = 2.0349036 
-'../ub3lyp_full/Cuvtz_r1.725_s1_UB3LYP_3.chk', #E = -213.459052532939  <S^2> = 1.3510888  2S+1 = 2.5306828
-#'../ub3lyp_full/Cuvtz_r1.725_s1_UB3LYP_4.chk', #E = -213.440520116249  <S^2> = 0.99639784  2S+1 = 2.2328438
-
-'../ub3lyp_full/Cuvtz_r1.725_s1_UB3LYP_0.chk', #E = -213.476203175783  <S^2> = 1.1669561  2S+1 = 2.3807193
-]
-
-excit = []
-
 df=json.load(open("trail.json"))
 r = 1.725 
 xc = 'B3LYP'
+basis='vtz'
 datacsv={}
 for nm in['run','method','basis','pseudopotential','bond-length','S','E','conv']:
   datacsv[nm]=[]
 
-basis='vtz'
+#Up: 5 [dy dz dx dd dd py pz px 4s] 13
+#Dn: 5 [dz dx dy dd dd pz px py 4s] 13
+#|GS>
 
-for run in range(len(chk0)):
-  run=0
+#Up: 5 [dy dz dx dd dd pz px 4s py] 13
+#Dn: 5 [dd dx dy dz pz px py dd 4s] 13
+#|1>
+
+#Up:  
+#Dn: 5 [dd dy dx dz py pz px dd 4s] 13
+#|6>
+
+#Up: 5 [dz dx dy dd dd pz px 4s py] 13
+#Dn: 5 [dy dx dd dd dz py px pz 4s] 13
+#|4> 
+
+#Up: 
+#Dn: 5 [dz dd dd dx dy pz px py 4s] 13 
+#|GS 3/2>
+
+#Up: 
+#Dn: 5 [dy dx dd dd dz px pz py 4s] 
+#|1 3/2>
+
+#Up: 
+#Dn: 5 [dx dy dd dd px py dz pz 4s] 
+#|5 3/2>
+
+'''
+S=[1,1,1,3]
+
+chk0=[
+'../ub3lyp_full/Cu'+str(basis)+'_r1.725_s1_UB3LYP_0.chk',
+'../ub3lyp_full/Cu'+str(basis)+'_r1.725_s1_UB3LYP_0.chk',
+'../ub3lyp_full/Cu'+str(basis)+'_r1.725_s1_UB3LYP_0.chk',
+'../ub3lyp_full/Cu'+str(basis)+'_r1.725_s3_UB3LYP_5.chk',
+]
+
+excit_list = [
+[[1,10,12],[0,11,13]],  #(z,z -> pi, s) (2,0,1) OK!  [4s up, dz dn, pz dn]
+[[1,7,12]],             #(dy -> py)     (3,4)   OK!  [4s up, pz dn, 3dy dn, 2py up]
+[[1,5,12]],             #(dz -> py)                  [4s up, dz dn, pz dn]
+[[1,10,12]],             #(dz -> 4s)               
+]# Build this
+'''
+
+S=[1,1,3]
+
+chk0=[
+'../ub3lyp_full/Cu'+str(basis)+'_r1.725_s1_UB3LYP_0.chk',
+'../ub3lyp_full/Cu'+str(basis)+'_r1.725_s1_UB3LYP_0.chk',
+'../ub3lyp_full/Cu'+str(basis)+'_r1.725_s3_UB3LYP_5.chk',
+]
+
+excit_list = [
+[[1,10,12],[0,11,13]],
+[[1,7,12]],             
+[[1,10,12]],            
+]# Build this
+
+for run in np.arange(3):
   mol=gto.Mole()
   mol.ecp={}
   mol.basis={}
@@ -42,41 +81,36 @@ for run in range(len(chk0)):
     mol.ecp[e]=gto.basis.parse_ecp(df[e]['ecp'])
     mol.basis[e]=gto.basis.parse(df[e][basis])
   mol.charge = 0
-  mol.spin = S
-  mol.build(atom="Cu 0. 0. 0.; O 0. 0. %g"%(r), verbose=4, symmetry=True)
+  mol.spin = S[run]
+  mol.build(atom="Cu 0. 0. 0.; O 0. 0. %g"%(r), verbose=4)
 
   m = UKS(mol)
   m.xc = xc
-
-  m.irrep_nelec = symm_dict[run]
   m.max_cycle = 100
   m = addons.remove_linear_dep_(m)
   m.conv_tol = 1e-5
-  #m.diis = scf.ADIIS()
 
   #MOM deltaSCF
-  mo0 = scf.chkfile.load(chk0,'scf/mo_coeff')
-  occ = scf.chkfile.load(chk0,'scf/mo_occ')
+  mo0 = scf.chkfile.load(chk0[run],'scf/mo_coeff')
+  occ = scf.chkfile.load(chk0[run],'scf/mo_occ')
 
   #---------------
-  #State 1: pz, pz -> pi, 4s using |GS> 
-  #occ[0][11]=0
-  #occ[0][13]=1
-  #occ[1][10]=0
-  #occ[1][12]=1
+  if(len(excit_list[run])>0):
+    for z in excit_list[run]:
+      occ[z[0]][z[1]]=0
+      occ[z[0]][z[2]]=1
+      dm = m.make_rdm1(mo0, occ)
+      m = scf.addons.mom_occ(m, mo0, occ)
+  else: 
+    dm=m.from_chk(chk0)
 
-  #MAP excitations
-  #---------------
-
-  dm = m.make_rdm1(mo0, occ)
-  m = scf.addons.mom_occ(m, mo0, occ)
-  m.chkfile='Cuvtz_r1.725_s1_UB3LYP_'+str(run)+'MOM.chk'
+  m.chkfile='Cuvtz_r1.725_s'+str(S[run])+'_UB3LYP_'+str(run+11)+'.chk'
 
   total_energy = m.kernel(dm)
   m.analyze()
   assert(np.sum(m.mo_occ)==25)
 
-  datacsv['run'].append(run)
+  datacsv['run'].append(run+11)
   datacsv['bond-length'].append(r)
   datacsv['S'].append(S)
   datacsv['method'].append('UB3LYP')
@@ -84,4 +118,4 @@ for run in range(len(chk0)):
   datacsv['pseudopotential'].append('trail')
   datacsv['E'].append(total_energy)
   datacsv['conv'].append(m.converged)
-  pd.DataFrame(datacsv).to_csv("cuo_MOM.csv",index=False)
+  pd.DataFrame(datacsv).to_csv("cuo_u.csv",index=False)
