@@ -188,21 +188,24 @@ def regr_log(X,model):
   param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_n_3dz2','mo_n_3dpi','mo_t_pi','mo_t_dz',
   'mo_t_ds','mo_t_sz','Jsd','Us']
   params=[]
-  params_err=[]
+  params_u=[]
+  params_l=[]
 
   exp_mu = np.mean(exp_parms_list,axis=0)
-  l = np.percentile(exp_parms_list,2.5,axis=0)
-  u = np.percentile(exp_parms_list,97.5, axis=0)
-  exp_err = (u-l)/2
+  l = exp_mu - np.percentile(exp_parms_list,2.5,axis=0)
+  u = np.percentile(exp_parms_list,97.5, axis=0) - exp_mu
 
   for parm in param_names:
     if(parm in model): 
       params.append(exp_mu[model.index(parm)+1])
-      params_err.append(exp_err[model.index(parm)+1])
+      params_u.append(u[model.index(parm)+1])
+      params_l.append(l[model.index(parm)+1])
     else: 
       params.append(0) 
-      params_err.append(0)
-  d = pd.DataFrame(data=np.array(params + params_err)[:,np.newaxis].T, columns = param_names + [x+'_err' for x in param_names],index=[0])
+      params_u.append(0)
+      params_l.append(0)
+  d = pd.DataFrame(data=np.array(params + params_u + params_l)[:,np.newaxis].T, columns = param_names + 
+  [x+'_u' for x in param_names] + [x+'_l' for x in param_names],index=[0])
   return exp_parms_list, d
 
 #Single parameter goodness of fit validation
@@ -743,12 +746,6 @@ def analyze(df,save=False):
   '''
 
   '''
-  df2 = pd.read_pickle('analysis/regr_log.pickle')
-  print(df2)
-  exit(0)
-  '''
-  
-  '''
   #Sort/group eigenvalues
   df = pd.read_pickle('analysis/ed_log.pickle')
   df3 = None
@@ -897,7 +894,7 @@ def analyze(df,save=False):
   '''
 
   #Average everything
-  '''
+  '''   
   df3 = pd.read_pickle('analysis/sorted_ed_log_d.pickle')
   av_df3 = av_ed_log(df3.drop(columns=['ci']))
   av_df3.to_pickle('analysis/av_sorted_ed_log_d.pickle')
