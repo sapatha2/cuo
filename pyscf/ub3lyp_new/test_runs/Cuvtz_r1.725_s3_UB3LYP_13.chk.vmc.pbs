@@ -1,0 +1,11 @@
+#!/bin/bash
+#PBS -q low
+#PBS -l nodes=1:ppn=32:xe
+#PBS -l walltime=01:00:00
+#PBS -N gsw1.0_1
+#PBS -e gsw1.0_1.perr
+#PBS -o gsw1.0_1.pout
+mkdir -p /scratch/sciteam/$USER/cuo/qwalk/test_runs/
+cd /scratch/sciteam/$USER/cuo/qwalk/test_runs/
+cp -u /u/sciteam/$USER/cuo/pyscf/ub3lyp_new/test_runs/* .
+aprun -n 32 /u/sciteam/$USER/fork/bin/qwalk Cuvtz_r1.725_s3_UB3LYP_13.chk.vmc &> Cuvtz_r1.725_s3_UB3LYP_13.chk.vmc.out
