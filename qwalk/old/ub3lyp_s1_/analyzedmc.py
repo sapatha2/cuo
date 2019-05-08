@@ -102,7 +102,10 @@ def format_df_iao(df):
 
   #IAO ordering: ['del','del','yz','xz','x','y','z2','z','s']
   #MO ordering:  dxz, dyz, dz2, delta, delta, px, py, pz, 4s
-  
+
+  df['iao_n_3dd']=0
+  df['iao_n_3dpi']=0
+  df['iao_n_3dz2']=0
   df['iao_n_3d']=0
   df['iao_n_2pz']=0
   df['iao_n_2ppi']=0
@@ -125,6 +128,9 @@ def format_df_iao(df):
     e[np.abs(e)<1e-10]=0
     e=(e+e.T)/2
 
+    df['iao_n_3dd'].iloc[z]=np.sum(np.diag(e)[[0,1]])
+    df['iao_n_3dpi'].iloc[z]=np.sum(np.diag(e)[[2,3]])
+    df['iao_n_3dz2'].iloc[z]=np.diag(e)[6]
     df['iao_n_3d'].iloc[z]=np.sum(np.diag(e)[[0,1,2,3,6]])
     df['iao_n_2pz'].iloc[z]=np.sum(np.diag(e)[7])
     df['iao_n_2ppi'].iloc[z]=np.sum(np.diag(e)[[4,5]])
@@ -179,7 +185,7 @@ def regr_log(X,model):
   print("REGR LOG ~~~~~~~~~~~~~~~~~")
   exp_parms_list, yhat, yerr_u, yerr_l = log_fit_bootstrap(X,n=50)
 
-  param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz',
+  param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_n_3dz2','mo_n_3dpi','mo_t_pi','mo_t_dz',
   'mo_t_ds','mo_t_sz','Jsd','Us']
   params=[]
   params_err=[]
@@ -203,7 +209,7 @@ def regr_log(X,model):
 def oneparm_valid_log(X,ncv,model):
   print("ONEPARM LOG ~~~~~~~~~~~~~~~~~")
   #Figure out which parameters are in my list
-  param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz',
+  param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_n_3dz2','mo_n_3dpi','mo_t_pi','mo_t_dz',
   'mo_t_ds','mo_t_sz','Jsd','Us']
   params=[]
   for parm in param_names:
@@ -262,7 +268,7 @@ def ed_log(model,exp_parms_list):
   for exp_parms in exp_parms_list:
     zz+=1
     #Figure out which parameters are in my list
-    param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz',
+    param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_n_3dz2','mo_n_3dpi','mo_t_pi','mo_t_dz',
     'mo_t_ds','mo_t_sz','Jsd','Us']
     params=[]
     for parm in param_names:
@@ -466,7 +472,7 @@ def plot_oneparm_valid_log(save=False):
   plt.close()
 
 #Plot eigenvalues and eigenproperties
-def plot_ed_log(save=True):
+def plot_ed_log(full_df,save=True):
   norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
   #FULL EIGENPROPERTIES and EIGENVALUES
   
@@ -487,7 +493,6 @@ def plot_ed_log(save=True):
       z+=1
       ax = axes[z//6,z%6]
 
-      '''
       if(beta==2.0):
         p=parm
         if(parm=='iao_Jsd'): p = 'Jsd'
@@ -499,14 +504,13 @@ def plot_ed_log(save=True):
         x = f_df[p].values
         y = f_df['energy'].values
         yerr = f_df['energy_err'].values
-        plt.errorbar(x,y,yerr,fmt='.',c=rgba_color,alpha=0.2)
+        ax.errorbar(x,y,yerr,fmt='.',c=rgba_color,alpha=0.2)
 
         f_df = full_df[full_df['Sz']==1.5]
         x = f_df[p].values
         y = f_df['energy'].values
         yerr = f_df['energy_err'].values
-        plt.errorbar(x,y,yerr,fmt='.',c=rgba_color2,alpha=0.2)
-      '''
+        ax.errorbar(x,y,yerr,fmt='.',c=rgba_color2,alpha=0.2)
 
       sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==0.5)]
       x=sub_df[parm].values
@@ -515,14 +519,14 @@ def plot_ed_log(save=True):
       yerr=sub_df['energy_err'].values
       ax.errorbar(x,y,xerr=xerr,yerr=yerr,markeredgecolor='k',fmt='o',c=rgba_color)
      
-      sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==1.5)]
+      sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==1.5)&(av_df['energy']<=4.5)]
       x=sub_df[parm].values
       xerr=sub_df[parm+'_err'].values
       y=sub_df['energy'].values
       yerr=sub_df['energy_err'].values
       ax.errorbar(x,y,xerr=xerr,yerr=yerr,markeredgecolor='k',fmt='o',c=rgba_color2)
       
-      ax.set_ylim((-0.2,2.5))
+      ax.set_ylim((-0.2,6.0))
       ax.set_xlabel(parm)
       ax.set_ylabel('energy (eV)')
     if(save): plt.savefig('analysis/sorted_ed_'+str(model)+'_log.pdf',bbox_inches='tight')
@@ -711,9 +715,9 @@ def compare_spectrum():
 #RUN
 def analyze(df,save=False):
   #LOG DATA COLLECTION
-  '''
   #Generate all possible models
-  X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
+  '''
+  X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_n_3dz2','mo_n_3dpi','Jsd','Us']]
   hopping=df[['mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
   y=df['energy']
   model_list=[list(X)]
@@ -725,11 +729,17 @@ def analyze(df,save=False):
 
   df0,df1,df2=main_log(df,model_list,betas=[2.0])
   print(df0)
-  #print(df1)
+  print(df1)
   print(df2)
   df0.to_pickle('analysis/regr_log.pickle')
-  #df1.to_pickle('analysis/oneparm_log.pickle')
+  df1.to_pickle('analysis/oneparm_log.pickle')
   df2.to_pickle('analysis/ed_log.pickle')
+  exit(0)
+  '''
+
+  '''
+  df2 = pd.read_pickle('analysis/regr_log.pickle')
+  print(df2)
   exit(0)
   '''
 
@@ -739,10 +749,10 @@ def analyze(df,save=False):
   df3 = None
   for model in range(16):
     df2 = df[(df['model']==model)]
-    for j in range(2,max(df2['bs_index'])+1):
+    for j in range(max(df2['bs_index'])+1):
       offset = 0
       for Sz in [0.5,1.5]:
-        a = df2[(df2['bs_index']==1)&(df2['Sz']==Sz)]#.iloc[:m[Sz]]
+        a = df2[(df2['bs_index']==0)&(df2['Sz']==Sz)]#.iloc[:m[Sz]]
         amat = np.array(list(a['ci']))
 
         b = df2[(df2['bs_index']==j)&(df2['Sz']==Sz)]#.iloc[:m[Sz]]
@@ -752,15 +762,15 @@ def analyze(df,save=False):
         cost = -1.*np.dot(amat,bmat.T)**2
         row_ind, col_ind = linear_sum_assignment(cost)
         
-        ovlp = np.dot(amat,bmat.T)
-        plt.matshow(ovlp,vmin=-1,vmax=1,cmap=plt.cm.bwr)
-        plt.show()
+        #ovlp = np.dot(amat,bmat.T)
+        #plt.matshow(ovlp,vmin=-1,vmax=1,cmap=plt.cm.bwr)
+        #plt.show()
 
         bmat = bmat[col_ind,:]
     
-        ovlp = np.dot(amat,bmat.T)
-        plt.matshow(ovlp,vmin=-1,vmax=1,cmap=plt.cm.bwr)
-        plt.show()
+        #ovlp = np.dot(amat,bmat.T)
+        #plt.matshow(ovlp,vmin=-1,vmax=1,cmap=plt.cm.bwr)
+        #plt.show()
 
         #Gotta do some extra work for the degenerate states
         #Get connected groups
@@ -795,10 +805,10 @@ def analyze(df,save=False):
           #If all checks prevail, then finally assign the elements to be identical
           if(eig_check): bmat[row_ind[sub_ind],:] = amat[row_ind[sub_ind],:]
       
-        ovlp = np.dot(amat,bmat.T)
-        plt.matshow(ovlp,vmin=-1,vmax=1,cmap=plt.cm.bwr)
-        plt.show()
-        exit(0)
+        #ovlp = np.dot(amat,bmat.T)
+        #plt.matshow(ovlp,vmin=-1,vmax=1,cmap=plt.cm.bwr)
+        #plt.show()
+        #exit(0)
 
         #Make sure that we have orthogonal columns and rows
         diff = np.dot(bmat,bmat.T) - np.identity(bmat.shape[0])
@@ -817,13 +827,12 @@ def analyze(df,save=False):
   exit(0)
   '''
 
-  #Calculate descriptors after sorting
   '''
+  #Calculate descriptors after sorting
   from pyscf import gto, scf, ao2mo, cc, fci, mcscf, lib
   import scipy as sp 
 
-  #df3 = pd.read_pickle('analysis/sorted_ed_log.pickle')
-  df3 = pd.read_pickle('analysis/ed_log.pickle')
+  df3 = pd.read_pickle('analysis/sorted_ed_log.pickle')
   df4 = None
   mol = gto.Mole()
   cis = fci.direct_uhf.FCISolver(mol)
@@ -884,40 +893,28 @@ def analyze(df,save=False):
   df3['iao_Us']=sigUs
   df3['iao_Jsd']=sigJsd
 
-  #df3.to_pickle('analysis/sorted_ed_log_d.pickle')
-  df3.to_pickle('analysis/ed_log_d.pickle')
+  df3.to_pickle('analysis/sorted_ed_log_d.pickle')
   print(df3)
   exit(0)
   '''
 
   #Average everything
-  ''' 
+  '''
   df3 = pd.read_pickle('analysis/sorted_ed_log_d.pickle')
   av_df3 = av_ed_log(df3.drop(columns=['ci']))
   av_df3.to_pickle('analysis/av_sorted_ed_log_d.pickle')
-
-  dd = pd.read_pickle('analysis/sorted_ed_log_d.pickle')
-  df3 = pd.read_pickle('analysis/ed_log_d.pickle')
-  df3['eig'] = dd['eig']
-  av_df3 = av_ed_log(df3.drop(columns=['ci']))
-  av_df3.to_pickle('analysis/av_ed_log_d.pickle')
   exit(0)
   '''
-  
+
   #Plot ED
-  #plot_ed_log()
+  #plot_ed_log(df)
   #exit(0)
 
   #Check to see which models have non zero elements
-  '''
   dfz = pd.read_pickle('analysis/regr_log.pickle')
-  dfz = dfz[dfz['beta']==2.0]
-  ind = np.unique(dfz[dfz['Jsd']!=0]['model'])
-  print(dfz.iloc[ind])
-  print(dfz.iloc[[2,3]])
+  print(dfz.drop(columns=['model','beta','mo_n_4s','mo_n_2ppi','mo_n_4s_err','mo_n_2ppi_err','Jsd','Us','Jsd_err','Us_err']))
   exit(0)
-  '''
-
+  
   #Compare spectra between models 
   '''
   df = pd.read_pickle('analysis/av_sorted_ed_log_d.pickle')
@@ -974,8 +971,22 @@ def analyze(df,save=False):
   #sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz'],hue='basestate',markers=['o']+['.']*17)
   #plt.show()
 
-  sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz','iao_t_ds','iao_t_dz'],hue='basestate',markers=['o']+['.']*17)
-  plt.show()
+  #sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz','iao_t_ds','iao_t_dz'],hue='basestate',markers=['o']+['.']*17)
+  #plt.show()
+ 
+  ed_df = pd.read_pickle('analysis/av_sorted_ed_log_d.pickle')
+  
+  max_df = df.max()
+  min_df = df.min()
+  print(max_df)
+  print(ed_df)
+  for model in [0]:
+    sub_ed_df = ed_df[ed_df['model']==0]
+    ind = np.ones(sub_ed_df.shape[0]).astype(bool)
+    for parms in ['iao_n_3d','iao_n_2pz','iao_n_2ppi','iao_n_4s','iao_t_pi','iao_t_dz','iao_t_ds','iao_t_sz']:
+      ind*=((sub_ed_df[parms]<=max_df[parms]) & (sub_ed_df[parms]>=max_df[parms]))
+    print(ind)
+
 if __name__=='__main__':
   #DATA COLLECTION
   '''
@@ -984,6 +995,7 @@ if __name__=='__main__':
   df.to_pickle('formatted_gosling.pickle')
   exit(0)
   '''
+  
   ''' 
   d=(pd.read_pickle('analysis/regr_log.pickle'))
   for i in range(16):

@@ -12,12 +12,12 @@ import seaborn as sns
 def h1_moToIAO(parms,printvals=False):
   #LOAD IN IAOS
   act_iao=[5,9,6,8,11,12,7,13,1]
-  iao=np.load('../../pyscf/ub3lyp_full/b3lyp_iao_b.pickle')
+  iao=np.load('../../../pyscf/ub3lyp_full/b3lyp_iao_b.pickle')
   iao=iao[:,act_iao]
   
   #LOAD IN MOS
   act_mo=[5,6,7,8,9,10,11,12,13]
-  chkfile='../../pyscf/chk/Cuvtz_r1.725_s1_B3LYP_1.chk'
+  chkfile='../../../pyscf/chk/Cuvtz_r1.725_s1_B3LYP_1.chk'
   mol=lib.chkfile.load_mol(chkfile)
   m=ROKS(mol)
   m.__dict__.update(lib.chkfile.load(chkfile, 'scf'))
@@ -26,10 +26,10 @@ def h1_moToIAO(parms,printvals=False):
 
   #IAO ordering: ['del','del','yz','xz','x','y','z2','z','s'] 
   #MO ordering:  dxz, dyz, dz2, delta, delta, px, py, pz, 4s
-  es,epi,epz,tpi,tdz,tsz,tds=parms
-  ed=0
+  es,epi,epz,edz,edpi,tpi,tdz,tsz,tds=parms
+  edd=0
 
-  e=np.diag([ed,ed,ed,ed,ed,epi,epi,epz,es])
+  e=np.diag([edpi,edpi,edz,edd,edd,epi,epi,epz,es])
   e[[0,1,5,6],[5,6,0,1]]=tpi
   e[[2,7],[7,2]]=tdz
   e[[8,7],[7,8]]=tsz
