@@ -2,18 +2,18 @@ import json
 import pandas as pd
 import numpy as np 
 import sys
-sys.path.append('../../../downfolding/')
+sys.path.append('../../../../downfolding/')
 from shivesh_downfold_tools import get_qwalk_dm, sum_onebody, sum_J, sum_U, sum_V
 import os 
 
 full_labels=np.array(["3s","3pz","3py","3px","2pz","3dz2","3dxz","3dyz"])
-def gather_all(N,gsw,basename):
+def gather_all():
   ''' 
   Gathers all your data and stores into 
   '''
   df=None
   for f in ['Cuvtz_r1.725_s1_UB3LYP_11.chk.vmc.gosling.json',
-  'Cuvtz_r1.725_s1_UB3LYP_12.chk.gosling.json','Cuvtz_r1.725_s3_UB3LYP_13.chk.gosling.json']:  
+  'Cuvtz_r1.725_s1_UB3LYP_12.chk.vmc.gosling.json','Cuvtz_r1.725_s3_UB3LYP_13.chk.vmc.gosling.json']:  
     statinfo=os.stat(f)
     if(statinfo.st_size>0):
       print(f)

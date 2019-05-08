@@ -3,7 +3,7 @@ import numpy as np
 
 def makejson():
   for f in ['Cuvtz_r1.725_s1_UB3LYP_11.chk.vmc',
-  'Cuvtz_r1.725_s1_UB3LYP_12.chk','Cuvtz_r1.725_s3_UB3LYP_13.chk']:
+  'Cuvtz_r1.725_s1_UB3LYP_12.chk.vmc','Cuvtz_r1.725_s3_UB3LYP_13.chk.vmc']:
     os.system('../../../../mainline/bin/gosling '+f+'.log -json &> '+f+'.gosling.json')
   
     #Replace labels in JSON 
