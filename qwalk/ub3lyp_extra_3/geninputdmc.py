@@ -37,9 +37,9 @@ def genpbs(N,basename,fout):
     '#PBS -N '+fname+'\n'\
     '#PBS -e '+fname+'.perr\n'+\
     '#PBS -o '+fname+'.pout\n'+\
-    'mkdir -p /scratch/sciteam/$USER/cuo/qwalk/ub3lyp_s3/'+basename+'/\n'+\
-    'cd /scratch/sciteam/$USER/cuo/qwalk/ub3lyp_s3/'+basename+'/\n'+\
-    'cp -u /u/sciteam/$USER/cuo/qwalk/ub3lyp_s3/'+basename+'/* .\n'+\
+    'mkdir -p /scratch/sciteam/$USER/cuo/qwalk/ub3lyp_extra_3/'+basename+'/\n'+\
+    'cd /scratch/sciteam/$USER/cuo/qwalk/ub3lyp_extra_3/'+basename+'/\n'+\
+    'cp -u /u/sciteam/$USER/cuo/qwalk/ub3lyp_extra_3/'+basename+'/* .\n'+\
     'aprun -n 256 /u/sciteam/$USER/fork/bin/qwalk '+fname+'.dmc &> '+fname+'.dmc.out\n'     
     f=open(basename+'/'+fname+'.dmc.pbs','w')
     f.write(string)

@@ -107,7 +107,7 @@ def genslater(N,gsw,basestate,basename,fout):
     gauss/=np.sqrt(np.dot(gauss,gauss))
     w=np.zeros(Ndet)
     w[basestate]=np.sqrt(abs(gsw))*np.sign(gsw)
-    w[w==0]=gauss*np.sqrt(1-gsw)
+    w[w==0]=gauss*np.sqrt(1-abs(gsw))
     assert(abs(np.dot(w,w)-1)<1e-15)
 
     states_up=np.arange(1,15)
