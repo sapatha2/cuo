@@ -30,10 +30,9 @@ pd.options.mode.chained_assignment = None  # default='warn'
 #Collect df
 def collect_df():
   df=None
-  for basestate in range(13):
-    #for gsw in np.arange(0.1,1.1,0.1):
+  for basestate in range(11,13):
     for gsw in [1.0]:
-      f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
+      f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/vmc_gosling.pickle' 
       small_df=pd.read_pickle(f)
 
       small_df['basestate']=basestate
@@ -42,10 +41,10 @@ def collect_df():
       if(df is None): df = small_df
       else: df = pd.concat((df,small_df),axis=0,sort=True)
 
-  for basestate in range(7):
+  for basestate in [6]:
     #for gsw in np.arange(0.1,1.1,0.1):
     for gsw in [1.0]:
-      f='../ub3lyp_3/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
+      f='../ub3lyp_3/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/vmc_gosling.pickle' 
       small_df=pd.read_pickle(f)
     
       small_df['basestate']=basestate+13
@@ -733,6 +732,7 @@ def analyze(df,save=False):
   exit(0)
   '''
 
+  '''
   #Sort/group eigenvalues
   df = pd.read_pickle('analysis/ed_log.pickle')
   df3 = None
@@ -757,9 +757,9 @@ def analyze(df,save=False):
 
         bmat = bmat[col_ind,:]
     
-        #ovlp = np.dot(amat,bmat.T)
-        #plt.matshow(ovlp,vmin=-1,vmax=1,cmap=plt.cm.bwr)
-        #plt.show()
+        ovlp = np.dot(amat,bmat.T)
+        plt.matshow(ovlp,vmin=-1,vmax=1,cmap=plt.cm.bwr)
+        plt.show()
 
         #Gotta do some extra work for the degenerate states
         #Get connected groups
@@ -778,24 +778,19 @@ def analyze(df,save=False):
             sub_ind=list(connected_sets[i])
             len_check = True
           
-          #Check that the eigenvalues are actually degenerate
+          #Check that the degenerate space is actually spanned properly
           if(len_check):
+            sub_mat = abdot[sub_ind][:,sub_ind]**2
+            sum_1 = np.around(sub_mat.sum(axis=0),2)
+            sum_2 = np.around(sub_mat.sum(axis=1),2)
+            if(((sum_1 - 1).sum() == 0 ) & ((sum_2 - 1).sum()==0)): sum_check = True
+          
+          #Check that the eigenvalues are actually degenerate
+          if(sum_check):
             degen_a = len(set(np.around(a['energy'].iloc[row_ind[sub_ind]],6)))
             degen_b = len(set(np.around(b['energy'].iloc[col_ind[sub_ind]],6)))
             if((degen_a == 1)&(degen_b ==1)): eig_check = True
-
-          #Check that the degenerate space is actually spanned properly
-          if(eig_check):
-            #sub_mat = abdot[sub_ind][:,sub_ind]**2
-            #sum_1 = np.around(sub_mat.sum(axis=0),2)
-            #sum_2 = np.around(sub_mat.sum(axis=1),2)
-            #if(((sum_1 - 1).sum() == 0 ) & ((sum_2 - 1).sum()==0)): sum_check = True
-            
-            sub_mat = abdot[sub_ind][:,sub_ind]
-            plt.matshow(sub_mat,vmin=-1,vmax=1,cmap=plt.cm.bwr)
-            plt.show()
-            exit(0)
-
+          
           #If all checks prevail, then finally assign the elements to be identical
           if(eig_check): bmat[row_ind[sub_ind],:] = amat[row_ind[sub_ind],:]
       
@@ -819,6 +814,7 @@ def analyze(df,save=False):
         else: df3 = pd.concat((df3,dtmp),axis=0)
   df3.to_pickle('analysis/sorted_ed_log.pickle')
   exit(0)
+  '''
 
   #Calculate descriptors after sorting
   '''
@@ -976,35 +972,19 @@ def analyze(df,save=False):
   #df['resid']=df['energy']-ols.predict()
   #sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz'],hue='basestate',markers=['o']+['.']*11)
   #plt.show()
-  
-  '''
-  df['energy']-=df['energy'].iloc[0]
-  print(df[['energy','energy_err']].iloc[[0,11,12,19]])
-  exit(0)
 
-  df['ind']=0
-  df['ind'].iloc[[11]]=11
-  df['ind'].iloc[[12]]=12
-  df['ind'].iloc[[19]]=19
-  sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz','iao_t_ds','iao_t_dz'],hue='ind',markers=['.']+['o']*3)
-  #sns.pairplot(df,vars=['energy','iao_n_3d','iao_n_2ppi','iao_n_2pz','iao_n_4s'],hue='ind',markers=['.']+['o']*3)
-  plt.savefig('dmc_t.pdf',bbox_inches='tight')
-  '''
+  df['energy']-=(-213.3571109*27.2114)
+  df['ind']=[11,12,13]
+  print(df[['energy','energy_err','ind']])
+  #sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz','iao_t_ds','iao_t_dz'],hue='ind')
+  #plt.show()
 
 if __name__=='__main__':
   #DATA COLLECTION
   df=collect_df()
   df=format_df(df)
-  df.to_pickle('formatted_gosling.pickle')
-
-  ''' 
-  d=(pd.read_pickle('analysis/regr_log.pickle'))
-  for i in range(16):
-    print(d[d['model']==i].iloc[0])
-  
-  exit(0)
-  '''
+  df.to_pickle('vmc_formatted_gosling.pickle')
   
   #DATA ANALYSIS
-  df=pd.read_pickle('formatted_gosling.pickle')
+  df=pd.read_pickle('vmc_formatted_gosling.pickle')
   analyze(df)

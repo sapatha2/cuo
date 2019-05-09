@@ -4,27 +4,10 @@ import pandas as pd
 import seaborn as sns 
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
-from sklearn import linear_model, preprocessing
-from sklearn.model_selection import cross_val_score
-from sklearn.metrics import mean_squared_error, r2_score
-from statsmodels.sandbox.regression.predstd import wls_prediction_std
-from sklearn.model_selection import KFold
-from scipy import stats
-from ed import ED
-#from roks_model import ED_roks
-#from uks_model import ED_uks
-import itertools
-from log import log_fit,log_fit_bootstrap, rmse_bar
+pd.options.mode.chained_assignment = None  # default='warn'
+from functools import reduce
 from pyscf import gto, scf, ao2mo, cc, fci, mcscf, lib
 from pyscf.scf import ROKS
-from functools import reduce
-from matplotlib import cm
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-from scipy.optimize import linear_sum_assignment
-import scipy 
-pd.options.mode.chained_assignment = None  # default='warn'
-
 ######################################################################################
 #FROZEN METHODS
 #Collect df
@@ -61,12 +44,12 @@ def format_df_iao(df):
   df['beta']=-1000
   #LOAD IN IAOS
   act_iao=[5,9,6,8,11,12,7,13,1]
-  iao=np.load('../../pyscf/ub3lyp_full/b3lyp_iao_b.pickle')
+  iao=np.load('../../../pyscf/ub3lyp_full/b3lyp_iao_b.pickle')
   iao=iao[:,act_iao]
   
   #LOAD IN MOS
   act_mo=[5,6,7,8,9,10,11,12,13]
-  chkfile='../../pyscf/chk/Cuvtz_r1.725_s1_B3LYP_1.chk'
+  chkfile='../../../pyscf/chk/Cuvtz_r1.725_s1_B3LYP_1.chk'
   mol=lib.chkfile.load_mol(chkfile)
   m=ROKS(mol)
   m.__dict__.update(lib.chkfile.load(chkfile, 'scf'))
@@ -112,15 +95,19 @@ def format_df_iao(df):
 ######################################################################################
 #RUN
 def analyze(df,save=False):
+  df['energy']-=(-213.3571109*27.2114)
+  print(df[['energy','energy_err']])
+  exit(0)
+  
   sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz','iao_t_ds','iao_t_dz'])#,hue='basestate',markers=['o']+['.']*20)
   plt.show()
 
 if __name__=='__main__':
   #DATA COLLECTION
-  df = pd.read_pickle('vmc_gosling.pickle')  
-  df=format_df(df)
-  df.to_pickle('formatted_gosling.pickle')
-  exit(0)
+  #df = pd.read_pickle('vmc_gosling.pickle')  
+  #df=format_df(df)
+  #df.to_pickle('formatted_gosling.pickle')
+  #exit(0)
   
   #DATA ANALYSIS
   df=pd.read_pickle('formatted_gosling.pickle')

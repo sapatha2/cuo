@@ -15,19 +15,17 @@ from downfold_tools import get_qwalk_dm, sum_onebody, sum_J, sum_U, sum_V
 #for basis in ['vdz','vtz']:
 
 #Gather IAOs
-f='b3lyp_iao_b_overshoot.pickle'
-a=np.load(f)
+#f='b3lyp_iao_b_overshoot.pickle'
+#a=np.load(f)
 #print(a.shape)
  
 #Gather MOs
-'''
 chkfile='../chk/Cuvtz_r1.725_s1_B3LYP_1.chk'
 mol=lib.chkfile.load_mol(chkfile)
 m=ROKS(mol)
 m.__dict__.update(lib.chkfile.load(chkfile, 'scf'))
 a=m.mo_coeff[:,:14]
 print(a.shape)
-'''
 
 charge=0
 S=1
