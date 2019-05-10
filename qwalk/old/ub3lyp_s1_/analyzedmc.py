@@ -987,7 +987,11 @@ if __name__=='__main__':
   '''
   #DATA ANALYSIS
   df=pd.read_pickle('formatted_gosling.pickle')
-  #df=df[df['basestate']==-1]
+  df=df[df['basestate']==-1]
+  df['energy']/=27.2114
+  print(df[['energy','Sz']])
+  exit(0)
+  
   #df['ind']=np.arange(df.shape[0])
   #sns.pairplot(df,vars=['energy','mo_n_3d','mo_n_2pz','mo_n_2ppi','mo_n_4s'],hue='ind',markers=['o']*5+['.']*12)
   #sns.pairplot(df,vars=['energy','mo_n_3d','mo_n_2pz','mo_n_2ppi','mo_n_4s'],hue='ind',markers=['o','.','o','o','o']+['.']*6+['o']*2+['.']*4)
