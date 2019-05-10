@@ -33,7 +33,7 @@ def genpbs(N,basename,fout):
     string='#!/bin/bash\n'+\
     '#PBS -q low\n'+\
     '#PBS -l nodes=8:ppn=32:xe\n'+\
-    '#PBS -l walltime=04:00:00\n'+\
+    '#PBS -l walltime=02:00:00\n'+\
     '#PBS -N '+fname+'\n'\
     '#PBS -e '+fname+'.perr\n'+\
     '#PBS -o '+fname+'.pout\n'+\

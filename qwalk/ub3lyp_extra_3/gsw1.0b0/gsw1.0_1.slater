@@ -2,8 +2,8 @@ SLATER
 ORBITALS  {
   MAGNIFY 1.0
   NMO 56
-  ORBFILE all_hispin.orb
-  INCLUDE all_hispin.basis
+  ORBFILE all_3extra.orb
+  INCLUDE all_3extra.basis
   CENTERS { USEGLOBAL }
 }
 

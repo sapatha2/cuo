@@ -2,15 +2,15 @@ SLATER
 ORBITALS  {
   MAGNIFY 1.0
   NMO 56
-  ORBFILE all_hispin.orb
-  INCLUDE all_hispin.basis
+  ORBFILE all_3extra.orb
+  INCLUDE all_3extra.basis
   CENTERS { USEGLOBAL }
 }
 
 SHERMAN_MORRISON_UPDATES 
 DETWT { 
   -1.0
-  0.0 
+  -0.0 
 }
 STATES {
   1 2 3 4 5 6 7 8 9 10 11 12 13 14

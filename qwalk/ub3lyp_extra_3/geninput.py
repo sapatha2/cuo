@@ -137,8 +137,8 @@ def genslater(N,gsw,basestate,basename,fout):
     'ORBITALS  {\n'+\
     '  MAGNIFY 1.0\n'+\
     '  NMO '+str(Ndet*14*2)+'\n'+\
-    '  ORBFILE all_hispin.orb\n'+\
-    '  INCLUDE all_hispin.basis\n'+\
+    '  ORBFILE all_3extra.orb\n'+\
+    '  INCLUDE all_3extra.basis\n'+\
     '  CENTERS { USEGLOBAL }\n'+\
     '}\n'+\
     '\n'+\
