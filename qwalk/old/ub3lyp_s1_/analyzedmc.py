@@ -52,7 +52,27 @@ def collect_df():
       if(gsw==1.0): small_df['basestate']=-1
       small_df['Sz']=1.5
       df = pd.concat((df,small_df),axis=0,sort=True)
-  
+
+  for basestate in range(4):
+    for gsw in [0.2,0.4,0.6,0.8,1.0]:
+      f='../../ub3lyp_extra_1/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
+      small_df=pd.read_pickle(f)
+    
+      small_df['basestate']=basestate+17
+      if(gsw==1.0): small_df['basestate']=-1
+      small_df['Sz']=0.5
+      df = pd.concat((df,small_df),axis=0,sort=True)
+ 
+  for basestate in range(2):
+    for gsw in np.arange(-1.0,1.2,0.2):
+      f='../../ub3lyp_extra_3/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
+      small_df=pd.read_pickle(f)
+    
+      small_df['basestate']=basestate+21
+      if(gsw==1.0): small_df['basestate']=-1
+      small_df['Sz']=1.5
+      df = pd.concat((df,small_df),axis=0,sort=True)
+
   return df
 
 #Formatting
@@ -421,11 +441,10 @@ def plot_regr_log(save=False):
 def plot_oneparm_valid_log(save=False):
   full_df=pd.read_pickle('analysis/oneparm_log.pickle')
   model=[]
-  for i in range(32):
+  for i in range(16):
     model+=list(np.linspace(i,i+0.75,15))
   full_df['model']=model
 
-  '''
   g = sns.FacetGrid(full_df,hue='beta')
   g.map(plt.errorbar, "model", "R2cv_mu_train", "R2cv_std_train",fmt='.').add_legend()
   plt.xlabel('Model, eV')
@@ -457,8 +476,8 @@ def plot_oneparm_valid_log(save=False):
   if(save): plt.savefig('analysis/oneparm_test_rmse.pdf',bbox_inches='tight')
   else: plt.show()
   plt.close()
+ 
   '''
-  
   tpi=[3, 7, 10, 13, 14, 16, 19, 20, 22, 23, 25, 26, 27, 29, 30, 31]
   pi=[]
   for i in range(32): 
@@ -472,6 +491,7 @@ def plot_oneparm_valid_log(save=False):
   if(save): plt.savefig('analysis/oneparm_test_r2.pdf',bbox_inches='tight')
   else: plt.show()
   plt.close()
+  '''
 
 #Plot eigenvalues and eigenproperties
 def plot_ed_log(full_df,save=True):
@@ -724,7 +744,6 @@ def compare_spectrum():
 def analyze(df,save=False):
   #LOG DATA COLLECTION
   #Generate all possible models
-  '''
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
   hopping=df[['mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
   y=df['energy']
@@ -735,15 +754,16 @@ def analyze(df,save=False):
     model_list+=[list(X)+list(m) for m in models]
   print(len(model_list))
 
-  df0,df1,df2=main_log(df,model_list,betas=[2.0])
+  df0,df1,df2=main_log(df,model_list)#,betas=[2.0])
   print(df0)
   print(df1)
   print(df2)
   df0.to_pickle('analysis/regr_log.pickle')
   df1.to_pickle('analysis/oneparm_log.pickle')
   df2.to_pickle('analysis/ed_log.pickle')
+
+  plot_oneparm_valid_log(save=False)
   exit(0)
-  '''
 
   #Sort/group eigenvalues
   '''
@@ -975,8 +995,8 @@ if __name__=='__main__':
   df=collect_df()
   df=format_df(df)
   df.to_pickle('formatted_gosling.pickle')
-  exit(0)
   '''
+  df=pd.read_pickle('formatted_gosling.pickle')
   
   ''' 
   d=(pd.read_pickle('analysis/regr_log.pickle'))
@@ -985,18 +1005,10 @@ if __name__=='__main__':
   
   exit(0)
   '''
+  
   #DATA ANALYSIS
-  df=pd.read_pickle('formatted_gosling.pickle')
-  df=df[df['basestate']==-1]
-  df['energy']/=27.2114
-  print(df[['energy','Sz']])
-  exit(0)
-  
-  #df['ind']=np.arange(df.shape[0])
-  #sns.pairplot(df,vars=['energy','mo_n_3d','mo_n_2pz','mo_n_2ppi','mo_n_4s'],hue='ind',markers=['o']*5+['.']*12)
-  #sns.pairplot(df,vars=['energy','mo_n_3d','mo_n_2pz','mo_n_2ppi','mo_n_4s'],hue='ind',markers=['o','.','o','o','o']+['.']*6+['o']*2+['.']*4)
-  #sns.pairplot(df,vars=['energy','mo_t_pi','mo_t_ds','mo_t_dz','mo_t_sz'],hue='ind',markers=['o']*5+['.']*12)
-  sns.pairplot(df,vars=['energy','mo_n_3d','mo_n_2pz','mo_n_2ppi','mo_n_4s'],hue='basestate',markers=['o']+['.']*17)
-  plt.show()
-  
-  #analyze(df)
+  #sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz','iao_t_ds','iao_t_dz'],hue='basestate',markers=['o']+['.']*23)
+  #plt.savefig('analysis/full_pp.pdf',bbox_inches='tight') 
+  #plt.show()
+
+  analyze(df)
