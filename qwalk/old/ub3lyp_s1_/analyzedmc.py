@@ -42,7 +42,6 @@ def collect_df():
       small_df['Sz']=0.5
       if(df is None): df = small_df
       else: df = pd.concat((df,small_df),axis=0,sort=True)
-
   for basestate in range(6):
     for gsw in [0.2,0.4,0.6,0.8,1.0]:
       f='../ub3lyp_s3/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
@@ -52,7 +51,8 @@ def collect_df():
       if(gsw==1.0): small_df['basestate']=-1
       small_df['Sz']=1.5
       df = pd.concat((df,small_df),axis=0,sort=True)
-
+ 
+  '''
   for basestate in range(4):
     for gsw in [0.2,0.4,0.6,0.8,1.0]:
       f='../../ub3lyp_extra_1/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
@@ -72,6 +72,12 @@ def collect_df():
       if(gsw==1.0): small_df['basestate']=-1
       small_df['Sz']=1.5
       df = pd.concat((df,small_df),axis=0,sort=True)
+  '''
+  f='../../ub3lyp_extra_1/mo_ex/dmc_gosling.pickle' 
+  small_df = pd.read_pickle(f)
+  small_df['basestate']=-2
+  small_df['Sz']=0.5
+  df = pd.concat((df,small_df),axis=0,sort=True)
 
   return df
 
@@ -445,6 +451,8 @@ def plot_oneparm_valid_log(save=False):
     model+=list(np.linspace(i,i+0.75,15))
   full_df['model']=model
 
+  full_df = full_df[full_df['beta']==1.5]
+
   g = sns.FacetGrid(full_df,hue='beta')
   g.map(plt.errorbar, "model", "R2cv_mu_train", "R2cv_std_train",fmt='.').add_legend()
   plt.xlabel('Model, eV')
@@ -498,7 +506,7 @@ def plot_ed_log(full_df,save=True):
   norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
   #FULL EIGENPROPERTIES and EIGENVALUES
   
-  beta=2.0
+  beta=1.5
   av_df = pd.read_pickle('analysis/av_sorted_ed_log_d.pickle')
   #av_df = pd.read_pickle('analysis/av_ed_log_d.pickle')
 
@@ -516,24 +524,23 @@ def plot_ed_log(full_df,save=True):
       z+=1
       ax = axes[z//6,z%6]
 
-      if(beta==2.0):
-        p=parm
-        if(parm=='iao_Jsd'): p = 'Jsd'
-        if(parm=='iao_Us'):  p = 'Us'
-        
-        full_df['energy']-=min(full_df['energy'])
+      p=parm
+      if(parm=='iao_Jsd'): p = 'Jsd'
+      if(parm=='iao_Us'):  p = 'Us'
+      
+      full_df['energy']-=min(full_df['energy'])
 
-        f_df = full_df[full_df['Sz']==0.5]
-        x = f_df[p].values
-        y = f_df['energy'].values
-        yerr = f_df['energy_err'].values
-        ax.errorbar(x,y,yerr,fmt='.',c=rgba_color,alpha=0.2)
+      f_df = full_df[full_df['Sz']==0.5]
+      x = f_df[p].values
+      y = f_df['energy'].values
+      yerr = f_df['energy_err'].values
+      ax.errorbar(x,y,yerr,fmt='.',c=rgba_color,alpha=0.2)
 
-        f_df = full_df[full_df['Sz']==1.5]
-        x = f_df[p].values
-        y = f_df['energy'].values
-        yerr = f_df['energy_err'].values
-        ax.errorbar(x,y,yerr,fmt='.',c=rgba_color2,alpha=0.2)
+      f_df = full_df[full_df['Sz']==1.5]
+      x = f_df[p].values
+      y = f_df['energy'].values
+      yerr = f_df['energy_err'].values
+      ax.errorbar(x,y,yerr,fmt='.',c=rgba_color2,alpha=0.2)
 
       sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==0.5)]
       x=sub_df[parm].values
@@ -743,6 +750,7 @@ def compare_spectrum():
 #RUN
 def analyze(df,save=False):
   #LOG DATA COLLECTION
+  '''
   #Generate all possible models
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
   hopping=df[['mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
@@ -761,13 +769,15 @@ def analyze(df,save=False):
   df0.to_pickle('analysis/regr_log.pickle')
   df1.to_pickle('analysis/oneparm_log.pickle')
   df2.to_pickle('analysis/ed_log.pickle')
+  '''
 
-  plot_oneparm_valid_log(save=False)
-  exit(0)
+  #plot_oneparm_valid_log(save=False)
+  #exit(0)
 
   #Sort/group eigenvalues
   '''
   df = pd.read_pickle('analysis/ed_log.pickle')
+  df = df[df['beta']==1.5]
   df3 = None
   for model in range(16):
     df2 = df[(df['model']==model)]
@@ -842,8 +852,8 @@ def analyze(df,save=False):
   exit(0)
   '''
 
-  '''
   #Calculate descriptors after sorting
+  '''
   from pyscf import gto, scf, ao2mo, cc, fci, mcscf, lib
   import scipy as sp 
 
@@ -929,15 +939,41 @@ def analyze(df,save=False):
   #print(dfz.drop(columns=['model','beta','mo_n_4s','mo_n_2ppi','mo_n_4s_err','mo_n_2ppi_err','Jsd','Us','Jsd_err','Us_err']))
   #exit(0)
 
+  #plot_ed_log(df)
+  #exit(0)
+
   #Low noise filter
   av_df = pd.read_pickle('analysis/av_sorted_ed_log_d.pickle')
   df['energy']-=min(df['energy'])
-  
-  models=[0,1,2,3,10,11,12]
+
+  av_df = av_df[av_df['model']==4]
+  av_df = av_df[av_df['energy']<=3.0]
+  print(av_df[av_df['iao_n_3dpi']<3.5][['energy','iao_n_3dpi','iao_n_2ppi','iao_t_pi','iao_t_dz','iao_t_ds','iao_t_sz']])
+  print(av_df[av_df['iao_n_3dd']<3.5][['energy','iao_n_3dd','iao_n_2ppi','iao_t_pi','iao_t_dz','iao_t_ds','iao_t_sz']])
+  print(av_df[av_df['iao_t_pi']<0][['energy','iao_n_3dd','iao_n_3dpi','iao_n_3dz2','iao_n_2ppi','iao_n_2pz','iao_n_4s','iao_t_pi','iao_t_dz','iao_t_ds','iao_t_sz']])
+  print(av_df[av_df['iao_t_dz']>0][['energy','iao_n_3dd','iao_n_3dpi','iao_n_3dz2','iao_n_2ppi','iao_n_2pz','iao_n_4s','iao_t_pi','iao_t_dz','iao_t_ds','iao_t_sz']])
+  print(av_df[av_df['iao_t_sz']>0][['energy','iao_n_3dd','iao_n_3dpi','iao_n_3dz2','iao_n_2ppi','iao_n_2pz','iao_n_4s','iao_t_pi','iao_t_dz','iao_t_ds','iao_t_sz']])
+  print(av_df[av_df['iao_t_ds']>0][['energy','iao_n_3dd','iao_n_3dpi','iao_n_3dz2','iao_n_2ppi','iao_n_2pz','iao_n_4s','iao_t_pi','iao_t_dz','iao_t_ds','iao_t_sz']])
+
+  '''
+  av_df['type']='ed'
+  df['type']='dmc'
+  df['eig']=0
+  av_df = pd.concat((av_df,df),axis=0)
+  av_df = av_df[av_df['energy']<=3.0]
+ 
+  sns.pairplot(av_df,vars=['energy','eig','iao_n_3dpi','iao_n_3dd','iao_n_2pz','iao_n_2ppi'],hue='type',markers=['o','.'])
+  plt.show()
+  sns.pairplot(av_df,vars=['energy','eig','iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz'],hue='type',markers=['o','.'])
+  plt.show()
+  '''
+  '''
+  models=[0,1,2,3,4,6,7,9,11,12,15]
   for model in models:
     sub_df = av_df[av_df['model']==model]
     err = (sub_df['energy_l'].mean() + sub_df['energy_u'].mean())/2
-    if(err <= 0.25):
+    print(err)
+    if(err <= 0.20):
       #Plot low noise models again, smaller 
       norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
       g = sns.FacetGrid(av_df,col='model',col_wrap=2,hue='Sz')
@@ -988,27 +1024,30 @@ def analyze(df,save=False):
         ax.set_xlim(limits[z])
       plt.savefig('analysis/small_ed_'+str(model)+'_log.pdf',bbox_inches='tight')
       plt.clf()
-    
+  '''
 if __name__=='__main__':
   #DATA COLLECTION
-  '''
   df=collect_df()
   df=format_df(df)
-  df.to_pickle('formatted_gosling.pickle')
+  #df.to_pickle('sub_formatted_gosling.pickle')
+  
   '''
   df=pd.read_pickle('formatted_gosling.pickle')
-  
-  ''' 
+  df=df[df['basestate']==-1]
+  print(df['energy']/27.2114)
+  exit(0)
+
   d=(pd.read_pickle('analysis/regr_log.pickle'))
   for i in range(16):
     print(d[d['model']==i].iloc[0])
   
   exit(0)
   '''
-  
-  #DATA ANALYSIS
-  #sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_sz','iao_t_ds','iao_t_dz'],hue='basestate',markers=['o']+['.']*23)
-  #plt.savefig('analysis/full_pp.pdf',bbox_inches='tight') 
-  #plt.show()
 
-  analyze(df)
+  df=df[df['basestate']<0]
+  #sns.pairplot(df,vars=['energy','iao_t_pi','iao_t_dz','iao_t_sz','iao_t_ds'],hue='basestate')
+  sns.pairplot(df,vars=['energy','iao_n_3dz2','iao_n_3dpi','iao_n_2pz','iao_n_2ppi','iao_n_4s'],hue='basestate')
+  plt.show()
+  
+  #analyze(df)
+
