@@ -19,6 +19,5 @@ def makejson(N,gsw,basename):
   return 1
 
 if __name__=='__main__':
-  for basestate in np.arange(4):
-    for gsw in [1.0]:
-      makejson(1,gsw,basename='.')
+  for gsw in [1.0]:
+    makejson(4,gsw,basename='.')

@@ -57,6 +57,5 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 import seaborn as sns 
 if __name__=='__main__':
-  for basestate in np.arange(4):
-    for gsw  in [1.0]:
-      gather_all(1,gsw,basename='.')
+  for gsw  in [1.0]:
+    gather_all(4,gsw,basename='.')
