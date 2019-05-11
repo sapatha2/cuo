@@ -58,4 +58,4 @@ import statsmodels.api as sm
 import seaborn as sns 
 if __name__=='__main__':
   for gsw  in [1.0]:
-    gather_all(4,gsw,basename='.')
+    gather_all(3,gsw,basename='.')

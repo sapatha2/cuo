@@ -20,4 +20,4 @@ def makejson(N,gsw,basename):
 
 if __name__=='__main__':
   for gsw in [1.0]:
-    makejson(4,gsw,basename='.')
+    makejson(3,gsw,basename='.')
