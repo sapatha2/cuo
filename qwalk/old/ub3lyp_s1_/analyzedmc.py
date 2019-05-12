@@ -740,8 +740,8 @@ def compare_spectrum():
 #RUN
 def analyze(df,save=False):
   #LOG DATA COLLECTION
-  #Generate all possible models
   '''
+  #Generate all possible models
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Us']]
   hopping=df[['Jsd','mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']]
   y=df['energy']
@@ -752,18 +752,19 @@ def analyze(df,save=False):
     model_list+=[list(X)+list(m) for m in models]
   print(len(model_list))
 
-  df0,df1,df2=main_log(df,model_list)#,betas=[2.0])
+  df0,df1,df2=main_log(df,model_list,betas=[2.0])
   print(df0)
   print(df1)
   print(df2)
   df0.to_pickle('analysis/regr_log.pickle')
   df1.to_pickle('analysis/oneparm_log.pickle')
   df2.to_pickle('analysis/ed_log.pickle')
+  exit(0)
   '''
 
+  '''
   #Plot the parameter values
   df = pd.read_pickle('analysis/regr_log.pickle')
-  df = df[df['beta']==2.0]
   params = ['mo_n_4s','mo_n_2ppi','mo_n_2pz','Us','Jsd','mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']
   for model in np.arange(32):
     x = df[df['model']==model][params].values[0]
@@ -776,12 +777,12 @@ def analyze(df,save=False):
   plt.xticks(np.arange(len(params)),params)
   plt.show()
   exit(0)
+  '''
 
   #plot_oneparm_valid_log(save=False)
   #exit(0)
 
   #Sort/group eigenvalues
-  '''
   df = pd.read_pickle('analysis/ed_log.pickle')
   df = df[df['beta']==2.0]
   df3 = None
@@ -855,10 +856,7 @@ def analyze(df,save=False):
         if(df3 is None): df3 = dtmp
         else: df3 = pd.concat((df3,dtmp),axis=0)
   df3.to_pickle('analysis/sorted_ed_log.pickle')
-  exit(0)
-  '''
 
-  '''
   #Calculate descriptors after sorting
   from pyscf import gto, scf, ao2mo, cc, fci, mcscf, lib
   import scipy as sp 
@@ -929,16 +927,12 @@ def analyze(df,save=False):
 
   df3.to_pickle('analysis/sorted_ed_log_d.pickle')
   print(df3)
-  exit(0)
-  '''
 
   #Average everything
-  '''
   df3 = pd.read_pickle('analysis/sorted_ed_log_d.pickle')
   av_df3 = av_ed_log(df3.drop(columns=['ci']))
   av_df3.to_pickle('analysis/av_sorted_ed_log_d.pickle')
   exit(0)
-  '''
 
   #Check to see which models have non zero elements
   #dfz = pd.read_pickle('analysis/regr_log.pickle')
