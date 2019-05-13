@@ -58,8 +58,7 @@ import statsmodels.api as sm
 import seaborn as sns 
 if __name__=='__main__':
   for basestate in np.arange(13):
-    for gsw in [1.0]:
-    #for gsw  in np.arange(0.1,1.1,0.1):
+    for gsw  in np.arange(0.1,1.1,0.1):
       N=10
       if(gsw==1.0): N=1
       gather_all(N,gsw,basename='gsw'+str(np.around(gsw,2))+'b'+str(basestate))
