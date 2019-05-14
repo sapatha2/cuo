@@ -1,0 +1,12 @@
+#!/bin/bash
+#PBS -q low
+#PBS -l nodes=8:ppn=32:xe
+#PBS -l walltime=00:30:00
+#PBS -N 3d8
+#PBS -e 3d8.perr
+#PBS -o 3d8.pout
+mkdir -p /scratch/sciteam/$USER/cuo/qwalk/
+cd /scratch/sciteam/$USER/cuo/qwalk/
+cp -u /u/sciteam/$USER/cuo/qwalk/3d8_vtz* .
+cp -u /u/sciteam/$USER/cuo/qwalk/optjast3 .
+aprun -n 256 /u/sciteam/$USER/fork/bin/qwalk 3d8_vtz.dmc &> 3d8_vtz.dmc.out

@@ -22,7 +22,7 @@ method {
       include iao.basis
       centers { useglobal }
     }
-    states { 2 6 7 8 9 10 }
+    states { 2 6 7 8 9 10 12 13 14}
   }
 }
 

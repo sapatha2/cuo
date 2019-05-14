@@ -33,7 +33,7 @@ def genpbs(N,basename,fout):
     string='#!/bin/bash\n'+\
     '#PBS -q low\n'+\
     '#PBS -l nodes=8:ppn=32:xe\n'+\
-    '#PBS -l walltime=02:00:00\n'+\
+    '#PBS -l walltime=10:00:00\n'+\
     '#PBS -N '+fname+'\n'\
     '#PBS -e '+fname+'.perr\n'+\
     '#PBS -o '+fname+'.pout\n'+\
@@ -76,7 +76,7 @@ def gendmc(N,basename,fout):
     '      include iao.basis\n'+\
     '      centers { useglobal }\n'+\
     '    }\n'+\
-    '    states { 2 6 7 8 9 10 }\n'+\
+    '    states { 2 6 7 8 9 10 12 13 14 }\n'+\
     '  }\n'+\
     '}\n'+\
     '\n'+\
@@ -93,7 +93,7 @@ def gendmc(N,basename,fout):
   return 1
 
 if __name__=='__main__':
-  for gsw in np.arange(0.1,1.1,0.1):
+  for gsw in [1.0]:
     for basestate in np.arange(7):
       if(gsw==1.0): N=1
       else: N=10

@@ -1,0 +1,13 @@
+method {
+  dmc
+  nblock 25
+  timestep 0.01
+  tmoves 
+}
+
+include 3d8_vtz.sys
+trialfunc {
+  slater-jastrow
+  wf1 { include 3d8_vtz.slater }
+  wf2 { include optjast3 }
+}

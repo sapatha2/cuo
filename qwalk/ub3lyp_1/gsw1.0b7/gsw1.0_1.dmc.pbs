@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -q low
 #PBS -l nodes=8:ppn=32:xe
-#PBS -l walltime=02:00:00
+#PBS -l walltime=10:00:00
 #PBS -N gsw1.0_1
 #PBS -e gsw1.0_1.perr
 #PBS -o gsw1.0_1.pout
