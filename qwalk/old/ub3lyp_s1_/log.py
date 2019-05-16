@@ -15,19 +15,23 @@ def pred(b,X):
 
 def cost(b,X,y,w):
   yhat = pred(b,X)
-  mi = min([min(yhat),min(y)])
-  c=np.sum(w*np.log((yhat-mi)/(y-mi))**2)
+  mi = min([min(yhat),min(y)]) 
+  #c=np.sum(w*np.log((yhat - mi + 1)/(y - mi + 1))**2)
+  c=np.sum(w*np.log((yhat - mi)/(y - mi))**2)
   return c
 
 def log_fit(df):
-  X=df.drop(columns=['energy','weights'])
+  X=df.drop(columns=['energy','weights','basestate','Sz','energy_err'])
   y=df['energy']
   w=df['weights']
     
   ols=sm.WLS(y,X,weights=w).fit()
   b0=ols.params.values
-  
+ 
+  print(b0)
   res_exp = minimize(lambda b: cost(b,X,y,w), b0).x
+  print(res_exp)
+  print("----------------------------------------")
   return res_exp, pred(res_exp,X)
 
 def log_fit_bootstrap(df,n=500):
@@ -35,9 +39,10 @@ def log_fit_bootstrap(df,n=500):
   yhat=[]
   coef=[]
   for i in range(n):
+    print(i)
     dfi=df.sample(n=df.shape[0],replace=True)
     res_expi, __ = log_fit(dfi)
-    yhati = pred(res_expi,df.drop(columns=['energy','weights']))
+    yhati = pred(res_expi,df.drop(columns=['energy','weights','basestate','Sz','energy_err']))
     
     yhat.append(yhati)
     coef.append(res_expi)

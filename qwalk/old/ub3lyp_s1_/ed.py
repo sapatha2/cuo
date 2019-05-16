@@ -7,6 +7,7 @@ from functools import reduce
 import matplotlib.pyplot as plt 
 import pandas as pd
 import seaborn as sns 
+from scipy.optimize import linear_sum_assignment
 
 #Get 1-body parameters in IAO representation
 def h1_moToIAO(parms,printvals=False):
@@ -26,30 +27,18 @@ def h1_moToIAO(parms,printvals=False):
 
   #IAO ordering: ['del','del','yz','xz','x','y','z2','z','s'] 
   #MO ordering:  dxz, dyz, dz2, delta, delta, px, py, pz, 4s
-  es,epi,epz,tpi,tdz,tsz,tds=parms
-  ed=0
-
-  e=np.diag([ed,ed,ed,ed,ed,epi,epi,epz,es])
+  es,edpi,edz2,edd,epi,epz,tpi,tdz,tsz,tds=parms
+  e=np.diag([edpi,edpi,edz2,edd,edd,epi,epi,epz,es])
   e[[0,1,5,6],[5,6,0,1]]=tpi
   e[[2,7],[7,2]]=tdz
   e[[8,7],[7,8]]=tsz
   e[[8,2],[2,8]]=tds
-  
-  if(printvals):
-    w,vr=np.linalg.eigh(e)
-    print('MO eigenvalues, Jsd=0 ------------------------------------')
-    print(w)
 
   mo_to_iao = reduce(np.dot,(mo.T,s,iao))
   e = reduce(np.dot,(mo_to_iao.T,e,mo_to_iao))
   e[np.abs(e)<1e-10]=0
   e=(e+e.T)/2
- 
-  if(printvals):
-    w,vr=np.linalg.eigh(e)
-    print('IAO eigenvalues, Jsd=0 ------------------------------------')
-    print(w)
-
+  
   return e
 
 def h2_IAO(Jcu,Us,t=False):
