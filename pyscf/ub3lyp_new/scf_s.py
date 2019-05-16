@@ -8,7 +8,7 @@ import pandas as pd
 df=json.load(open("trail.json"))
 r = 1.725 
 xc = 'B3LYP'
-basis='vtz'
+basis='vdz'
 datacsv={}
 for nm in['run','method','basis','pseudopotential','bond-length','S','E','conv']:
   datacsv[nm]=[]
@@ -41,36 +41,18 @@ for nm in['run','method','basis','pseudopotential','bond-length','S','E','conv']
 #Dn: 5 [dx dy dd dd px py dz pz 4s] 
 #|5 3/2>
 
-'''
-S=[1,1,1,3]
+S=[1,1,1]
 
 chk0=[
 '../ub3lyp_full/Cu'+str(basis)+'_r1.725_s1_UB3LYP_0.chk',
-'../ub3lyp_full/Cu'+str(basis)+'_r1.725_s1_UB3LYP_0.chk',
-'../ub3lyp_full/Cu'+str(basis)+'_r1.725_s1_UB3LYP_0.chk',
-'../ub3lyp_full/Cu'+str(basis)+'_r1.725_s3_UB3LYP_5.chk',
+'../ub3lyp_full/Cu'+str(basis)+'_r1.725_s1_UB3LYP_3.chk',
+'../ub3lyp_full/Cu'+str(basis)+'_r1.725_s1_UB3LYP_5.chk',
 ]
 
 excit_list = [
-[[1,10,12],[0,11,13]],  #(z,z -> pi, s) (2,0,1) OK!  [4s up, dz dn, pz dn]
-[[1,7,12]],             #(dy -> py)     (3,4)   OK!  [4s up, pz dn, 3dy dn, 2py up]
-[[1,5,12]],             #(dz -> py)                  [4s up, dz dn, pz dn]
-[[1,10,12]],             #(dz -> 4s)               
-]# Build this
-'''
-
-S=[1,1,3]
-
-chk0=[
-'../ub3lyp_full/Cu'+str(basis)+'_r1.725_s1_UB3LYP_0.chk',
-'../ub3lyp_full/Cu'+str(basis)+'_r1.725_s1_UB3LYP_0.chk',
-'../ub3lyp_full/Cu'+str(basis)+'_r1.725_s3_UB3LYP_5.chk',
-]
-
-excit_list = [
-[[1,10,12],[0,11,13]],
-[[1,7,12]],             
-[[1,10,12]],            
+[[1,7,12]],       
+[[1,6,12]],
+[[1,7,12]]
 ]# Build this
 
 for run in np.arange(3):

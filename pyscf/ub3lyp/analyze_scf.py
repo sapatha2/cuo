@@ -9,6 +9,7 @@ from pyscf2qwalk import print_qwalk_mol
 from pyscf.mcscf import newton_casscf
 from pyscf2qwalk import print_qwalk_mol
 
+'''
 el='Cu'
 r=1.725
 method='UB3LYP'
@@ -19,3 +20,10 @@ for run in range(14,15):
   m=ROHF(mol)
   m.__dict__.update(lib.chkfile.load(chkfile,'scf'))
   print_qwalk_mol(mol,m,method='scf',basename='qwalk_vtz/gs'+str(run))
+'''
+
+chkfile="3d8_vtz.chk"
+mol=lib.chkfile.load_mol(chkfile)
+m=ROHF(mol)
+m.__dict__.update(lib.chkfile.load(chkfile,'scf'))
+print_qwalk_mol(mol,m,method='scf',basename='qwalk_vtz/3d8_vtz')
