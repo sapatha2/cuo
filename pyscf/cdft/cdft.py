@@ -494,42 +494,58 @@ def get_newton_step_aug_hess(jac,hess):
 if __name__ == '__main__':
   from pyscf import gto,scf,mcscf, fci,lo,ci,cc, lib
   from pyscf.scf import ROHF,ROKS,UHF,UKS, addons
-  chkfile='../ub3lyp_full/Cuvdz_r1.725_s1_UB3LYP_0.chk'
+  chkfile='../ub3lyp_full/Cuvtz_r1.725_s1_UB3LYP_0.chk'
   mol = lib.chkfile.load_mol(chkfile)
   mol.verbose = 4
   mf = UKS(mol)
   mf.__dict__.update(lib.chkfile.load(chkfile, 'scf'))
   mf.xc = 'B3LYP'
   mf.irrep_nelec = {'A1':(5,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}
-  
+
   mf.max_cycle=100
   mf = addons.remove_linear_dep_(mf)
   mf.conv_tol=1e-5
   mf.diis = scf.ADIIS()
-  #mf.run()
 
-  #3s constraint - this one actually works fine!
+  #3dpi - 2ppi constraint
   '''
-  id1 = mol.search_ao_label('Cu 3s')
-  orbital_indices = [[id1[0],id1[0]]]
-  spin_labels = [[0,1]]
-  nelec_required = [2]
-  '''
-
-  #2py constraint - this one works too!
-  '''
-  id1 = mol.search_ao_label('O 2py')
-  orbital_indices = [[id1[0],id1[0]]]
-  spin_labels = [[0,1]]
-  nelec_required = [1]
-  '''
-  
-  #3dpi - 2ppi constraint (actually works, but we can relax the constraint!)
-  id0 = mol.search_ao_label('Cu 3dyz')
-  id1 = mol.search_ao_label('O 2py')
+  id0 = list(mol.search_ao_label('Cu 3dyz')) + list(mol.search_ao_label('Cu 3dxz'))
+  id1 = mol.search_ao_label('Cu 4s')
   orbital_indices = [[id0[0],id0[0]],[id1[0],id1[0]]]
   spin_labels = [[0,1],[0,1]]
-  nelec_required = [1.,2.]
-  
+  nelec_required = [1.,0.3]
+  mf.chkfile = 'Cuvtz_r1.725_s1_UB3LYP_0c.chk'
+  '''
+
+  #3dz2 - 2ppi
+  '''
+  id0 = list([26])
+  id2 = mol.search_ao_label('Cu 4s')
+  orbital_indices = [[id0[0],id0[0]],[id2[0],id2[0]]]
+  spin_labels = [[0,1],[0,1]]
+  nelec_required = [1.,0.3]
+  mf.chkfile = 'Cuvtz_r1.725_s1_UB3LYP_1c.chk'
+  '''
+
+  #3dz2 - 4s
+  '''
+  id0 = list([26])
+  id1 = mol.search_ao_label('Cu 4s')
+  orbital_indices = [[id0[0],id0[0]],[id1[0],id1[0]]]
+  spin_labels = [[0,1],[0,1]]
+  nelec_required = [1.,1.]
+  mf.chkfile = 'Cuvtz_r1.725_s1_UB3LYP_2c.chk'
+  '''
+
+  #2z -> pi,4s
+  id0 = mol.search_ao_label('O 2pz')
+  id1 = mol.search_ao_label('Cu 4s')
+  id2 = mol.search_ao_label('O 2px')
+  id3 = mol.search_ao_label('O 2py')
+  orbital_indices = [[id0[0],id0[0],id1[0],id1[0]],[id1[0],id1[0]],[id2[0],id2[0],id3[0],id3[0]]]
+  spin_labels = [[0,0,1,1],[0],[0,1,0,1]]
+  nelec_required = [2,0.7,4.]
+  mf.chkfile = 'Cuvtz_r1.725_s1_UB3LYP_3c.chk'
+
   constraints = Constraints(orbital_indices, spin_labels, nelec_required)
   mf, dm_pop = cdft(mf, constraints, lo_method='nao', verbose=4)

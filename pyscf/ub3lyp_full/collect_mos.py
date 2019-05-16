@@ -8,24 +8,25 @@ import matplotlib.pyplot as plt
 from pyscf2qwalk import print_qwalk_mol
 
 charge=0
-S=3
+S=1
 r=1.725
 method='UB3LYP'
 basis='vtz'
 el='Cu'
 
+b 
+
 occ=np.arange(14) 
 mo_coeff=None
-<<<<<<< HEAD
-for run in [0,1,2]:
-=======
-for run in [0,1]:
->>>>>>> ba5cb5d2c420434d93aeb8fb854b6ac770efe311
+for run in [0]:
   chkfile=el+basis+"_r"+str(r)+"_s"+str(S)+"_"+method+"_"+str(run)+".chk"
   mol=lib.chkfile.load_mol(chkfile)
   m=ROKS(mol)
   m.__dict__.update(lib.chkfile.load(chkfile, 'scf'))
   
+
+
+  '''
   if(mo_coeff is None): 
     mo_coeff=[None,None]
     mo_coeff[0]=m.mo_coeff[0][:,occ]
@@ -33,13 +34,10 @@ for run in [0,1]:
   else: 
     mo_coeff[0]=np.concatenate((mo_coeff[0],m.mo_coeff[0][:,occ]),axis=1)
     mo_coeff[1]=np.concatenate((mo_coeff[1],m.mo_coeff[1][:,occ]),axis=1)
-
+  
 #Write to file 
 m.mo_coeff=mo_coeff
 print(m.mo_coeff[0].shape)
 print(m.mo_coeff[1].shape)
-<<<<<<< HEAD
 print_qwalk_mol(mol,m,basename="all_min_s3")
-=======
-print_qwalk_mol(mol,m,basename="all_d10_s3")
->>>>>>> ba5cb5d2c420434d93aeb8fb854b6ac770efe311
+  '''

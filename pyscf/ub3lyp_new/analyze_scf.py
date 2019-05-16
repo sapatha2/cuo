@@ -9,9 +9,9 @@ from pyscf2qwalk import print_qwalk_mol
 from pyscf.mcscf import newton_casscf
 from pyscf2qwalk import print_qwalk_mol
 
-chkfile="test_mom.chk"
+chkfile="Cuvtz_r1.725_s1_UB3LYP_12.chk"
 mol=lib.chkfile.load_mol(chkfile)
 m=ROHF(mol)
 m.__dict__.update(lib.chkfile.load(chkfile,'scf'))
 print(sum(m.mo_occ[0]),sum(m.mo_occ[1]))
-print_qwalk_mol(mol,m,method='scf',basename='orbs/test_mom')
+print_qwalk_mol(mol,m,method='scf',basename='Cuvtz_r1.725_s1_UB3LYP_12')

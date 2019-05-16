@@ -11,6 +11,9 @@ charge=0
 S=[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 symm_dict=[
 #3d10 sector
+{'A1':(5,6),'E1x':(3,3),'E1y':(3,3),'E2x':(1,0),'E2y':(1,0)}, #GS
+'''
+#3d10 sector
 {'A1':(5,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #GS
 {'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}, #(z -> pi)
 {'A1':(5,6),'E1x':(3,2),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}, #(pi -> s, J~-small)
@@ -25,6 +28,8 @@ symm_dict=[
 
 #3d9 sector
 {'A1':(5,5),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,0)}, #(dd -> pi)
+]
+'''
 ]
 
 '''
@@ -52,7 +57,7 @@ datacsv={}
 for nm in['run','method','basis','pseudopotential','bond-length','S','E','conv']:
   datacsv[nm]=[]
 
-for run in range(14,len(S)):
+for run in [0]:
   for r in [1.725]:
     for method in ['UB3LYP']:
       for basis in ['vdz','vtz']:
@@ -84,7 +89,7 @@ for run in range(14,len(S)):
 
           if basis=='vdz':
             #m=m.newton()
-            m.chkfile=el+basis+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk"
+            m.chkfile= '3d8_vdz.chk' #el+basis+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk"
             m.irrep_nelec = symm_dict[run]
             m.max_cycle=100
             m = addons.remove_linear_dep_(m)
@@ -99,8 +104,8 @@ for run in range(14,len(S)):
           
           #Once we get past the vdz basis, just read-in the existing chk file...
           else:
-            dm=m.from_chk(el+'vdz'+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk")
-            m.chkfile=el+basis+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk"
+            dm= m.from_chk('3d8_vdz.chk') #m.from_chk(el+'vdz'+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk")
+            m.chkfile= '3d8_vtz.chk' #el+basis+"_r"+str(r)+"_s"+str(S[run])+"_"+method+"_"+str(run)+".chk"
             m.irrep_nelec = symm_dict[run]
             m.max_cycle=100
             m = addons.remove_linear_dep_(m)
@@ -112,6 +117,7 @@ for run in range(14,len(S)):
             #m.stability(external=True)
             assert(np.sum(m.mo_occ)==25)
 
+          '''
           datacsv['run'].append(run)
           datacsv['bond-length'].append(r)
           datacsv['S'].append(S[run])
@@ -121,3 +127,4 @@ for run in range(14,len(S)):
           datacsv['E'].append(total_energy)
           datacsv['conv'].append(m.converged)
           pd.DataFrame(datacsv).to_csv("cuo_additional.csv",index=False)
+          '''

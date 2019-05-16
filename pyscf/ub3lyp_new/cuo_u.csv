@@ -1,0 +1,4 @@
+run,method,basis,pseudopotential,bond-length,S,E,conv
+11,UB3LYP,vdz,trail,1.725,"[1, 1, 1]",-213.45781322144182,True
+12,UB3LYP,vdz,trail,1.725,"[1, 1, 1]",-213.4577579495521,True
+13,UB3LYP,vdz,trail,1.725,"[1, 1, 1]",-213.45777660646104,True
