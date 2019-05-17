@@ -530,10 +530,11 @@ def analyze(df=None,save=False):
   '''
 
   avg_eig_df = pd.read_pickle('analysis/avg_eig.pickle')
-  #plot_ed(df,avg_eig_df,model=3)
+  #plot_ed(df,avg_eig_df,model=0)
   #exit(0)
 
-  #Mahlanobis distance under 3 eV is our prior for now 
+  #Mahalanobis distance under 3 eV is our prior for now 
+  mdists = []
   variables = ['iao_n_4s','iao_n_3dz2','iao_n_3dpi','iao_n_3dd',
   'iao_n_2pz','iao_n_2ppi','iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','energy']
   for model in range(16):
@@ -555,7 +556,13 @@ def analyze(df=None,save=False):
       eigenvectors = m_df.values
       d = reduce(np.dot,((eigenvectors - mu),VI,(eigenvectors - mu).T))
       mdist += list(np.sqrt(np.diag(d)))
-    plt.plot(model,np.mean(mdist),'bo')
+    mdists.append(np.mean(mdist))
+  mdists = np.array(mdists)
+  ind = np.argsort(mdists)
+  plt.plot(mdists[ind],'bo')
+  plt.xticks(np.arange(len(ind)),ind)
+  plt.ylabel('Mahalanobis distance')
+  plt.xlabel('Model')
   plt.show()
 
 if __name__=='__main__':
