@@ -498,6 +498,7 @@ def plot_ed(full_df,av_df,model,save=True):
     ax.set_ylabel('energy (eV)')
     ax.set_xlim(limits[z])
     ax.set_ylim((-0.2,4.5))
+  plt.suptitle('Ed model '+str(model))
   plt.show()
   return -1
 
@@ -508,7 +509,7 @@ def analyze(df=None,save=False):
   '''
   max_model = ['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz','mo_t_sz','mo_t_ds','Jsd','Us']
   core = [0,1,2,8]
-  hopping=[3,4,5,6]
+  hopping=[3,4,5,6,7]
   sel_model=[core]
   for n in range(1,len(hopping)+1):
     s=set(list(hopping))
@@ -516,28 +517,52 @@ def analyze(df=None,save=False):
     sel_model+=[core+list(m) for m in models]
   print(len(sel_model))
 
+  #Parameters and regression 
+  oneparm_df = oneparm_valid(df,max_model,sel_model,nbs=100)
+
   #Exact diagonalization of the models
-  eig_df = exact_diag(df,max_model,sel_model)
+  eig_df = exact_diag(df,max_model,sel_model,nbs=100)
 
   #Sorting and averaging 
   eig_df = sort_ed(eig_df)
   eig_df = desc_ed(eig_df)
   avg_eig_df = avg_ed(eig_df.drop(columns=['ci']))
 
+  oneparm_df.to_pickle('analysis/oneparm.pickle')
   eig_df.to_pickle('analysis/eig.pickle')
   avg_eig_df.to_pickle('analysis/avg_eig.pickle')
   exit(0)
   '''
 
-  avg_eig_df = pd.read_pickle('analysis/avg_eig.pickle')
-  #plot_ed(df,avg_eig_df,model=0)
-  #exit(0)
+  #Select model - R2 and Malhanobis
+  '''
+  unique_models = []
+  oneparm_df = pd.read_pickle('analysis/oneparm.pickle').drop(columns=['r2_mu','r2_err'])
+  for model in np.arange(32):
+    non_zero = np.nonzero(oneparm_df.iloc[model])[0]
+    half = int(len(non_zero)/2)
+    vals = oneparm_df.iloc[model].values[non_zero[:half]]
+    errs = oneparm_df.iloc[model].values[non_zero[half:]]
+    
+    u = vals + 2*errs
+    l = vals - 2*errs
+    sign = np.prod(np.sign(u*l))
+    if(sign > 0): 
+      if(oneparm_df.iloc[model]['Jsd']!=0):
+        unique_models.append(model)
+  print('unique models: ',unique_models)
 
-  #Mahalanobis distance under 3 eV is our prior for now 
+  avg_eig_df = pd.read_pickle('analysis/avg_eig.pickle')
+  plot_ed(df,avg_eig_df,model=12)
+  exit(0)
+  '''
+
+  '''
+  cutoff = 3#eV
   mdists = []
   variables = ['iao_n_4s','iao_n_3dz2','iao_n_3dpi','iao_n_3dd',
-  'iao_n_2pz','iao_n_2ppi','iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','energy']
-  for model in range(16):
+  'iao_n_2pz','iao_n_2ppi','iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz']
+  for model in unique_models:
     mdist = []
     for spin in [0.5,1.5]:
       big_df = df
@@ -550,7 +575,7 @@ def analyze(df=None,save=False):
   
       m_df = avg_eig_df[(avg_eig_df['model']==model) & (avg_eig_df['Sz']==spin)]
       m_df['energy'] -= min(m_df['energy'])
-      m_df = m_df[m_df['energy']<3]
+      m_df = m_df[m_df['energy']<cutoff]
       m_df = m_df[variables]
      
       eigenvectors = m_df.values
@@ -559,11 +584,39 @@ def analyze(df=None,save=False):
     mdists.append(np.mean(mdist))
   mdists = np.array(mdists)
   ind = np.argsort(mdists)
-  plt.plot(mdists[ind],'bo')
-  plt.xticks(np.arange(len(ind)),ind)
+ 
+  plt.subplot(121)
+  plt.plot(np.arange(len(ind)),mdists[ind],'bo')
+  plt.xticks(np.arange(len(ind)),np.array(unique_models)[ind])
   plt.ylabel('Mahalanobis distance')
   plt.xlabel('Model')
+  
+  plt.subplot(122)
+  oneparm_df = pd.read_pickle('analysis/oneparm.pickle')
+  plt.errorbar(np.arange(len(ind)),oneparm_df['r2_mu'].iloc[np.array(unique_models)[ind]],
+  yerr = oneparm_df['r2_err'].iloc[np.array(unique_models)[ind]],fmt='go')
+  plt.xticks(np.arange(len(ind)),np.array(unique_models)[ind])
+  plt.ylabel('R2')
+  plt.xlabel('Model')
   plt.show()
+  '''
+
+  model = ['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us','mo_t_dz']
+  X = df[model]
+  X['const'] = 1
+  y = df['energy']
+  ols = sm.OLS(y,X).fit()
+  __, u, l = wls_prediction_std(ols)
+  plt.plot(ols.predict(),y,'.b')
+  ind = df['basestate']<0
+  plt.errorbar(ols.predict()[ind],y[ind],yerr=df[ind]['energy_err'],
+  xerr=[(ols.predict()-l)[ind],(u-ols.predict())[ind]],fmt='og')
+  plt.plot(y,y,'--k')
+  plt.title('OLS, model 12')
+  plt.xlabel('E_pred, eV')
+  plt.ylabel('E_DMC, eV')
+  plt.show()
+
 
 if __name__=='__main__':
   #DATA COLLECTION
