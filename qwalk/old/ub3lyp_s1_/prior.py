@@ -2,7 +2,20 @@ import numpy as np
 import statsmodels.api as sm
 from scipy.optimize import minimize
 import pandas as pd
+from sklearn.metrics import r2_score, mean_squared_log_error
 
+def prior_score(b,df):
+  df_train = df[df['prior']==False]
+  y = df_train['y'] 
+  yhat = pred(b,df_train.drop(columns=['y','prior']))
+  score_train = r2_score(y,yhat)
+
+  df_prior = df[df['prior']==True]
+  y = df_prior['y'] 
+  yhat = pred(b,df_prior.drop(columns=['y','prior']))
+  score_prior = np.linalg.norm(y-yhat)/np.sqrt(len(y))
+  return score_train, score_prior 
+  
 def pred(b,X):
   return np.dot(b,X.values.T)
 
@@ -19,9 +32,13 @@ def cost(b,X,y,lam,X_prior,y_prior):
     cost - SSE(training)/n_train + lambda* SSE(priors)/n_prior
   '''
 
-  c1 = np.linalg.norm(pred(b,X) - y)**2
+  #RMS
+  yhat = pred(b,X)
+  mi = min(min(yhat),min(y))
+  c1 = np.sum(np.log((yhat - mi + 1)/(y - mi +1))**2)
+  #c1 = np.linalg.norm(pred(b,X) - y)**2
   c2 = np.linalg.norm(pred(b,X_prior) - y_prior)**2
-  return c1 + lam*c2 
+  return c1 + lam*c2
 
 def prior_fit(df,lam):
   '''

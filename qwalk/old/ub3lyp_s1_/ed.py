@@ -27,8 +27,12 @@ def h1_moToIAO(parms,printvals=False):
 
   #IAO ordering: ['del','del','yz','xz','x','y','z2','z','s'] 
   #MO ordering:  dxz, dyz, dz2, delta, delta, px, py, pz, 4s
-  es,edpi,edz2,edd,epi,epz,tpi,tdz,tsz,tds=parms
-  e=np.diag([edpi,edpi,edz2,edd,edd,epi,epi,epz,es])
+  #es,edpi,edz2,edd,epi,epz,tpi,tdz,tsz,tds=parms
+  #e=np.diag([edpi,edpi,edz2,edd,edd,epi,epi,epz,es])
+  
+  es,epi,epz,tpi,tdz,tsz,tds=parms
+  ed=0 
+  e=np.diag([ed,ed,ed,ed,ed,epi,epi,epz,es])
   e[[0,1,5,6],[5,6,0,1]]=tpi
   e[[2,7],[7,2]]=tdz
   e[[8,7],[7,8]]=tsz

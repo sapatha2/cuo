@@ -15,6 +15,8 @@ pd.options.mode.chained_assignment = None  # default='warn'
 from scipy.optimize import linear_sum_assignment 
 from find_connect import  *
 import matplotlib as mpl 
+from statsmodels.sandbox.regression.predstd import wls_prediction_std
+import itertools
 
 ######################################################################################
 #FROZEN METHODS
@@ -436,7 +438,7 @@ def avg_ed(df):
   return avg_df
 
 #Plot eigenvalues and eigenproperties
-def plot_ed_log(full_df,av_df,model,save=True):
+def plot_ed(full_df,av_df,model,save=True):
   norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
   limits = [(0.5,2.5),(2.5,4.5),(1.5,4.5),(0.5,2.5),(1.5,4.5),(0,1.5),
   (-1.0,1.5),(-1.5,1.5),(-1.5,1.5),(-1.5,1.5),(-1,1),(-0.5,1.0)]
@@ -444,18 +446,18 @@ def plot_ed_log(full_df,av_df,model,save=True):
   rgba_color = plt.cm.Blues(norm(1.75))
   rgba_color2 = plt.cm.Oranges(norm(1.75))
   z=-1 
-  fig, axes = plt.subplots(nrows=2,ncols=6,sharey=True,figsize=(12,6))
-  for parm in ['iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2pz','iao_n_2ppi','iao_n_4s',
-  'iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','iao_Jsd','iao_Us']:
+  fig, axes = plt.subplots(nrows=2,ncols=3,sharey=True,figsize=(6,6))
+  for parm in ['iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2pz','iao_n_2ppi','iao_n_4s']:#,
+  #'iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','iao_Jsd','iao_Us']:
     z+=1 
-    ax = axes[z//6,z%6]
+    ax = axes[z//3,z%3]
 
     #DMC Data
     p=parm
     if(parm=='iao_Jsd'): p = 'Jsd'
     if(parm=='iao_Us'):  p = 'Us' 
-         
-    full_df['energy']-=min(full_df['energy'])
+    
+    full_df['energy'] -= min(full_df['energy'])
 
     f_df = full_df[full_df['Sz']==0.5]
     x = f_df[p].values
@@ -470,7 +472,9 @@ def plot_ed_log(full_df,av_df,model,save=True):
     ax.errorbar(x,y,yerr,fmt='s',c=rgba_color2,alpha=0.5)
 
     #Eigenstates
+    minE = min(av_df[av_df['model']==model]['energy'])
     sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==0.5)]
+    sub_df['energy'] -= minE
     x=sub_df[parm].values
     xerr_u=sub_df[parm+'_u'].values
     xerr_d=sub_df[parm+'_l'].values
@@ -480,6 +484,7 @@ def plot_ed_log(full_df,av_df,model,save=True):
     ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color)
 
     sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==1.5)]
+    sub_df['energy'] -= minE
     x=sub_df[parm].values
     xerr_u=sub_df[parm+'_u'].values
     xerr_d=sub_df[parm+'_l'].values
@@ -488,26 +493,30 @@ def plot_ed_log(full_df,av_df,model,save=True):
     yerr_d=sub_df['energy_l'].values
     ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color2)
 
+    ax.axhline(min(full_df['energy'])+3,ls='--',c='k')
     ax.set_xlabel(parm)
     ax.set_ylabel('energy (eV)')
     ax.set_xlim(limits[z])
+    ax.set_ylim((-0.2,4.5))
   plt.show()
   return -1
 
 ######################################################################################
 #RUN
 def analyze(df=None,save=False):
-  #Analysis
+  #Analysis (Collect model information)
   '''
-  #Lasso
-  max_model = ['mo_n_4s','mo_n_3dpi','mo_n_3dz2','mo_n_3dd','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz','mo_t_sz','mo_t_ds','Jsd','Us']
-  sel_model, nz = lasso(df,max_model,alphas = np.arange(1e-6,0.105,0.005))
-  sel_model = set(sel_model)
-  sel_model = sorted(sel_model, key = lambda x: len(x)) #Sorted by model complexity
-  print(sel_model)
-  oneparm_df = oneparm_valid(df,max_model,sel_model)
+  max_model = ['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz','mo_t_sz','mo_t_ds','Jsd','Us']
+  core = [0,1,2,8]
+  hopping=[3,4,5,6]
+  sel_model=[core]
+  for n in range(1,len(hopping)+1):
+    s=set(list(hopping))
+    models=list(map(set,itertools.combinations(s,n)))
+    sel_model+=[core+list(m) for m in models]
+  print(len(sel_model))
 
-  #Exact diagonalization of the model
+  #Exact diagonalization of the models
   eig_df = exact_diag(df,max_model,sel_model)
 
   #Sorting and averaging 
@@ -515,47 +524,40 @@ def analyze(df=None,save=False):
   eig_df = desc_ed(eig_df)
   avg_eig_df = avg_ed(eig_df.drop(columns=['ci']))
 
-  oneparm_df.to_pickle('analysis/oneparm.pickle')
   eig_df.to_pickle('analysis/eig.pickle')
   avg_eig_df.to_pickle('analysis/avg_eig.pickle')
+  exit(0)
   '''
-
-  #Plotting
-  '''
-  #R2 score for different models selected from Lasso
-  oneparm_df = pd.read_pickle('analysis/oneparm.pickle')
-  plt.errorbar(np.arange(oneparm_df.shape[0]),oneparm_df['r2_mu'],oneparm_df['r2_err'],fmt='o')
-  plt.show()
-  
-  #ED eigenvalues for different bootstrap samples
-  eig_df = pd.read_pickle('analysis/eig.pickle')
-  g = sns.FacetGrid(eig_df, col="model", col_wrap=4,hue="Sz")
-  g = g.map(plt.plot, "bs_index", "energy", marker=".", ls="None")
-  plt.show()
-  ''' 
- 
-  model=4
-  #oneparm_df = pd.read_pickle('analysis/oneparm.pickle')
-  #print(oneparm_df.iloc[4])
-  #exit(0)
 
   avg_eig_df = pd.read_pickle('analysis/avg_eig.pickle')
-  avg_eig_df = avg_eig_df[avg_eig_df['model']==model]
-  avg_eig_df['energy']-=avg_eig_df['energy'].min()
-  plot_ed_log(df,avg_eig_df,model,save=False)
+  #plot_ed(df,avg_eig_df,model=3)
+  #exit(0)
+
+  #Mahlanobis distance under 3 eV is our prior for now 
+  variables = ['iao_n_4s','iao_n_3dz2','iao_n_3dpi','iao_n_3dd',
+  'iao_n_2pz','iao_n_2ppi','iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','energy']
+  for model in range(16):
+    mdist = []
+    for spin in [0.5,1.5]:
+      big_df = df
+      big_df['energy'] -= min(big_df['energy'])
+      big_df = big_df[(big_df['Sz']==spin)]
+      big_df = big_df[variables]
+      
+      mu = big_df.mean(axis=0).values
+      VI = np.linalg.inv(big_df.cov())
   
-  avg_eig_df['type']='ed'
-  df['energy']-=df['energy'].min()
-  df['type']='dmc'
-  #df=df[(df['basestate']==-5)|(df['basestate']==0)]
-  #print(df[['energy','iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2ppi','iao_n_2pz','iao_t_pi','iao_t_dz','iao_t_ds','iao_t_sz']])
-  #print(df[['energy','mo_n_3dz2','mo_n_3dpi','mo_n_3dd','mo_n_2ppi','mo_n_2pz','mo_n_4s','mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz']])
-  combo = pd.concat((df,avg_eig_df),axis=0)
-  print(avg_eig_df[['energy','iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2ppi','iao_n_2pz','iao_t_pi','iao_t_dz','iao_t_ds','iao_t_sz']].iloc[:20])
-  #sns.pairplot(combo,vars=['energy','iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2ppi','iao_n_2pz'],hue='type')
-  sns.pairplot(combo,vars=['energy','iao_n_2pz','iao_t_pi','iao_t_dz','iao_t_ds','iao_t_sz'],hue='type')
+      m_df = avg_eig_df[(avg_eig_df['model']==model) & (avg_eig_df['Sz']==spin)]
+      m_df['energy'] -= min(m_df['energy'])
+      m_df = m_df[m_df['energy']<3]
+      m_df = m_df[variables]
+     
+      eigenvectors = m_df.values
+      d = reduce(np.dot,((eigenvectors - mu),VI,(eigenvectors - mu).T))
+      mdist += list(np.sqrt(np.diag(d)))
+    plt.plot(model,np.mean(mdist),'bo')
   plt.show()
-  
+
 if __name__=='__main__':
   #DATA COLLECTION
   #df=collect_df()
