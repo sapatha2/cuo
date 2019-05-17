@@ -374,6 +374,33 @@ def desc_ed(df):
   sigTdz = []
   sigTsz = []
 
+  sigMONdz2 = []
+  sigMONdpi = []
+  sigMONdd =[]
+  sigMONd = []
+  sigMON2pz = []
+  sigMON2ppi = []
+  sigMON4s = []
+  sigMOTpi = []
+  sigMOTds = []
+  sigMOTdz = []
+  sigMOTsz = []
+
+  #GET MO TO IAO MATRIX
+  act_iao=[5,9,6,8,11,12,7,13,1]
+  iao=np.load('../../../pyscf/ub3lyp_full/b3lyp_iao_b.pickle')
+  iao=iao[:,act_iao]
+  
+  #LOAD IN MOS
+  act_mo=[5,6,7,8,9,10,11,12,13]
+  chkfile='../../../pyscf/chk/Cuvtz_r1.725_s1_B3LYP_1.chk'
+  mol=lib.chkfile.load_mol(chkfile)
+  m=ROKS(mol)
+  m.__dict__.update(lib.chkfile.load(chkfile, 'scf'))
+  mo=m.mo_coeff[:,act_mo]
+  s=m.get_ovlp()
+  mo_to_iao = reduce(np.dot,(mo.T,s,iao))
+
   for i in range(df.shape[0]):
     ci = df['ci'].iloc[i]
     norb=9
@@ -385,13 +412,14 @@ def desc_ed(df):
     sigUs.append(dm2[1][1][8,8,8,8])
     
     Jsd = 0
-    for i in [0,1,2,3,6]:
-      Jsd += 0.25*(dm2[1][0][8,8,i,i] + dm2[1][2][8,8,i,i] - dm2[1][1][8,8,i,i] - dm2[1][1][i,i,8,8])-\
-             0.5*(dm2[1][1][i,8,8,i] + dm2[1][1][8,i,i,8]) 
+    for j in [0,1,2,3,6]:
+      Jsd += 0.25*(dm2[1][0][8,8,j,j] + dm2[1][2][8,8,j,j] - dm2[1][1][8,8,j,j] - dm2[1][1][j,j,8,8])-\
+             0.5*(dm2[1][1][j,8,8,j] + dm2[1][1][8,j,j,8]) 
     sigJsd.append(Jsd)
   
     dm = dm2[0][0] + dm2[0][1]
-    
+   
+    #IAO ordering: ['del','del','yz','xz','x','y','z2','z','s'] 
     sigNdz2.append(dm[6,6])
     sigNdpi.append(dm[2,2]+dm[3,3])
     sigNdd.append(dm[0,0]+dm[1,1])
@@ -404,6 +432,20 @@ def desc_ed(df):
     sigTdz.append(2*dm[6,7])
     sigTsz.append(2*dm[7,8])
   
+    #MO ordering:  dxz, dyz, dz2, delta, delta, px, py, pz, 4s
+    mo_dm = reduce(np.dot,(mo_to_iao,dm,mo_to_iao.T))
+    sigMONdz2.append(mo_dm[2,2])
+    sigMONdpi.append(mo_dm[0,0]+mo_dm[1,1])
+    sigMONdd.append(mo_dm[3,3]+mo_dm[4,4])
+    sigMONd.append(mo_dm[0,0]+mo_dm[1,1]+mo_dm[2,2]+mo_dm[3,3]+mo_dm[4,4])
+    sigMON2pz.append(mo_dm[7,7])
+    sigMON2ppi.append(mo_dm[6,6]+mo_dm[5,5])
+    sigMON4s.append(mo_dm[8,8])
+    sigMOTpi.append(2*(mo_dm[0,5]+mo_dm[1,6]))
+    sigMOTds.append(2*mo_dm[2,8])
+    sigMOTdz.append(2*mo_dm[2,7])
+    sigMOTsz.append(2*mo_dm[7,8])
+
   df['iao_n_3dz2']=sigNdz2
   df['iao_n_3dpi']=sigNdpi
   df['iao_n_3dd']=sigNdd
@@ -415,8 +457,21 @@ def desc_ed(df):
   df['iao_t_ds']=sigTds
   df['iao_t_dz']=sigTdz
   df['iao_t_sz']=sigTsz
-  df['iao_Us']=sigUs
-  df['iao_Jsd']=sigJsd  
+
+  df['mo_n_3dz2']=sigMONdz2
+  df['mo_n_3dpi']=sigMONdpi
+  df['mo_n_3dd']=sigMONdd
+  df['mo_n_3d']=sigMONd
+  df['mo_n_2pz']=sigMON2pz
+  df['mo_n_2ppi']=sigMON2ppi
+  df['mo_n_4s']=sigMON4s
+  df['mo_t_pi']=sigMOTpi
+  df['mo_t_ds']=sigMOTds
+  df['mo_t_dz']=sigMOTdz
+  df['mo_t_sz']=sigMOTsz
+
+  df['Us']=sigUs
+  df['Jsd']=sigJsd  
   return df
 
 def avg_ed(df):
@@ -446,27 +501,23 @@ def plot_ed(full_df,av_df,model,save=True):
   rgba_color = plt.cm.Blues(norm(1.75))
   rgba_color2 = plt.cm.Oranges(norm(1.75))
   z=-1 
-  fig, axes = plt.subplots(nrows=2,ncols=3,sharey=True,figsize=(6,6))
-  for parm in ['iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2pz','iao_n_2ppi','iao_n_4s']:#,
-  #'iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','iao_Jsd','iao_Us']:
+  fig, axes = plt.subplots(nrows=2,ncols=6,sharey=True,figsize=(12,6))
+  for parm in ['iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2pz','iao_n_2ppi','iao_n_4s',
+  'iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz','Jsd','Us']:
     z+=1 
-    ax = axes[z//3,z%3]
+    ax = axes[z//6,z%6]
 
     #DMC Data
-    p=parm
-    if(parm=='iao_Jsd'): p = 'Jsd'
-    if(parm=='iao_Us'):  p = 'Us' 
-    
     full_df['energy'] -= min(full_df['energy'])
 
     f_df = full_df[full_df['Sz']==0.5]
-    x = f_df[p].values
+    x = f_df[parm].values
     y = f_df['energy'].values
     yerr = f_df['energy_err'].values
     ax.errorbar(x,y,yerr,fmt='s',c=rgba_color,alpha=0.5)
 
     f_df = full_df[full_df['Sz']==1.5]
-    x = f_df[p].values
+    x = f_df[parm].values
     y = f_df['energy'].values
     yerr = f_df['energy_err'].values
     ax.errorbar(x,y,yerr,fmt='s',c=rgba_color2,alpha=0.5)
@@ -534,7 +585,13 @@ def analyze(df=None,save=False):
   exit(0)
   '''
 
-  #Select model - R2 and Malhanobis
+  eig_df = pd.read_pickle('analysis/eig.pickle')
+  eig_df = desc_ed(eig_df)
+  avg_eig_df = avg_ed(eig_df.drop(columns=['ci']))
+  avg_eig_df.to_pickle('analysis/avg_eig.pickle')
+  exit(0)
+
+  #Select and plot unique models
   '''
   unique_models = []
   oneparm_df = pd.read_pickle('analysis/oneparm.pickle').drop(columns=['r2_mu','r2_err'])
@@ -553,70 +610,10 @@ def analyze(df=None,save=False):
   print('unique models: ',unique_models)
 
   avg_eig_df = pd.read_pickle('analysis/avg_eig.pickle')
-  plot_ed(df,avg_eig_df,model=12)
+  for model in unique_models:
+    plot_ed(df,avg_eig_df,model=model)
   exit(0)
   '''
-
-  '''
-  cutoff = 3#eV
-  mdists = []
-  variables = ['iao_n_4s','iao_n_3dz2','iao_n_3dpi','iao_n_3dd',
-  'iao_n_2pz','iao_n_2ppi','iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz']
-  for model in unique_models:
-    mdist = []
-    for spin in [0.5,1.5]:
-      big_df = df
-      big_df['energy'] -= min(big_df['energy'])
-      big_df = big_df[(big_df['Sz']==spin)]
-      big_df = big_df[variables]
-      
-      mu = big_df.mean(axis=0).values
-      VI = np.linalg.inv(big_df.cov())
-  
-      m_df = avg_eig_df[(avg_eig_df['model']==model) & (avg_eig_df['Sz']==spin)]
-      m_df['energy'] -= min(m_df['energy'])
-      m_df = m_df[m_df['energy']<cutoff]
-      m_df = m_df[variables]
-     
-      eigenvectors = m_df.values
-      d = reduce(np.dot,((eigenvectors - mu),VI,(eigenvectors - mu).T))
-      mdist += list(np.sqrt(np.diag(d)))
-    mdists.append(np.mean(mdist))
-  mdists = np.array(mdists)
-  ind = np.argsort(mdists)
- 
-  plt.subplot(121)
-  plt.plot(np.arange(len(ind)),mdists[ind],'bo')
-  plt.xticks(np.arange(len(ind)),np.array(unique_models)[ind])
-  plt.ylabel('Mahalanobis distance')
-  plt.xlabel('Model')
-  
-  plt.subplot(122)
-  oneparm_df = pd.read_pickle('analysis/oneparm.pickle')
-  plt.errorbar(np.arange(len(ind)),oneparm_df['r2_mu'].iloc[np.array(unique_models)[ind]],
-  yerr = oneparm_df['r2_err'].iloc[np.array(unique_models)[ind]],fmt='go')
-  plt.xticks(np.arange(len(ind)),np.array(unique_models)[ind])
-  plt.ylabel('R2')
-  plt.xlabel('Model')
-  plt.show()
-  '''
-
-  model = ['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us','mo_t_dz']
-  X = df[model]
-  X['const'] = 1
-  y = df['energy']
-  ols = sm.OLS(y,X).fit()
-  __, u, l = wls_prediction_std(ols)
-  plt.plot(ols.predict(),y,'.b')
-  ind = df['basestate']<0
-  plt.errorbar(ols.predict()[ind],y[ind],yerr=df[ind]['energy_err'],
-  xerr=[(ols.predict()-l)[ind],(u-ols.predict())[ind]],fmt='og')
-  plt.plot(y,y,'--k')
-  plt.title('OLS, model 12')
-  plt.xlabel('E_pred, eV')
-  plt.ylabel('E_DMC, eV')
-  plt.show()
-
 
 if __name__=='__main__':
   #DATA COLLECTION

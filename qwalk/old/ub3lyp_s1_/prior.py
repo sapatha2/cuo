@@ -4,16 +4,21 @@ from scipy.optimize import minimize
 import pandas as pd
 from sklearn.metrics import r2_score, mean_squared_log_error
 
+import numpy as np
+
+def sigmoid(x, derivative=False):
+  return x*(1-x) if derivative else 1/(1+np.exp(-x))
+
 def prior_score(b,df):
   df_train = df[df['prior']==False]
-  y = df_train['y'] 
-  yhat = pred(b,df_train.drop(columns=['y','prior']))
+  y = df_train['energy'] 
+  yhat = pred(b,df_train.drop(columns=['energy','prior']))
   score_train = r2_score(y,yhat)
 
   df_prior = df[df['prior']==True]
-  y = df_prior['y'] 
-  yhat = pred(b,df_prior.drop(columns=['y','prior']))
-  score_prior = np.linalg.norm(y-yhat)/np.sqrt(len(y))
+  y = df_prior['energy'] 
+  yhat = pred(b,df_prior.drop(columns=['energy','prior']))
+  score_prior = (yhat-y).values
   return score_train, score_prior 
   
 def pred(b,X):
@@ -34,10 +39,10 @@ def cost(b,X,y,lam,X_prior,y_prior):
 
   #RMS
   yhat = pred(b,X)
-  mi = min(min(yhat),min(y))
-  c1 = np.sum(np.log((yhat - mi + 1)/(y - mi +1))**2)
-  #c1 = np.linalg.norm(pred(b,X) - y)**2
-  c2 = np.linalg.norm(pred(b,X_prior) - y_prior)**2
+  c1 = np.linalg.norm(pred(b,X) - y)**2
+
+  yhat_prior = pred(b,X_prior)
+  c2 = np.sum(sigmoid(y_prior - yhat_prior))
   return c1 + lam*c2
 
 def prior_fit(df,lam):
@@ -55,11 +60,11 @@ def prior_fit(df,lam):
   df_train = df[df['prior']==False]
   df_prior = df[df['prior']==True]
  
-  y = df_train['y']
-  X = df_train.drop(columns=['y','prior'])
+  y = df_train['energy']
+  X = df_train.drop(columns=['energy','prior'])
   
-  y_prior = df_prior['y']
-  X_prior = df_prior.drop(columns=['y','prior'])
+  y_prior = df_prior['energy']
+  X_prior = df_prior.drop(columns=['energy','prior'])
 
   ols=sm.WLS(y,X).fit()
   b0=ols.params.values
