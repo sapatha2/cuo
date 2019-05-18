@@ -69,25 +69,37 @@ def ed(model,exp_parms):
   E1 = res1[0]
   E3 = res3[0]
   
-  return [E1,E3]
+  return [E1-min(E1),E3-min(E1)]
 
 #RUN
 def analyze(df=None,save=False):
   #Analysis
   df = add_priors(df,cutoff = 2)
   
-  #for x in df[df['priors']==True]:
-  #  print(mahalanobis(df,x))
+  oneparm_df = pd.read_pickle('analysis/oneparm.pickle').drop(columns=['r2_mu','r2_err'])
+  for i in [5, 9, 12]:
+    ind = np.nonzero(oneparm_df.iloc[i])[0]
+    model = np.array(list(oneparm_df))[ind]
+    model = list(model[:int(len(model)/2)])
+    print(model)
 
-  model = ['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']
-  fit_df = df[['energy','prior']+model]
-  fit_df['const'] = 1
+    fit_df = df[['energy','prior']+model]
+    fit_df['const'] = 1
 
-  for lam in np.arange(0,120,20):
-    params = prior_fit(fit_df,lam)
-    score = prior_score(params,fit_df)
-    print(np.around(params[:-1],2))
-    #print(score)
+    lams = np.arange(0,140,20)
+    r2scores = []
+    diff = []
+    for lam in lams:
+      params = prior_fit(fit_df,lam)
+      print(np.around(params[:-1],2))
+      scores = prior_score(params,fit_df)
+      r2scores.append(scores[0])
+      diff.append(scores[1].sum())
+    plt.plot(diff,r2scores,'o-',label=str(i))
+  plt.ylabel('R2 score')
+  plt.xlabel('E_p - E_cut, eV')
+  plt.legend(loc='best')
+  plt.show()
 
 if __name__=='__main__':
   #DATA COLLECTION
