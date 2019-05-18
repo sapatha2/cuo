@@ -10,7 +10,7 @@ import statsmodels.api as sm
 #Collect df
 def collect_df():
   df=None
-  for basestate in range(11):
+  for basestate in range(13):
     for gsw in [1.0]:
       f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
       small_df=pd.read_pickle(f)
@@ -20,12 +20,12 @@ def collect_df():
       if(df is None): df = small_df
       else: df = pd.concat((df,small_df),axis=0,sort=True)
 
-  for basestate in range(6):
+  for basestate in range(7):
     for gsw in [1.0]:
       f='../ub3lyp_3/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
       small_df=pd.read_pickle(f)
     
-      small_df['basestate']=basestate+11
+      small_df['basestate']=basestate+13
       small_df['Sz']=1.5
       df = pd.concat((df,small_df),axis=0,sort=True)
   
@@ -69,16 +69,16 @@ df = format_df(df)
 df = df.sort_values(by='energy')
 df['energy']/=27.2114
 df['energy_err']/=27.2114
-#terms = ['energy','basestate','Sz','mo_n_3dz2','mo_n_3dpi','mo_n_2ppi','mo_n_2pz','mo_n_4s','mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz','Us']
-#terms = ['energy','basestate','Sz','Us','Up','Ud','Jdd','Jpp','Jdp','Jsp','Jsd']
-#print(df[terms])
 
-'''
-terms = ['mo_n_3dz2','mo_n_3dpi','mo_n_2ppi','mo_n_2pz','mo_n_4s','mo_t_pi','mo_t_dz','mo_t_ds','mo_t_sz',
-'Us','Up','Ud','Jdd','Jpp','Jdp','Jsp','Jsd']
-var=df[terms].var()
-print(var.sort_values())
-'''
+#sns.pairplot(df,vars=['energy','mo_n_3dz2','mo_n_3dd','mo_n_3dpi','mo_n_2ppi','mo_n_2pz'],hue='basestate')
+#sns.pairplot(df,vars=['energy','mo_n_2p','mo_n_3d','mo_n_4s'],hue='basestate')
+#sns.pairplot(df,vars=['energy','Us','Ud','Up'],hue='basestate')
+#sns.pairplot(df,vars=['energy','mo_n_3d','mo_n_2ppi','mo_n_2pz','mo_n_4s','Us','Ud'],hue='basestate')
+#plt.show()
 
-plt.plot(df['energy'],df['energy_err'],'o')
-plt.show()
+model = ['mo_n_4s','mo_n_2ppi','mo_n_2pz','Us','mo_t_pi']#,'Us','Up','Ud','Jsd','Jsp','Jpp','Jdp','Jdd']
+X = df[model]
+X = sm.add_constant(X)
+y = df['energy']
+ols = sm.OLS(y,X).fit()
+print(ols.summary())

@@ -500,7 +500,6 @@ if __name__ == '__main__':
   mf = UKS(mol)
   mf.__dict__.update(lib.chkfile.load(chkfile, 'scf'))
   mf.xc = 'B3LYP'
-  mf.irrep_nelec = {'A1':(5,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}
 
   mf.max_cycle=100
   mf = addons.remove_linear_dep_(mf)
@@ -515,6 +514,7 @@ if __name__ == '__main__':
   spin_labels = [[0,1],[0,1]]
   nelec_required = [1.,0.3]
   mf.chkfile = 'Cuvtz_r1.725_s1_UB3LYP_0c.chk'
+  mf.irrep_nelec = {'A1':(5,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}
   '''
 
   #3dz2 - 2ppi
@@ -525,6 +525,7 @@ if __name__ == '__main__':
   spin_labels = [[0,1],[0,1]]
   nelec_required = [1.,0.3]
   mf.chkfile = 'Cuvtz_r1.725_s1_UB3LYP_1c.chk'
+  mf.irrep_nelec = {'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}
   '''
 
   #3dz2 - 4s
@@ -535,9 +536,11 @@ if __name__ == '__main__':
   spin_labels = [[0,1],[0,1]]
   nelec_required = [1.,1.]
   mf.chkfile = 'Cuvtz_r1.725_s1_UB3LYP_2c.chk'
+  mf.irrep_nelec = {'A1':(5,5),'E1x':(3,3),'E1y':(3,2),'E2x':(1,1),'E2y':(1,1)}
   '''
 
   #2z -> pi,4s
+  '''
   id0 = mol.search_ao_label('O 2pz')
   id1 = mol.search_ao_label('Cu 4s')
   id2 = mol.search_ao_label('O 2px')
@@ -546,6 +549,8 @@ if __name__ == '__main__':
   spin_labels = [[0,0,1,1],[0],[0,1,0,1]]
   nelec_required = [2,0.7,4.]
   mf.chkfile = 'Cuvtz_r1.725_s1_UB3LYP_3c.chk'
+  mf.irrep_nelec = {'A1':(5,4),'E1x':(3,3),'E1y':(3,3),'E2x':(1,1),'E2y':(1,1)}
+  '''
 
   constraints = Constraints(orbital_indices, spin_labels, nelec_required)
   mf, dm_pop = cdft(mf, constraints, lo_method='nao', verbose=4)

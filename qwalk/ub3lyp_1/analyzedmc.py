@@ -31,8 +31,7 @@ pd.options.mode.chained_assignment = None  # default='warn'
 def collect_df():
   df=None
   for basestate in range(13):
-    #for gsw in np.arange(0.1,1.1,0.1):
-    for gsw in [1.0]:
+    for gsw in np.arange(0.1,1.1,0.1):
       f='gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
       small_df=pd.read_pickle(f)
 
@@ -43,8 +42,7 @@ def collect_df():
       else: df = pd.concat((df,small_df),axis=0,sort=True)
 
   for basestate in range(7):
-    #for gsw in np.arange(0.1,1.1,0.1):
-    for gsw in [1.0]:
+    for gsw in np.arange(0.1,1.1,0.1):
       f='../ub3lyp_3/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
       small_df=pd.read_pickle(f)
     
@@ -52,7 +50,17 @@ def collect_df():
       if(gsw==1.0): small_df['basestate']=-1
       small_df['Sz']=1.5
       df = pd.concat((df,small_df),axis=0,sort=True)
-  
+ 
+  for basestate in range(4):
+    for gsw in np.arange(0.2,1.2,0.2):
+      f='../ub3lyp_extra_1/gsw'+str(np.round(gsw,2))+'b'+str(basestate)+'/dmc_gosling.pickle' 
+      small_df=pd.read_pickle(f)
+    
+      small_df['basestate']=basestate+20
+      if(gsw==1.0): small_df['basestate']=-1
+      small_df['Sz']=0.5
+      df = pd.concat((df,small_df),axis=0,sort=True)
+
   return df
 
 #Formatting
@@ -711,6 +719,31 @@ def compare_spectrum():
 #RUN
 def analyze(df,save=False):
   #LOG DATA COLLECTION
+
+  df = df[df['basestate']==-1][['energy','mo_n_3dpi','mo_n_2ppi']]
+  print(df)
+  exit(0)
+  print(df[df['mo_n_3dpi']<3.3]['basestate'].values)
+  exit(0)
+  
+  df = df[(df['basestate']!=11)&(df['basestate']!=19)]
+  
+  #model = ['mo_n_2ppi','mo_n_2pz','mo_n_4s','Jsd','Us','mo_t_pi','mo_t_ds','mo_t_sz','mo_t_dz']
+  model = ['mo_n_2ppi','mo_n_2pz','mo_n_4s','Jsd','Us','mo_t_pi','mo_t_sz','mo_t_dz']
+  X = df[model]
+  X = sm.add_constant(X)
+  y = df['energy']
+  ols = sm.WLS(y,X,weights=np.exp(-2*(y-min(y)))).fit()
+  print(ols.summary())
+
+  #ind = df['basestate']==-1
+  #plt.plot(y[ind],y[ind],'g--')
+  #plt.plot(ols.predict()[ind],y[ind],'ob')
+  plt.plot(y,y,'g--')
+  plt.plot(ols.predict(),y,'ob')
+  plt.show()
+  exit(0)
+
   '''
   #Generate all possible models
   X=df[['mo_n_4s','mo_n_2ppi','mo_n_2pz','Jsd','Us']]
@@ -993,9 +1026,11 @@ def analyze(df,save=False):
 
 if __name__=='__main__':
   #DATA COLLECTION
+  '''
   df=collect_df()
   df=format_df(df)
   df.to_pickle('formatted_gosling.pickle')
+  '''
 
   ''' 
   d=(pd.read_pickle('analysis/regr_log.pickle'))
