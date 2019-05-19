@@ -76,10 +76,8 @@ def analyze(df=None,save=False):
   #Analysis
   df = add_priors(df,cutoff = 2)
 
-  '''
-  #Generate models + get all the proeperties we need
+  #Generate models
   oneparm_df = pd.read_pickle('analysis/oneparm.pickle').drop(columns=['r2_mu','r2_err'])
-  prior_df = None
   for i in [5, 9, 12, 21, 20, 24]:
     ind = np.nonzero(oneparm_df.iloc[i])[0]
     model = np.array(list(oneparm_df))[ind]
@@ -90,38 +88,52 @@ def analyze(df=None,save=False):
     fit_df['const'] = 1
 
     lams = np.arange(0,80,20)
+    r2_mus = []
+    r2_errs = []
+    diff_mus = []
+    diff_errs = []
+    E_mus = []
     E_errs = []
-    s1 = []
-    s2 = []
-    r2 = []
+    
     for lam in lams:
       print("lambda = "+str(lam)) 
+      r2 = []
+      diff = []
       E = []
-      for j in range(10): #10 BS samples for error bars
+      for i in range(10): #10 BS samples for error bars
         d = fit_df.sample(n=fit_df.shape[0],replace=True)
         params = prior_fit(d,lam)
+        print(np.around(params[:-1],2))
+        scores = prior_score(params,d)
+
         e = ed(model,params[:-1])
         E.append(np.array(e[0]+e[1])-min(e[0]+e[1]))
-     
-      params = prior_fit(fit_df,lam)
-      score = prior_score(params,fit_df)
-      print(score)
+        r2.append(scores[0])
+        diff.append(scores[1].sum())
+      r2_mu = np.mean(r2)
+      r2_err = np.std(r2)
+      
+      diff_mu = np.mean(diff)
+      diff_err = np.std(diff)
 
-      E_errs.append(np.std(E,axis=0).mean())
-      s1.append(score[1].values[0])
-      s2.append(score[1].values[1])
-      r2.append(score[0])
+      r2_mus.append(r2_mu)
+      r2_errs.append(r2_err)
+      diff_mus.append(diff_mu)
+      diff_errs.append(diff_err)
 
-    data = pd.DataFrame({'r2':r2,'E_errs':E_errs,'s1':s1,'s2':s2,'lam':lams,'model':i*np.ones(len(r2))})
-    if(prior_df is None): prior_df = data
-    else: prior_df = pd.concat((prior_df,data),axis=0)
-  prior_df.to_pickle('analysis/prior.pickle')
-  '''
+      E_mus.append(np.mean(E,axis=0))
+      E_errs.append(np.std(E,axis=0))
 
-  prior_df = pd.read_pickle('analysis/prior.pickle')
-  prior_df = prior_df[prior_df['E_errs']<=0.25]
-  sns.scatterplot(data =prior_df, x='s1',y='s2',hue='model')
-  plt.show()
+
+      #print(E_errs[-1].mean())
+      #plt.errorbar(np.arange(len(E_mus[-1])),E_mus[-1],yerr=E_errs[-1],fmt='.b')
+      #plt.show()
+
+    #plt.errorbar(diff_mus,r2_mus,yerr=r2_errs,fmt='o-',label=str(i))
+  #plt.ylabel('R2 score')
+  #plt.xlabel('E_p - E_cut, eV')
+  #plt.legend(loc='best')
+  #plt.show()
 
 if __name__=='__main__':
   #DATA COLLECTION

@@ -586,6 +586,7 @@ def analyze(df=None,save=False):
   '''
 
   #Select unique models
+  '''
   unique_models = []
   oneparm_df = pd.read_pickle('analysis/oneparm.pickle').drop(columns=['r2_mu','r2_err'])
   for model in np.arange(32):
@@ -609,23 +610,21 @@ def analyze(df=None,save=False):
     noise = avg_eig_df[avg_eig_df['model']==model].mean()['energy_u'] +\
     avg_eig_df[avg_eig_df['model']==model].mean()['energy_l']
     noises.append(noise)
-    #plot_ed(df,avg_eig_df,model=model)
 
   ind = np.argsort(noises)
   y = np.array(sorted(noises))
-  plt.plot(y[0],'o',label='A')
-  plt.plot([1,4,5,9,10],y[[1,4,5,9,10]],'o',label='B')
-  plt.plot([2,3,6,7,8,11],y[[2,3,6,7,8,11]],'o',label='C')
+  plt.plot(y,'o')
   plt.ylabel('Avg E_err, eV')
   plt.xlabel('Model')
   plt.xticks(np.arange(len(ind)),np.array(unique_models)[ind])
-  plt.axhline(0.20,ls='--',c='k')
+  plt.axhline(0.25,ls='--',c='k')
   plt.show() 
   exit(0)
+  '''
 
   #Plot ed
   avg_eig_df = pd.read_pickle('analysis/avg_eig.pickle')
-  for model in [9,21]:
+  for model in [5,9,12,21,20,24]:
     plot_ed(df,avg_eig_df,model=model)
 
 if __name__=='__main__':

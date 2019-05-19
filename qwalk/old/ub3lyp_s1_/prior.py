@@ -7,7 +7,7 @@ from sklearn.metrics import r2_score, mean_squared_log_error
 import numpy as np
 
 def sigmoid(x, derivative=False):
-  return x*(1-x) if derivative else 1/(1+np.exp(-x))
+  return x*(1-x) if derivative else 1/(1+np.exp(-2*x))
 
 def prior_score(b,df):
   df_train = df[df['prior']==False]
@@ -18,7 +18,7 @@ def prior_score(b,df):
   df_prior = df[df['prior']==True]
   y = df_prior['energy'] 
   yhat = pred(b,df_prior.drop(columns=['energy','prior']))
-  score_prior = (yhat-y).values
+  score_prior = y - yhat
   return score_train, score_prior 
   
 def pred(b,X):
