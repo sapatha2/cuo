@@ -76,7 +76,6 @@ def analyze(df=None,save=False):
   #Analysis
   df = add_priors(df,cutoff = 2)
 
-  '''
   #Generate models + get all the proeperties we need
   oneparm_df = pd.read_pickle('analysis/oneparm.pickle').drop(columns=['r2_mu','r2_err'])
   prior_df = None
@@ -89,11 +88,12 @@ def analyze(df=None,save=False):
     fit_df = df[['energy','prior']+model]
     fit_df['const'] = 1
 
-    lams = np.arange(0,80,20)
+    lams = [15]#np.arange(0,40,5)
     E_errs = []
     s1 = []
     s2 = []
     r2 = []
+    z = []
     for lam in lams:
       print("lambda = "+str(lam)) 
       E = []
@@ -102,10 +102,13 @@ def analyze(df=None,save=False):
         params = prior_fit(d,lam)
         e = ed(model,params[:-1])
         E.append(np.array(e[0]+e[1])-min(e[0]+e[1]))
-     
+        z.append(params)
+        
       params = prior_fit(fit_df,lam)
       score = prior_score(params,fit_df)
-      print(score)
+      print(np.array(z).mean(axis=0))
+      print(np.array(z).std(axis=0))
+      exit(0)
 
       E_errs.append(np.std(E,axis=0).mean())
       s1.append(score[1].values[0])
@@ -115,13 +118,18 @@ def analyze(df=None,save=False):
     data = pd.DataFrame({'r2':r2,'E_errs':E_errs,'s1':s1,'s2':s2,'lam':lams,'model':i*np.ones(len(r2))})
     if(prior_df is None): prior_df = data
     else: prior_df = pd.concat((prior_df,data),axis=0)
+    exit(0)
   prior_df.to_pickle('analysis/prior.pickle')
-  '''
 
+  exit(0)
+  
+  '''
   prior_df = pd.read_pickle('analysis/prior.pickle')
   prior_df = prior_df[prior_df['E_errs']<=0.25]
+  print(prior_df)
   sns.scatterplot(data =prior_df, x='s1',y='s2',hue='model')
   plt.show()
+  '''
 
 if __name__=='__main__':
   #DATA COLLECTION
