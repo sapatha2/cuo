@@ -71,11 +71,15 @@ def ed(model,exp_parms):
   
   return [E1-min(E1),E3-min(E1)]
 
+def sigmoid(x):
+  return 1/(1+np.exp(-1*x))
+
 #RUN
 def analyze(df=None,save=False):
   #Analysis
   df = add_priors(df,cutoff = 2)
-
+  
+  '''
   #Generate models + get all the proeperties we need
   oneparm_df = pd.read_pickle('analysis/oneparm.pickle').drop(columns=['r2_mu','r2_err'])
   prior_df = None
@@ -88,48 +92,102 @@ def analyze(df=None,save=False):
     fit_df = df[['energy','prior']+model]
     fit_df['const'] = 1
 
-    lams = [15]#np.arange(0,40,5)
-    E_errs = []
-    s1 = []
-    s2 = []
-    r2 = []
-    z = []
+    lams = np.arange(0,55,5)
+    E_err = []
+    s1_mu = []
+    s1_err = []
+    s2_mu = []
+    s2_err = []
+    r2_mu = []
+    r2_err = []
+    params_mu = []
+    params_err = []
     for lam in lams:
       print("lambda = "+str(lam)) 
       E = []
+      r2 = []
+      s1 = []
+      s2 = []
+      ps = []
       for j in range(10): #10 BS samples for error bars
-        d = fit_df.sample(n=fit_df.shape[0],replace=True)
+        d = fit_df[fit_df['prior']==False].sample(n=fit_df[fit_df['prior']==False].shape[0],replace=True)
+        d = pd.concat((d,fit_df[fit_df['prior']==True]),axis=0)
+
         params = prior_fit(d,lam)
+        score = prior_score(params,d)
         e = ed(model,params[:-1])
+  
         E.append(np.array(e[0]+e[1])-min(e[0]+e[1]))
-        z.append(params)
-        
-      params = prior_fit(fit_df,lam)
-      score = prior_score(params,fit_df)
-      print(np.array(z).mean(axis=0))
-      print(np.array(z).std(axis=0))
-      exit(0)
+        s1.append(score[1].values[0])
+        s2.append(score[1].values[1])
+        ps.append(params)
+        r2.append(score[0])
 
-      E_errs.append(np.std(E,axis=0).mean())
-      s1.append(score[1].values[0])
-      s2.append(score[1].values[1])
-      r2.append(score[0])
+      r2_mu.append(np.mean(r2))
+      r2_err.append(np.std(r2))
+    
+      s1_mu.append(np.mean(s1))
+      s1_err.append(np.std(s1))
 
-    data = pd.DataFrame({'r2':r2,'E_errs':E_errs,'s1':s1,'s2':s2,'lam':lams,'model':i*np.ones(len(r2))})
+      s2_mu.append(np.mean(s2))
+      s2_err.append(np.std(s2))
+
+      E_err.append(np.std(E,axis=0).mean())
+
+      params_mu.append(np.mean(ps,axis=0))
+      params_err.append(np.std(ps,axis=0))
+
+    data = pd.DataFrame({'r2_mu':r2_mu,'r2_err':r2_err,'E_err':E_err,'s1_mu':s1_mu,'s1_err':s1_err,
+    's2_mu':s2_mu,'s2_err':s2_err,'params_mu':params_mu,'params_err':params_err,'lam':lams,'model':i*np.ones(len(lams))})
     if(prior_df is None): prior_df = data
     else: prior_df = pd.concat((prior_df,data),axis=0)
-    exit(0)
   prior_df.to_pickle('analysis/prior.pickle')
-
   exit(0)
-  
   '''
+
   prior_df = pd.read_pickle('analysis/prior.pickle')
-  prior_df = prior_df[prior_df['E_errs']<=0.25]
-  print(prior_df)
-  sns.scatterplot(data =prior_df, x='s1',y='s2',hue='model')
+
+  #R2 vs lambda
+  plt.subplot(221)
+  for group_model in prior_df.groupby(by='model'):        
+    plt.errorbar(group_model[1]['lam'],group_model[1]['r2_mu'],
+    group_model[1]['r2_err'],fmt='o-')
+  plt.xlabel('lambda')
+  plt.ylabel('r2')
+
+  #R2 vs s1
+  plt.subplot(222)
+  for group_model in prior_df.groupby(by='model'):        
+    plt.errorbar(2-group_model[1]['s1_mu'],group_model[1]['r2_mu'],
+    yerr=group_model[1]['r2_err'],xerr=group_model[1]['s1_err'],marker='o')
+  plt.axvline(2.0,c='k',ls='--')
+  plt.xlim(-0.1,2.5)
+  plt.xlabel('E_1, eV')
+  plt.ylabel('r2')
+
+  #R2 vs s2
+  plt.subplot(223)
+  for group_model in prior_df.groupby(by='model'):        
+    plt.errorbar(group_model[1]['r2_mu'],2-group_model[1]['s2_mu'],
+    yerr=group_model[1]['s2_err'],xerr=group_model[1]['r2_err'],marker='o')
+  plt.axhline(2.0,c='k',ls='--')
+  plt.ylim(-0.1,2.5)
+  plt.ylabel('E_2, eV')
+  plt.xlabel('r2')
+
+  #s1_err vs s2_err for low energy error models
+  plt.subplot(224)
+  for group_model in prior_df.groupby(by='model'):        
+      plt.errorbar(2-group_model[1]['s1_mu'],2-group_model[1]['s2_mu'],
+      yerr=group_model[1]['s2_err'],xerr=group_model[1]['s1_err'],marker='o',label=str(int(group_model[0])))
+  plt.legend(loc='best')
+  plt.xlabel('E_1, eV')
+  plt.ylabel('E_2, eV')
+  plt.axvline(2.0,c='k',ls='--')
+  plt.xlim(-0.1,2.5)
+  plt.axhline(2.0,c='k',ls='--')
+  plt.ylim(-0.1,2.5)
   plt.show()
-  '''
 
 if __name__=='__main__':
   #DATA COLLECTION

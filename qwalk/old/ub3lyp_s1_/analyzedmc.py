@@ -624,7 +624,7 @@ def analyze(df=None,save=False):
 
   #Plot ed
   avg_eig_df = pd.read_pickle('analysis/avg_eig.pickle')
-  for model in [9,12]:
+  for model in [9]:
     plot_ed(df,avg_eig_df,model=model)
 
 if __name__=='__main__':

@@ -3,11 +3,18 @@ import statsmodels.api as sm
 from scipy.optimize import minimize
 import pandas as pd
 from sklearn.metrics import r2_score, mean_squared_log_error
-
 import numpy as np
 
-def sigmoid(x, derivative=False):
-  return x*(1-x) if derivative else 1/(1+np.exp(-2*x))
+def logical_or(v):
+  v = list(v)
+  if(len(v)>1):
+    return v[0]
+  else: 
+    return v[:-2] + [v[-1]+v[-2]-v[-1]*v[-2]]
+
+def sigmoid(x):
+  #return 1/(1+np.exp(-8*x)) #F(0.25) ~ 0.9
+  return 1/(1+np.exp(-6*x)) #F(0.50) ~ 0.95
 
 def prior_score(b,df):
   df_train = df[df['prior']==False]
@@ -36,12 +43,12 @@ def cost(b,X,y,lam,X_prior,y_prior):
   return:
     cost - SSE(training)/n_train + lambda* SSE(priors)/n_prior
   '''
-
   #RMS
   yhat = pred(b,X)
   c1 = np.linalg.norm(pred(b,X) - y)**2
 
   yhat_prior = pred(b,X_prior)
+  #c2 = logical_or(sigmoid(y_prior.values - yhat_prior)) #np.sum(sigmoid(y_prior - yhat_prior))
   c2 = np.sum(sigmoid(y_prior - yhat_prior))
   return c1 + lam*c2
 
@@ -68,8 +75,10 @@ def prior_fit(df,lam):
 
   ols=sm.WLS(y,X).fit()
   b0=ols.params.values
+  
+  b = minimize(lambda b: cost(b,X,y,lam,X_prior,y_prior), b0).x
 
-  return minimize(lambda b: cost(b,X,y,lam,X_prior,y_prior), b0).x
+  return b
 
 if __name__=='__main__':
   #Let's do a test case
