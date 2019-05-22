@@ -16,3 +16,4 @@ outputs/
 *ed_log_d.pickle
 *sorted_ed_log_d.pickle
 eig.pickle
+eig_prior.pickle

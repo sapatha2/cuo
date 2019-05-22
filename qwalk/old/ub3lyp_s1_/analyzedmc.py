@@ -302,7 +302,7 @@ def sort_ed(df):
   print("SORT_ED")
   #Sorting
   sorted_df = None
-  for model in range(max(df['model'])+1):
+  for model in np.unique(df['model']):
     d = df[(df['model']==model)]
     for j in range(max(d['bs_index'])+1):
       offset=0
@@ -477,7 +477,7 @@ def desc_ed(df):
 def avg_ed(df):
   print("AVG_ED")
   avg_df = None
-  for model in range(max(df['model'])+1):
+  for model in np.unique(df['model']): #range(max(df['model'])+1):
     for eig in range(max(df['eig'])+1):
       sub_df = df[(df['model']==model) & (df['eig']==eig)]
       data = sub_df.values
@@ -545,6 +545,64 @@ def plot_ed(full_df,av_df,model,save=True):
     ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color2)
 
     ax.axhline(min(full_df['energy'])+3,ls='--',c='k')
+    ax.set_xlabel(parm)
+    ax.set_ylabel('energy (eV)')
+    ax.set_xlim(limits[z])
+    ax.set_ylim((-0.2,4.5))
+  plt.suptitle('Ed model '+str(model))
+  plt.show()
+  return -1
+
+def plot_ed_small(full_df,av_df,model,save=True):
+  norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
+  limits = [(0.5,2.5),(2.5,4.5),(1.5,4.5),(0.5,2.5),(1.5,4.5),(0,1.5)]
+    
+  rgba_color = plt.cm.Blues(norm(1.75))
+  rgba_color2 = plt.cm.Oranges(norm(1.75))
+  z=-1 
+  fig, axes = plt.subplots(nrows=2,ncols=3,sharey=True,figsize=(6,6))
+  for parm in ['iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2pz','iao_n_2ppi','iao_n_4s']:
+    z+=1 
+    ax = axes[z//3,z%3]
+
+    #DMC Data
+    full_df['energy'] -= min(full_df['energy'])
+
+    f_df = full_df[full_df['Sz']==0.5]
+    x = f_df[parm].values
+    y = f_df['energy'].values
+    yerr = f_df['energy_err'].values
+    ax.errorbar(x,y,yerr,fmt='s',c=rgba_color,alpha=0.5)
+
+    f_df = full_df[full_df['Sz']==1.5]
+    x = f_df[parm].values
+    y = f_df['energy'].values
+    yerr = f_df['energy_err'].values
+    ax.errorbar(x,y,yerr,fmt='s',c=rgba_color2,alpha=0.5)
+
+    #Eigenstates
+    minE = min(av_df[av_df['model']==model]['energy'])
+    sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==0.5)]
+    sub_df['energy'] -= minE
+    x=sub_df[parm].values
+    xerr_u=sub_df[parm+'_u'].values
+    xerr_d=sub_df[parm+'_l'].values
+    y=sub_df['energy'].values
+    yerr_u=sub_df['energy_u'].values
+    yerr_d=sub_df['energy_l'].values
+    ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color)
+
+    sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==1.5)]
+    sub_df['energy'] -= minE
+    x=sub_df[parm].values
+    xerr_u=sub_df[parm+'_u'].values
+    xerr_d=sub_df[parm+'_l'].values
+    y=sub_df['energy'].values
+    yerr_u=sub_df['energy_u'].values
+    yerr_d=sub_df['energy_l'].values
+    ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color2)
+
+    ax.axhline(min(full_df['energy'])+2,ls='--',c='k')
     ax.set_xlabel(parm)
     ax.set_ylabel('energy (eV)')
     ax.set_xlim(limits[z])
