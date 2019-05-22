@@ -572,7 +572,8 @@ def plot_ed_small(full_df,av_df,model,save=True):
     x = f_df[parm].values
     y = f_df['energy'].values
     yerr = f_df['energy_err'].values
-    ax.errorbar(x,y,yerr,fmt='s',c=rgba_color,alpha=0.5)
+    if(parm=='iao_n_3dz2'): ax.errorbar(x,y,yerr,fmt='s',c=rgba_color,alpha=0.5,label='DMC')
+    else: ax.errorbar(x,y,yerr,fmt='s',c=rgba_color,alpha=0.5)
 
     f_df = full_df[full_df['Sz']==1.5]
     x = f_df[parm].values
@@ -590,6 +591,7 @@ def plot_ed_small(full_df,av_df,model,save=True):
     y=sub_df['energy'].values
     yerr_u=sub_df['energy_u'].values
     yerr_d=sub_df['energy_l'].values
+    if(parm=='iao_n_3dz2'): ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color,label='ED')
     ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color)
 
     sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==1.5)]
@@ -607,6 +609,8 @@ def plot_ed_small(full_df,av_df,model,save=True):
     ax.set_ylabel('energy (eV)')
     ax.set_xlim(limits[z])
     ax.set_ylim((-0.2,4.5))
+    
+    if(parm=='iao_n_3dz2'): ax.legend(loc='best')
   plt.suptitle('Ed model '+str(model))
   plt.show()
   return -1
