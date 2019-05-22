@@ -184,6 +184,13 @@ def format_df_iao(df):
     df['iao_t_sz'].iloc[z]=2*e[7,8]
   return df
 
+def mahalanobis(df,vs):
+  Sinv = np.linalg.inv(df.cov())
+  mu = df.mean().values
+  full = reduce(np.dot,((vs - mu),Sinv,(vs-mu).T))
+  
+  return np.sqrt(np.diag(full))
+
 ######################################################################################
 #ANALYSIS CODE 
 
@@ -544,7 +551,7 @@ def plot_ed(full_df,av_df,model,save=True):
     yerr_d=sub_df['energy_l'].values
     ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color2)
 
-    ax.axhline(min(full_df['energy'])+3,ls='--',c='k')
+    ax.axhline(min(full_df['energy'])+2,ls='--',c='k')
     ax.set_xlabel(parm)
     ax.set_ylabel('energy (eV)')
     ax.set_xlim(limits[z])
@@ -572,7 +579,7 @@ def plot_ed_small(full_df,av_df,model,save=True):
     x = f_df[parm].values
     y = f_df['energy'].values
     yerr = f_df['energy_err'].values
-    if(parm=='iao_n_3dz2'): ax.errorbar(x,y,yerr,fmt='s',c=rgba_color,alpha=0.5,label='DMC')
+    if(parm=='iao_n_3dd'): ax.errorbar(x,y,yerr,fmt='s',c=rgba_color,alpha=0.5,label='DMC')
     else: ax.errorbar(x,y,yerr,fmt='s',c=rgba_color,alpha=0.5)
 
     f_df = full_df[full_df['Sz']==1.5]
@@ -591,7 +598,7 @@ def plot_ed_small(full_df,av_df,model,save=True):
     y=sub_df['energy'].values
     yerr_u=sub_df['energy_u'].values
     yerr_d=sub_df['energy_l'].values
-    if(parm=='iao_n_3dz2'): ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color,label='ED')
+    if(parm=='iao_n_3dd'): ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color,label='ED')
     ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color)
 
     sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==1.5)]
@@ -610,8 +617,79 @@ def plot_ed_small(full_df,av_df,model,save=True):
     ax.set_xlim(limits[z])
     ax.set_ylim((-0.2,4.5))
     
-    if(parm=='iao_n_3dz2'): ax.legend(loc='best')
+    if(parm=='iao_n_3dd'): ax.legend(loc='best')
   plt.suptitle('Ed model '+str(model))
+  plt.show()
+  return -1
+
+#Consider the "bad" states in our models
+def plot_ed_outliers(full_df,av_df,save=True):
+  norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
+  limits = [(0.5,2.5),(2.5,4.5),(1.5,4.5),(0.5,2.5),(1.5,4.5),(0,1.5),
+  (-1.0,1.5),(-1.5,1.5),(-1.5,1.5),(-1.5,1.5),(-1,1),(-0.5,1.0)]
+
+  rgba_color = plt.cm.Blues(norm(1.75))
+  rgba_color2 = plt.cm.Oranges(norm(1.75))
+  z=-1 
+  fig, axes = plt.subplots(nrows=2,ncols=5,sharey=True,figsize=(12,6))
+  for parm in ['iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2pz','iao_n_2ppi','iao_n_4s',
+  'iao_t_pi','iao_t_ds','iao_t_dz','iao_t_sz']:
+    z+=1 
+    ax = axes[z//5,z%5]
+
+    #DMC Data
+    full_df['energy'] -= min(full_df['energy'])
+
+    f_df = full_df[full_df['Sz']==0.5]
+    x = f_df[parm].values
+    y = f_df['energy'].values
+    yerr = f_df['energy_err'].values
+    if(parm=='iao_n_3dd'): ax.errorbar(x,y,yerr,fmt='s',c=rgba_color,alpha=0.5,label='DMC')
+    else: ax.errorbar(x,y,yerr,fmt='s',c=rgba_color,alpha=0.5)
+
+    f_df = full_df[full_df['Sz']==1.5]
+    x = f_df[parm].values
+    y = f_df['energy'].values
+    yerr = f_df['energy_err'].values
+    ax.errorbar(x,y,yerr,fmt='s',c=rgba_color2,alpha=0.5)
+
+    #Eigenstates
+    sub_df = av_df[(av_df['Sz']==0.5)]
+    x=sub_df[parm].values
+    #xerr_u=sub_df[parm+'_u'].values
+    #xerr_d=sub_df[parm+'_l'].values
+    y=sub_df['energy'].values
+    #yerr_u=sub_df['energy_u'].values
+    #yerr_d=sub_df['energy_l'].values
+    xerr_u = xerr_d = yerr_u = yerr_d = np.zeros(len(y))
+    if(parm=='iao_n_3dd'): ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color,label='ED')
+    ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color)
+    
+    #for i, txt in enumerate(sub_df['model']):
+    #  ax.annotate(int(txt), (x[i]+0.05, y[i]-0.05))
+
+    sub_df = av_df[(av_df['Sz']==1.5)]
+    x=sub_df[parm].values
+    #xerr_u=sub_df[parm+'_u'].values
+    #xerr_d=sub_df[parm+'_l'].values
+    y=sub_df['energy'].values
+    #yerr_u=sub_df['energy_u'].values
+    #yerr_d=sub_df['energy_l'].values
+    xerr_u = xerr_d = yerr_u = yerr_d = np.zeros(len(y))
+    ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color2)
+
+    #for i, txt in enumerate(sub_df['model']):
+    #  print(i)
+    #  ax.annotate(int(txt), (x[i]+0.05, y[i]-0.2+(i*0.1)))
+
+    ax.axhline(min(full_df['energy'])+2,ls='--',c='k')
+    ax.set_xlabel(parm)
+    ax.set_ylabel('energy (eV)')
+    ax.set_xlim(limits[z])
+    ax.set_ylim((-0.2,4.5))
+    
+    if(parm=='iao_n_3dd'): ax.legend(loc='best')
+  plt.suptitle('Ed extrapolation errors')
   plt.show()
   return -1
 
@@ -686,8 +764,52 @@ def analyze(df=None,save=False):
 
   #Plot ed
   avg_eig_df = pd.read_pickle('analysis/avg_eig.pickle')
-  for model in [9]:
-    plot_ed(df,avg_eig_df,model=model)
+  #for model in [12]:
+  #  plot_ed(df,avg_eig_df,model=model)
+
+  #Identify outliers for priors
+  outlier_df = None
+  unique_models = [5,9,12,21,20,24]
+  var = ['energy','iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2pz',
+        'iao_n_2ppi','iao_n_4s','iao_t_pi','iao_t_dz','iao_t_ds','iao_t_sz']
+  #df['energy'] -= min(df['energy'])
+  VI = np.linalg.inv(df[var].cov())
+  for model in unique_models:
+
+    #MINIMUM MAHALANOBIS DISTNACE IS NEEDED
+    data = avg_eig_df[avg_eig_df['model']==model]
+    data = data[var+['Sz']]
+    #data['energy'] -= min(data['energy'])
+    data = data[data['energy']<=(2.0 + min(data['energy']))]
+
+    dists = []
+    to_add = []
+    for i in range(data.shape[0]):
+      diff = df[var] - data.drop(columns=['Sz']).iloc[i]
+      dist = np.sqrt(np.diag(reduce(np.dot,(diff,VI,diff.T))))
+      dist = min(dist)
+      
+      if(dist > 80): to_add.append(i)
+      dists.append(dist)
+
+    d = avg_eig_df[avg_eig_df['model']==model]
+    d['energy'] -= min(avg_eig_df[avg_eig_df['model']==model]['energy'])
+    d = d[d['energy']<=2.0]
+    d = d.iloc[to_add]
+    if(outlier_df is None): 
+      outlier_df = d
+    else: 
+      outlier_df = pd.concat((outlier_df,d),axis=0)
+
+    plt.plot(data['energy'],dists,marker='o',ls='None',label=str(model))
+  plt.axhline(80,ls='--',c='k')
+  plt.ylabel('Minimum MD')
+  plt.xlabel('Energy of eigenstate')
+  plt.legend(loc='best')
+  plt.show()
+  
+  plot_ed_outliers(df,outlier_df)
+  outlier_df.to_pickle('analysis/outlier.pickle')
 
 if __name__=='__main__':
   #DATA COLLECTION

@@ -14,7 +14,7 @@ pd.options.mode.chained_assignment = None  # default='warn'
 from scipy.optimize import linear_sum_assignment 
 from find_connect import  *
 import matplotlib as mpl 
-from prior import prior_fit, prior_score
+from prior import prior_fit, prior_score, sigmoid
 import itertools 
 from analyzedmc import sort_ed, desc_ed, avg_ed, plot_ed_small
 ######################################################################################
@@ -31,13 +31,19 @@ def add_priors(df,cutoff):
   df = df[var]
   df['prior'] = False
   
+  '''
   prior_df = avg_eig[(avg_eig['model']==12)&(avg_eig['Sz']==0.5)].iloc[2]
   prior_df = pd.concat((prior_df,avg_eig[(avg_eig['model']==9)&(avg_eig['Sz']==1.5)].iloc[0]),axis=1)
   prior_df = prior_df.T
   prior_df = prior_df[var]
   prior_df['prior'] = True
-  prior_df['energy'] = min(df['energy']) + cutoff
+  '''
   
+  prior_df = pd.read_pickle('analysis/outlier.pickle')
+  prior_df = prior_df.iloc[[0,6,21,22,23,13]] #Remove any degenerate/near degenerate stuff
+  prior_df['prior'] = True 
+  prior_df['energy'] = min(df['energy']) + cutoff
+
   return pd.concat((df,prior_df),axis=0)
 
 ######################################################################################
@@ -57,10 +63,8 @@ def prior_analysis(df,cutoff=2):
     fit_df['const'] = 1
 
     lams = np.arange(0,55,5)
-    s1_mu = []
-    s1_err = []
-    s2_mu = []
-    s2_err = []
+    s_mu = []
+    s_err = []
     r2_mu = []
     r2_err = []
     params_mu = []
@@ -69,8 +73,7 @@ def prior_analysis(df,cutoff=2):
       print("lambda = "+str(lam)) 
       E = []
       r2 = []
-      s1 = []
-      s2 = []
+      s = []
       ps = []
       for j in range(10): #10 BS samples for error bars
         d = fit_df[fit_df['prior']==False].sample(n=fit_df[fit_df['prior']==False].shape[0],replace=True)
@@ -79,25 +82,23 @@ def prior_analysis(df,cutoff=2):
         params = prior_fit(d,lam)
         score = prior_score(params,d)
   
-        s1.append(score[1].values[0])
-        s2.append(score[1].values[1])
+        s.append(score[1])
         ps.append(params)
         r2.append(score[0])
 
       r2_mu.append(np.mean(r2))
       r2_err.append([np.percentile(r2,2.5),np.percentile(r2,97.5)])
    
-      s1_mu.append(np.mean(s1))
-      s1_err.append([np.percentile(s1,2.5),np.percentile(s1,97.5)])
-
-      s2_mu.append(np.mean(s2))
-      s2_err.append([np.percentile(s2,2.5),np.percentile(s2,97.5)])
+      s_mu.append(np.mean(s,axis=0))
+      s_err.append([np.percentile(s,2.5,axis=0),np.percentile(s,97.5,axis=0)])
+      print(len(s_mu[-1]))
+      print(len(s_err[-1][0]))
 
       params_mu.append(np.mean(ps,axis=0))
       params_err.append(np.std(ps,axis=0))
 
-    data = pd.DataFrame({'r2_mu':r2_mu,'r2_err':r2_err,'s1_mu':s1_mu,'s1_err':s1_err,
-    's2_mu':s2_mu,'s2_err':s2_err,'params_mu':params_mu,'params_err':params_err,'lam':lams,'model':i*np.ones(len(lams))})
+    data = pd.DataFrame({'r2_mu':r2_mu,'r2_err':r2_err,'s_mu':s_mu,'s_err':s_err,
+    'params_mu':params_mu,'params_err':params_err,'lam':lams,'model':i*np.ones(len(lams))})
     if(prior_df is None): prior_df = data
     else: prior_df = pd.concat((prior_df,data),axis=0)
   return prior_df 
@@ -106,74 +107,46 @@ def plot_prior():
   #Plot prior analysis figure
   prior_df = pd.read_pickle('analysis/prior.pickle')
 
-  #R2 vs lambda
+  #Calculate model scores
+  scores = []
+  for i in range(prior_df.shape[0]):
+    y = prior_df['s_mu'].iloc[i]
+    y = y[y>0]
+    y = np.linalg.norm(y,ord=1)/6
+    scores.append(y)
+  prior_df['score'] = scores
+
+  #R2 vs Score
   plt.subplot(221)
   for group_model in prior_df.groupby(by='model'):        
     error_r2 = np.vstack(group_model[1]['r2_err']).T
     error_r2[0] = group_model[1]['r2_mu'] - error_r2[0,:]
     error_r2[1] = -group_model[1]['r2_mu'] + error_r2[1,:]
-    plt.errorbar(group_model[1]['lam'],group_model[1]['r2_mu'],
-    yerr=error_r2,fmt='o-')
-  plt.xlabel('lambda')
+    plt.errorbar(group_model[1]['score'],group_model[1]['r2_mu'],
+    yerr = error_r2,fmt='o-',label=str(group_model[0]),ls='None')
+  plt.xlabel('score')
   plt.ylabel('r2')
-  
-  #R2 vs s1
+  plt.legend(loc='best')
+
+  #R2 vs lambda
   plt.subplot(222)
   for group_model in prior_df.groupby(by='model'):        
     error_r2 = np.vstack(group_model[1]['r2_err']).T
-    error_r2[0] = group_model[1]['r2_mu'] - error_r2[0]
-    error_r2[1] = -group_model[1]['r2_mu'] + error_r2[1]
-    
-    error_s1 = np.vstack(group_model[1]['s1_err']).T
-    error_s1[0] = group_model[1]['s1_mu'] - error_s1[0]
-    error_s1[1] = -group_model[1]['s1_mu'] + error_s1[1]
-    
-    plt.errorbar(2-group_model[1]['s1_mu'],group_model[1]['r2_mu'],
-    yerr=error_r2,xerr=error_s1,marker='o')
-  plt.axvline(2.0,c='k',ls='--')
-  plt.xlim(-0.1,2.5)
-  plt.xlabel('E_1, eV')
+    error_r2[0] = group_model[1]['r2_mu'] - error_r2[0,:]
+    error_r2[1] = -group_model[1]['r2_mu'] + error_r2[1,:]
+    plt.errorbar(group_model[1]['lam'],group_model[1]['r2_mu'],
+    yerr=error_r2,fmt='o-',label=str(group_model[0]))
+  plt.xlabel('lambda')
   plt.ylabel('r2')
 
-  #R2 vs s2
+  #Lambda vs score
   plt.subplot(223)
   for group_model in prior_df.groupby(by='model'):        
-    error_r2 = np.vstack(group_model[1]['r2_err']).T
-    error_r2[0] = group_model[1]['r2_mu'] - error_r2[0]
-    error_r2[1] = -group_model[1]['r2_mu'] + error_r2[1]
-    
-    error_s2 = np.vstack(group_model[1]['s2_err']).T
-    error_s2[0] = group_model[1]['s2_mu'] - error_s2[0]
-    error_s2[1] = -group_model[1]['s2_mu'] + error_s2[1]
-    
-    plt.errorbar(group_model[1]['r2_mu'],2-group_model[1]['s2_mu'],
-    yerr=error_s2,xerr=error_r2,marker='o')
-  plt.axhline(2.0,c='k',ls='--')
-  plt.ylim(-0.1,2.5)
-  plt.ylabel('E_2, eV')
-  plt.xlabel('r2')
+    plt.errorbar(group_model[1]['score'],group_model[1]['lam'],
+    marker='o',ls='None')
+  plt.xlabel('score, eV')
+  plt.ylabel('lam')
 
-  #s1_err vs s2_err for low energy error models
-  plt.subplot(224)
-  for group_model in prior_df.groupby(by='model'):  
-    error_s2 = np.vstack(group_model[1]['s2_err']).T
-    error_s2[0] = group_model[1]['s2_mu'] - error_s2[0]
-    error_s2[1] = -group_model[1]['s2_mu'] + error_s2[1]
-    
-    error_s1 = np.vstack(group_model[1]['s1_err']).T
-    error_s1[0] = group_model[1]['s1_mu'] - error_s1[0]
-    error_s1[1] = -group_model[1]['s1_mu'] + error_s1[1]
-    
-    plt.errorbar(2-group_model[1]['s1_mu'],2-group_model[1]['s2_mu'],
-    yerr=error_s2,xerr=error_s1,marker='o',label=str(int(group_model[0])))
-  
-  plt.legend(loc='best')
-  plt.xlabel('E_1, eV')
-  plt.ylabel('E_2, eV')
-  plt.axvline(2.0,c='k',ls='--')
-  plt.xlim(-0.1,2.5)
-  plt.axhline(2.0,c='k',ls='--')
-  plt.ylim(-0.1,2.5)
   plt.show()
   return -1
 
@@ -258,9 +231,9 @@ def regr_prior(df,model_ind,lam,cutoff=2,nbs=20):
     d = pd.concat((d,fit_df[fit_df['prior']==True]),axis=0)
 
     ps = prior_fit(d.drop(columns=['index']),lam)
-    yhat = np.dot(d.drop(columns=['index','prior','energy']).iloc[:-2],ps)
+    yhat = np.dot(d.drop(columns=['index','prior','energy']).iloc[:-6],ps)
     y+=list(yhat)
-    ind+=list(d.iloc[:-2]['index'].values)
+    ind+=list(d.iloc[:-6]['index'].values)
 
   df = pd.read_pickle('formatted_gosling.pickle')
   plot_df = pd.DataFrame({'y':y,'ind':ind})
@@ -299,9 +272,9 @@ def analyze(df=None,save=False):
 
   #ED plot of selected model
   model = 5
-  lam = 10 
+  lam = 5
   '''
-  ed_df = exact_diag_prior(df, cutoff, model, lam, nbs=100)
+  ed_df = exact_diag_prior(df, cutoff, model, lam, nbs=20)
   ed_df.to_pickle('analysis/eig_prior.pickle')
   
   ed_df = pd.read_pickle('analysis/eig_prior.pickle')
@@ -309,10 +282,10 @@ def analyze(df=None,save=False):
   ed_df = desc_ed(ed_df).drop(columns=['ci'])
   avg_df = avg_ed(ed_df)
   avg_df.to_pickle('analysis/avg_eig_prior.pickle')
-  '''
   #avg_df = pd.read_pickle('analysis/avg_eig_prior.pickle')
-  #plot_ed_small(df,avg_df,5)
-  
+  plot_ed_small(df,avg_df,5)
+  '''
+
   #Linear regression plot of selected model 
   regr_prior(df,model,lam)
 
