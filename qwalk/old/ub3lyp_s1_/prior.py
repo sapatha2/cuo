@@ -25,7 +25,7 @@ def prior_score(b,df):
   df_prior = df[df['prior']==True]
   y = df_prior['energy'] 
   yhat = pred(b,df_prior.drop(columns=['energy','prior']))
-  score_prior = y - yhat
+  score_prior = yhat - y + 2
   return score_train, score_prior 
   
 def pred(b,X):
@@ -49,7 +49,8 @@ def cost(b,X,y,lam,X_prior,y_prior):
 
   yhat_prior = pred(b,X_prior)
   #c2 = logical_or(sigmoid(y_prior.values - yhat_prior)) #np.sum(sigmoid(y_prior - yhat_prior))
-  c2 = np.sum(sigmoid(y_prior - yhat_prior))
+  #c2 = np.sum(sigmoid(y_prior - yhat_prior))
+  c2 = np.sum((yhat_prior - y_prior)[yhat_prior < y_prior]**2)
   return c1 + lam*c2
 
 def prior_fit(df,lam):

@@ -764,34 +764,36 @@ def analyze(df=None,save=False):
 
   #Plot ed
   avg_eig_df = pd.read_pickle('analysis/avg_eig.pickle')
-  #for model in [12]:
+  #for model in [21]: #[5,9,12,21,20,24]:
   #  plot_ed(df,avg_eig_df,model=model)
+  #exit(0)
 
   #Identify outliers for priors
   outlier_df = None
   unique_models = [5,9,12,21,20,24]
   var = ['energy','iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2pz',
         'iao_n_2ppi','iao_n_4s','iao_t_pi','iao_t_dz','iao_t_ds','iao_t_sz']
-  #df['energy'] -= min(df['energy'])
+  variances = df[var].var()
+  
+  df['energy'] -= min(df['energy'])
   VI = np.linalg.inv(df[var].cov())
   for model in unique_models:
 
-    #MINIMUM MAHALANOBIS DISTNACE IS NEEDED
     data = avg_eig_df[avg_eig_df['model']==model]
     data = data[var+['Sz']]
-    #data['energy'] -= min(data['energy'])
-    data = data[data['energy']<=(2.0 + min(data['energy']))]
+    data['energy'] -= min(data['energy'])
+    data = data[data['energy']<=(2.0)]# + min(data['energy']))]
 
     dists = []
     to_add = []
     for i in range(data.shape[0]):
-      diff = df[var] - data.drop(columns=['Sz']).iloc[i]
-      dist = np.sqrt(np.diag(reduce(np.dot,(diff,VI,diff.T))))
-      dist = min(dist)
-      
-      if(dist > 80): to_add.append(i)
-      dists.append(dist)
+      diff = df[var].mean() - data.drop(columns=['Sz']).iloc[i]
+      dist = np.dot(diff,np.dot(VI,diff))
+      dist = np.sqrt(dist)
 
+      if((dist > 80) & (i > 1)): to_add.append(i)
+      dists.append(dist)
+    
     d = avg_eig_df[avg_eig_df['model']==model]
     d['energy'] -= min(avg_eig_df[avg_eig_df['model']==model]['energy'])
     d = d[d['energy']<=2.0]
@@ -801,13 +803,14 @@ def analyze(df=None,save=False):
     else: 
       outlier_df = pd.concat((outlier_df,d),axis=0)
 
-    plt.plot(data['energy'],dists,marker='o',ls='None',label=str(model))
+    plt.plot(data['energy'].iloc[2:],dists[2:],marker='o',ls='None',label=str(model))
   plt.axhline(80,ls='--',c='k')
-  plt.ylabel('Minimum MD')
+  plt.axvline(0,ls='--',c='k')
+  plt.ylabel('Mahalanobis distance')
   plt.xlabel('Energy of eigenstate')
   plt.legend(loc='best')
   plt.show()
-  
+
   plot_ed_outliers(df,outlier_df)
   outlier_df.to_pickle('analysis/outlier.pickle')
 

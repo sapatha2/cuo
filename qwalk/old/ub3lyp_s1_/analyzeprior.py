@@ -14,7 +14,7 @@ pd.options.mode.chained_assignment = None  # default='warn'
 from scipy.optimize import linear_sum_assignment 
 from find_connect import  *
 import matplotlib as mpl 
-from prior import prior_fit, prior_score, sigmoid
+from prior import prior_fit, prior_score #, sigmoid
 import itertools 
 from analyzedmc import sort_ed, desc_ed, avg_ed, plot_ed_small
 ######################################################################################
@@ -40,7 +40,7 @@ def add_priors(df,cutoff):
   '''
   
   prior_df = pd.read_pickle('analysis/outlier.pickle')
-  prior_df = prior_df.iloc[[0,6,21,22,23,13]] #Remove any degenerate/near degenerate stuff
+  prior_df = prior_df.iloc[[0,11,19,20,22]] #Remove any degenerate/near degenerate stuff
   prior_df['prior'] = True 
   prior_df['energy'] = min(df['energy']) + cutoff
 
@@ -62,7 +62,8 @@ def prior_analysis(df,cutoff=2):
     fit_df = df[['energy','prior']+model]
     fit_df['const'] = 1
 
-    lams = np.arange(0,55,5)
+    #lams = np.arange(0,55,5)
+    lams = np.arange(0,22,2)
     s_mu = []
     s_err = []
     r2_mu = []
@@ -81,7 +82,8 @@ def prior_analysis(df,cutoff=2):
 
         params = prior_fit(d,lam)
         score = prior_score(params,d)
-  
+        print(score[0],score[1].values)
+
         s.append(score[1])
         ps.append(params)
         r2.append(score[0])
@@ -109,13 +111,33 @@ def plot_prior():
 
   #Calculate model scores
   scores = []
+  scores_u = []
+  scores_d = []
+  from sklearn.metrics import log_loss
   for i in range(prior_df.shape[0]):
-    y = prior_df['s_mu'].iloc[i]
+    y = 2 - prior_df['s_mu'].iloc[i]
     y = y[y>0]
-    y = np.linalg.norm(y,ord=1)/6
+    y = np.linalg.norm(y)**2
+    y = y.sum()
     scores.append(y)
-  prior_df['score'] = scores
+    
+    y = 2 - prior_df['s_err'].iloc[i][0]
+    y = y[y>0]
+    y = np.linalg.norm(y)**2
+    y = y.sum()
+    scores_u.append(y)
 
+    y = 2 - prior_df['s_err'].iloc[i][1]
+    y = y[y>0]
+    y = np.linalg.norm(y)**2
+    y = y.sum()
+    scores_d.append(y)
+  
+  prior_df['score'] = scores
+  prior_df['score_u'] = scores_u
+  prior_df['score_d'] = scores_d
+
+  '''
   #R2 vs Score
   plt.subplot(221)
   for group_model in prior_df.groupby(by='model'):        
@@ -124,28 +146,33 @@ def plot_prior():
     error_r2[1] = -group_model[1]['r2_mu'] + error_r2[1,:]
     plt.errorbar(group_model[1]['score'],group_model[1]['r2_mu'],
     yerr = error_r2,fmt='o-',label=str(group_model[0]),ls='None')
-  plt.xlabel('score')
+  plt.xlabel('Quad hinge loss')
   plt.ylabel('r2')
   plt.legend(loc='best')
+  '''
 
   #R2 vs lambda
-  plt.subplot(222)
+  plt.subplot(211)
   for group_model in prior_df.groupby(by='model'):        
     error_r2 = np.vstack(group_model[1]['r2_err']).T
     error_r2[0] = group_model[1]['r2_mu'] - error_r2[0,:]
     error_r2[1] = -group_model[1]['r2_mu'] + error_r2[1,:]
     plt.errorbar(group_model[1]['lam'],group_model[1]['r2_mu'],
     yerr=error_r2,fmt='o-',label=str(group_model[0]))
-  plt.xlabel('lambda')
+  plt.xticks(np.arange(0,22,2))
   plt.ylabel('r2')
 
   #Lambda vs score
-  plt.subplot(223)
+  plt.subplot(212)
   for group_model in prior_df.groupby(by='model'):        
-    plt.errorbar(group_model[1]['score'],group_model[1]['lam'],
-    marker='o',ls='None')
-  plt.xlabel('score, eV')
-  plt.ylabel('lam')
+    score_u = group_model[1]['score_u'] - group_model[1]['score']
+    score_d = group_model[1]['score'] - group_model[1]['score_d']
+    plt.errorbar(group_model[1]['lam'],group_model[1]['score'],
+    yerr=[score_d,score_u],marker='o',ls='None',label=str(group_model[0]))
+  plt.legend(loc='best')
+  plt.xticks(np.arange(0,22,2))
+  plt.ylabel('Quad hinge loss')
+  plt.xlabel('lam')
 
   plt.show()
   return -1
@@ -272,22 +299,19 @@ def analyze(df=None,save=False):
 
   #ED plot of selected model
   model = 5
-  lam = 5
-  '''
-  ed_df = exact_diag_prior(df, cutoff, model, lam, nbs=20)
-  ed_df.to_pickle('analysis/eig_prior.pickle')
+  lam = 6
   
-  ed_df = pd.read_pickle('analysis/eig_prior.pickle')
-  ed_df = sort_ed(ed_df)
-  ed_df = desc_ed(ed_df).drop(columns=['ci'])
-  avg_df = avg_ed(ed_df)
-  avg_df.to_pickle('analysis/avg_eig_prior.pickle')
-  #avg_df = pd.read_pickle('analysis/avg_eig_prior.pickle')
-  plot_ed_small(df,avg_df,5)
-  '''
-
+  for model in [9,20,21,12,24,5]:
+    for lam in [4,10,20]:
+      ed_df = exact_diag_prior(df, cutoff, model, lam, nbs=20)
+      ed_df = sort_ed(ed_df)
+      ed_df = desc_ed(ed_df).drop(columns=['ci'])
+      avg_df = avg_ed(ed_df)
+      avg_df.to_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
+  
+  #plot_ed_small(df,avg_df,model)
   #Linear regression plot of selected model 
-  regr_prior(df,model,lam)
+  #regr_prior(df,model,lam)
 
 if __name__=='__main__':
   #DATA COLLECTION
