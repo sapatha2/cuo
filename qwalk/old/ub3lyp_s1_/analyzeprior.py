@@ -291,16 +291,15 @@ def regr_prior(df,model_ind,lam,cutoff=2,nbs=20):
 
 def analyze(df=None,save=False):
   cutoff = 2
+
   #Generate models and plot cost 
   #prior_df = prior_analysis(df,cutoff=cutoff)
   #prior_df.to_pickle('analysis/prior.pickle')
   #plot_prior()
   #exit(0)
 
-  #ED plot of selected model
-  model = 5
-  lam = 6
-  
+  #ED for models
+  '''
   for model in [9,20,21,12,24,5]:
     for lam in [4,10,20]:
       ed_df = exact_diag_prior(df, cutoff, model, lam, nbs=20)
@@ -308,10 +307,28 @@ def analyze(df=None,save=False):
       ed_df = desc_ed(ed_df).drop(columns=['ci'])
       avg_df = avg_ed(ed_df)
       avg_df.to_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
-  
+  '''
+ 
+  #Lowest noise model
+  '''
+  for model in [9,20,21,12,24,5]:
+    for lam in [20]:
+      avg_df = pd.read_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
+      e_err = avg_df['energy_u'].mean() + avg_df['energy_l'].mean()
+      p_err = 0
+      for z in list(avg_df):
+        if(('l' or 'u') in z): p_err+=avg_df[z].mean()
+      print(e_err,p_err)
+  '''
+ 
+  #ED plot
+  model = 5
+  lam = 20
+  #avg_df = pd.read_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
   #plot_ed_small(df,avg_df,model)
+  
   #Linear regression plot of selected model 
-  #regr_prior(df,model,lam)
+  regr_prior(df,model,lam)
 
 if __name__=='__main__':
   #DATA COLLECTION

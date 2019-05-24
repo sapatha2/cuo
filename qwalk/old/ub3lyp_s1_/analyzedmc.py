@@ -592,6 +592,7 @@ def plot_ed_small(full_df,av_df,model,save=True):
     minE = min(av_df[av_df['model']==model]['energy'])
     sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==0.5)]
     sub_df['energy'] -= minE
+    sub_df = sub_df[sub_df['energy']<=4]
     x=sub_df[parm].values
     xerr_u=sub_df[parm+'_u'].values
     xerr_d=sub_df[parm+'_l'].values
@@ -603,6 +604,7 @@ def plot_ed_small(full_df,av_df,model,save=True):
 
     sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==1.5)]
     sub_df['energy'] -= minE
+    sub_df = sub_df[sub_df['energy']<=4]
     x=sub_df[parm].values
     xerr_u=sub_df[parm+'_u'].values
     xerr_d=sub_df[parm+'_l'].values
