@@ -328,7 +328,13 @@ def analyze(df=None,save=False):
   #plot_ed_small(df,avg_df,model)
   
   #Linear regression plot of selected model 
-  regr_prior(df,model,lam)
+  #regr_prior(df,model,lam)
+
+  #Model parameters
+  prior_df = pd.read_pickle('analysis/prior.pickle')
+  prior_df = prior_df[((prior_df['model']==model)&(prior_df['lam']==lam))]
+  print(np.around(prior_df['params_mu'].values[0],2)[:-1])
+  print(np.around(prior_df['params_err'].values[0],2)[:-1])
 
 if __name__=='__main__':
   #DATA COLLECTION
