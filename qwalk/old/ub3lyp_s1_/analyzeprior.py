@@ -6,7 +6,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 import sklearn.linear_model
-from ed import ED
+from ed import ED, h1_moToIAO
 from pyscf import gto, scf, ao2mo, cc, fci, mcscf, lib
 from pyscf.scf import ROKS
 from functools import reduce 
@@ -45,6 +45,27 @@ def add_priors(df,cutoff):
   prior_df['energy'] = min(df['energy']) + cutoff
 
   return pd.concat((df,prior_df),axis=0)
+
+def get_iao_parms(exp_parms,model):
+  print(exp_parms, model)
+  param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz',
+  'mo_t_sz','mo_t_ds','Jsd','Us']
+  params=[]
+  for parm in param_names:
+    if(parm in model): params.append(exp_parms[model.index(parm)])
+    else: params.append(0)
+  print(params)
+  
+  #params input must be es,epi,epz,tpi,tdz,tsz,tds
+  h1_iao = h1_moToIAO(params[:-2])
+  #IAO ordering: ['del','del','yz','xz','x','y','z2','z','s']
+  #Return parameter ordering: iao_n_3dz2, ,iao_n_3dpi, iao_n_3dd, 
+  #iao_n_4s, iao_n_2ppi, iao_n_2pz, iao_t_pi, 
+  #iao_t_dz, iao_t_sz, iao_t_ds, Jsd, Us
+
+  return [h1_iao[6,6], h1_iao[2,2], h1_iao[0,0],
+  h1_iao[8,8],h1_iao[4,4],h1_iao[7,7],h1_iao[2,5],
+  h1_iao[6,7],h1_iao[7,8],h1_iao[6,8],params[-2],params[-1]]
 
 ######################################################################################
 #ANALYSIS CODE 
@@ -289,6 +310,54 @@ def regr_prior(df,model_ind,lam,cutoff=2,nbs=20):
   plt.show()
   return -1
 
+def iao_analysis(df,cutoff=2):
+  #Generate models + get iao properties we need
+  df = add_priors(df,cutoff = 2)
+  oneparm_df = pd.read_pickle('analysis/oneparm.pickle').drop(columns=['r2_mu','r2_err'])
+  prior_df = None
+  for i in [5, 9, 12, 21, 20, 24]:
+    ind = np.nonzero(oneparm_df.iloc[i])[0]
+    model = np.array(list(oneparm_df))[ind]
+    model = list(model[:int(len(model)/2)])
+    print(model)
+
+    fit_df = df[['energy','prior']+model]
+    fit_df['const'] = 1
+
+    lams = [20]
+    params_mu = []
+    params_err = []
+    params_iao_mu = []
+    params_iao_err = []
+    for lam in lams:
+      print("lambda = "+str(lam)) 
+      ps = []
+      ps_iao = []
+      for j in range(10): #10 BS samples for error bars
+        d = fit_df[fit_df['prior']==False].sample(n=fit_df[fit_df['prior']==False].shape[0],replace=True)
+        d = pd.concat((d,fit_df[fit_df['prior']==True]),axis=0)
+
+        params = prior_fit(d,lam)
+        params_iao = get_iao_parms(params[:-1],model)
+        score = prior_score(params,d)
+        print(score[0],score[1].values)
+
+        ps.append(params)
+        ps_iao.append(params_iao)
+
+      params_mu.append(np.mean(ps,axis=0))
+      params_err.append(np.std(ps,axis=0))
+
+      params_iao_mu.append(np.mean(ps_iao,axis=0))
+      params_iao_err.append(np.std(ps_iao,axis=0))
+
+    data = pd.DataFrame({'params_mu':params_mu,'params_err':params_err,
+    'params_iao_mu':params_iao_mu,'params_err':params_iao_err,
+    'lam':lams,'model':i*np.ones(len(lams))})
+    if(prior_df is None): prior_df = data
+    else: prior_df = pd.concat((prior_df,data),axis=0)
+  return prior_df 
+
 def analyze(df=None,save=False):
   cutoff = 2
 
@@ -331,10 +400,8 @@ def analyze(df=None,save=False):
   #regr_prior(df,model,lam)
 
   #Model parameters
-  prior_df = pd.read_pickle('analysis/prior.pickle')
-  prior_df = prior_df[((prior_df['model']==model)&(prior_df['lam']==lam))]
-  print(np.around(prior_df['params_mu'].values[0],2)[:-1])
-  print(np.around(prior_df['params_err'].values[0],2)[:-1])
+  params_df = iao_analysis(df)
+  params_df.to_pickle('analysis/params.pickle')
 
 if __name__=='__main__':
   #DATA COLLECTION
