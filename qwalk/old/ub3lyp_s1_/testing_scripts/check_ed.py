@@ -5,7 +5,6 @@ from functools import reduce
 import matplotlib.pyplot as plt 
 
 #1-body 
-'''
 #MO to IAO Matrix in the correct ordering 
 #dxy, dy, dz, z, py, s
 act_iao=[5,6,7,13,12,1]
@@ -41,12 +40,12 @@ mo_to_iao = reduce(np.dot,(mo.T,s,iao))
 #IAO = [0,0.1,0.39,0.74,1.72,2.16,-0.43,0.56,0.83,0.67]
 
 #model 20
-#MO = [0,0,0,0.45,2.08,2.87,0.22,0,-0.9,0]
-#IAO = [0,0.08,0.48,1.46,2.00,1.3,-0.46,0.84,1.25,0.71]
+MO = [0,0,0,0.45,2.08,2.87,0.22,0,-0.9,0]
+IAO = [0,0.08,0.48,1.46,2.00,1.3,-0.46,0.84,1.25,0.71]
 
 #model 24 
-MO = [0,0,0,0.32,1.74,2.78,0,-0.21,0,0.11]
-IAO = [0,0.18,0.44,0.56,1.57,2.02,-0.52,0.53,0.98,0.49]
+#MO = [0,0,0,0.32,1.74,2.78,0,-0.21,0,0.11]
+#IAO = [0,0.18,0.44,0.56,1.57,2.02,-0.52,0.53,0.98,0.49]
 
 H1_MO = np.diag(MO[:6])
 H1_IAO = np.diag(IAO[:6])
@@ -70,8 +69,8 @@ print(np.around(w2,2))
 ovlp = reduce(np.dot,(vr.T,mo_to_iao,vr2))
 plt.matshow(ovlp,vmin=-1,vmax=1,cmap = plt.cm.bwr)
 plt.show()
-'''
 
+'''
 #2-body
 #Jsi = 0.25*(ns_u - ns_d)*(ni_u - ni_d) + 
 #0.5*(cs_u^+ cs_d ci_d^+ ci_u + cs_d^+ cs_u ci_u^+ ci_d)
@@ -103,3 +102,4 @@ eri = (eri_aa, eri_ab, eri_bb)
 
 e, ci = fci.direct_uhf.kernel(h1, eri, norb, nelec, nroots=10)
 print(e)
+'''
