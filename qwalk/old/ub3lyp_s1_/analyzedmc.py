@@ -766,9 +766,9 @@ def analyze(df=None,save=False):
 
   #Plot ed
   avg_eig_df = pd.read_pickle('analysis/avg_eig.pickle')
-  #for model in [21]: #[5,9,12,21,20,24]:
-  #  plot_ed(df,avg_eig_df,model=model)
-  #exit(0)
+  for model in [5,9,12]: #[5,9,12,21,20,24]:
+    plot_ed_small(df,avg_eig_df,model=model)
+  exit(0)
 
   #Identify outliers for priors
   outlier_df = None

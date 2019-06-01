@@ -7,17 +7,18 @@ from functools import reduce
 import matplotlib.pyplot as plt 
 import pandas as pd
 import seaborn as sns 
+from analyzedmc import plot_ed_small 
 
 #Get 1-body parameters in IAO representation
 def h1_moToIAO(printvals=False):
   #LOAD IN IAOS
   act_iao=[5,9,6,8,11,12,7,13,1]
-  iao=np.load('../../pyscf/ub3lyp_full/b3lyp_iao_b.pickle')
+  iao=np.load('../../../pyscf/ub3lyp_full/b3lyp_iao_b.pickle')
   iao=iao[:,act_iao]
   
   #LOAD IN MOS
   act_mo=[5,6,7,8,9,10,11,12,13]
-  chkfile='../../pyscf/chk/Cuvtz_r1.725_s1_B3LYP_0.chk'
+  chkfile='../../../pyscf/chk/Cuvtz_r1.725_s1_B3LYP_0.chk'
   mol=lib.chkfile.load_mol(chkfile)
   m=ROKS(mol)
   m.__dict__.update(lib.chkfile.load(chkfile, 'scf'))
@@ -114,25 +115,44 @@ def ED_roks(save=False):
   n_occ = res1[2]+res1[3]
   Sz = np.ones(len(E))*0.5
   n_3d = n_occ[:,0] + n_occ[:,1] + n_occ[:,2] + n_occ[:,3] + n_occ[:,6]
+  n_3dz2 = n_occ[:,6]
+  n_3dpi = n_occ[:,2] + n_occ[:,3]
+  n_3dd = n_occ[:,0] + n_occ[:,1]
   n_2ppi = n_occ[:,4] + n_occ[:,5]
   n_2pz = n_occ[:,7]
   n_4s = n_occ[:,8]
-  df = pd.DataFrame({'E':E,'Sz':Sz,'n_3d':n_3d,'n_2pz':n_2pz,'n_2ppi':n_2ppi,'n_4s':n_4s})
+  df = pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3dz2':n_3dz2,'iao_n_3dpi':n_3dpi,
+  'iao_n_3dd':n_3dd,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s})
   
   E = res3[0]
   n_occ = res3[2]+res3[3]
   Sz = np.ones(len(E))*1.5
   n_3d = n_occ[:,0] + n_occ[:,1] + n_occ[:,2] + n_occ[:,3] + n_occ[:,6]
+  n_3dz2 = n_occ[:,6]
+  n_3dpi = n_occ[:,2] + n_occ[:,3]
+  n_3dd = n_occ[:,0] + n_occ[:,1]
   n_2ppi = n_occ[:,4] + n_occ[:,5]
   n_2pz = n_occ[:,7]
   n_4s = n_occ[:,8]
-  df = pd.concat((df,pd.DataFrame({'E':E,'Sz':Sz,'n_3d':n_3d,'n_2pz':n_2pz,'n_2ppi':n_2ppi,'n_4s':n_4s})),axis=0)
+  df = pd.concat((df,pd.DataFrame({'energy':E,'Sz':Sz,'iao_n_3dz2':n_3dz2,
+  'iao_n_3dpi':n_3dpi,'iao_n_3dd':n_3dd,'iao_n_2pz':n_2pz,'iao_n_2ppi':n_2ppi,'iao_n_4s':n_4s})),axis=0)
 
-  df['E']-=min(df['E'])
+  df['energy']-=min(df['energy'])
   df['eig']=np.arange(df.shape[0])
+  
+  df['model'] = 0
+  for z in list(df):
+    df[z+'_u'] = 0 
+    df[z+'_l'] = 0
+  
+  full_df = pd.read_pickle('formatted_gosling.pickle')
+  plot_ed_small(full_df,df,0)
 
-  sns.pairplot(df,vars=['E','n_2ppi','n_2pz','n_4s','n_3d'],hue='Sz')
-  if(save): plt.savefig('analysis/roks_eigenvalues.pdf',bbox_inches='tight'); plt.close()
-  else: plt.show(); plt.close()
+  #sns.pairplot(df,vars=['E','n_2ppi','n_2pz','n_4s','n_3d'],hue='Sz')
+  #if(save): plt.savefig('analysis/figs/roks_eigenvalues.pdf',bbox_inches='tight'); plt.close()
+  #else: plt.show(); plt.close()
 
-  return df
+  #return df
+
+if __name__=='__main__':
+  ED_roks(save=True)
