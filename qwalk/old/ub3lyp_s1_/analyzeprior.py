@@ -362,8 +362,8 @@ def analyze(df=None,save=False):
   #Generate models and plot cost 
   #prior_df = prior_analysis(df,cutoff=cutoff)
   #prior_df.to_pickle('analysis/prior.pickle')
-  plot_prior()
-  exit(0)
+  #plot_prior()
+  #exit(0)
 
   #ED for models
   '''
