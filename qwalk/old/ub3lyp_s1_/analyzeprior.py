@@ -134,7 +134,6 @@ def plot_prior():
   scores = []
   scores_u = []
   scores_d = []
-  from sklearn.metrics import log_loss
   for i in range(prior_df.shape[0]):
     y = 2 - prior_df['s_mu'].iloc[i]
     y = y[y>0]
@@ -158,44 +157,35 @@ def plot_prior():
   prior_df['score_u'] = scores_u
   prior_df['score_d'] = scores_d
 
-  '''
-  #R2 vs Score
-  plt.subplot(221)
-  for group_model in prior_df.groupby(by='model'):        
-    error_r2 = np.vstack(group_model[1]['r2_err']).T
-    error_r2[0] = group_model[1]['r2_mu'] - error_r2[0,:]
-    error_r2[1] = -group_model[1]['r2_mu'] + error_r2[1,:]
-    plt.errorbar(group_model[1]['score'],group_model[1]['r2_mu'],
-    yerr = error_r2,fmt='o-',label=str(group_model[0]),ls='None')
-  plt.xlabel('Quad hinge loss')
-  plt.ylabel('r2')
-  plt.legend(loc='best')
-  '''
-
   #R2 vs lambda
+  fig = plt.figure(figsize = (3,6))
   plt.subplot(211)
   for group_model in prior_df.groupby(by='model'):        
     error_r2 = np.vstack(group_model[1]['r2_err']).T
     error_r2[0] = group_model[1]['r2_mu'] - error_r2[0,:]
     error_r2[1] = -group_model[1]['r2_mu'] + error_r2[1,:]
     plt.errorbar(group_model[1]['lam'],group_model[1]['r2_mu'],
-    yerr=error_r2,fmt='o-',label=str(group_model[0]))
-  plt.xticks(np.arange(0,22,2))
-  plt.ylabel('r2')
+    yerr=error_r2,fmt='o-')
+  plt.xticks(np.arange(0,24,4),['']*len(np.arange(0,24,4)))
+  plt.ylabel(r'R$^2$')
 
   #Lambda vs score
+  labels=[r'Min',r'Min$ + \bar{t}_\pi$',
+  r'Min$ + \bar{t}_{dz}$',r'Min$ + \bar{t}_\pi, \bar{t}_{sz}$',
+  r'Min$ + \bar{t}_\pi, \bar{t}_{ds}$',r'Min$ + \bar{t}_{ds}, \bar{t}_{dz}$']
   plt.subplot(212)
+  z=0
   for group_model in prior_df.groupby(by='model'):        
     score_u = group_model[1]['score_u'] - group_model[1]['score']
     score_d = group_model[1]['score'] - group_model[1]['score_d']
     plt.errorbar(group_model[1]['lam'],group_model[1]['score'],
-    yerr=[score_d,score_u],marker='o',ls='None',label=str(group_model[0]))
+    yerr=[score_d,score_u],marker='o',ls='None',label=labels[z])
+    z+=1
   plt.legend(loc='best')
-  plt.xticks(np.arange(0,22,2))
-  plt.ylabel('Quad hinge loss')
-  plt.xlabel('lam')
-
-  plt.show()
+  plt.xticks(np.arange(0,24,4))
+  plt.ylabel('QHL')
+  plt.xlabel(r'$\lambda$')
+  plt.savefig('analysis/figs/prior.pdf',bbox_inches='tight')
   return -1
 
 def exact_diag_prior(df, cutoff, model_ind, lam, nbs=20):
@@ -295,19 +285,27 @@ def regr_prior(df,model_ind,lam,cutoff=2,nbs=20):
       'basestate':df.iloc[sub[0]]['basestate']},index=[0])
     if(av_df is None): av_df = z
     else: av_df = pd.concat((av_df,z),axis=0)
-  
+ 
+  fig = plt.figure(figsize=(3,3))
   plt.errorbar(av_df['y_mu'].values,av_df['y'].values,yerr=av_df['y_err'].values,
-    xerr=[av_df['y_l'].values,av_df['y_u'].values],fmt='s',alpha=0.5)
+    xerr=[av_df['y_l'].values,av_df['y_u'].values],fmt='o',alpha=0.3,label='Sample')
   plt.errorbar(av_df['y_mu'].values,av_df['y'].values,yerr=av_df['y_err'].values,
-    xerr=[av_df['y_l'].values,av_df['y_u'].values],fmt='s',alpha=0.0)
+    xerr=[av_df['y_l'].values,av_df['y_u'].values],fmt='o',alpha=0.0)
+  plt.errorbar(av_df['y_mu'].values,av_df['y'].values,yerr=av_df['y_err'].values,
+    xerr=[av_df['y_l'].values,av_df['y_u'].values],fmt='o',alpha=0.0)
   ind = av_df['basestate']<0
   plt.errorbar(av_df[ind]['y_mu'].values,av_df[ind]['y'].values,yerr=av_df[ind]['y_err'].values,
     xerr=[av_df[ind]['y_l'].values,av_df[ind]['y_u'].values],fmt='o',markeredgecolor='k',label='Basestate')
-  plt.plot(av_df['y'].values,av_df['y'].values,c='k',ls='--')
+  plt.plot([-5809.5,-5803.5],[-5809.5,-5803.5],c='k',ls='--')
   plt.legend(loc='best')
-  plt.xlabel('E_m, eV')
-  plt.ylabel('E_DMC, eV')
-  plt.show()
+  plt.ylabel(r'Minimal model')
+  plt.xlabel(r'E$_{eff}$, eV')
+  plt.ylabel(r'E$_{DMC}$, eV')
+  plt.ylim((-5809.5,-5803.5))
+  plt.xlim((-5809.5,-5803.5))
+  plt.xticks([-5809,-5807,-5805])
+  plt.yticks([-5809,-5807,-5805])
+  plt.savefig('analysis/figs/regr_m'+str(model_ind)+'_l'+str(lam)+'.pdf',bbox_inches='tight')
   return -1
 
 def iao_analysis(df,cutoff=2):
@@ -364,8 +362,8 @@ def analyze(df=None,save=False):
   #Generate models and plot cost 
   #prior_df = prior_analysis(df,cutoff=cutoff)
   #prior_df.to_pickle('analysis/prior.pickle')
-  #plot_prior()
-  #exit(0)
+  plot_prior()
+  exit(0)
 
   #ED for models
   '''
@@ -397,11 +395,11 @@ def analyze(df=None,save=False):
   #plot_ed_small(df,avg_df,model)
   
   #Linear regression plot of selected model 
-  #regr_prior(df,model,lam)
+  regr_prior(df,model,lam)
 
   #Model parameters
-  params_df = iao_analysis(df)
-  params_df.to_pickle('analysis/params.pickle')
+  #params_df = iao_analysis(df)
+  #params_df.to_pickle('analysis/params.pickle')
 
 if __name__=='__main__':
   #DATA COLLECTION
