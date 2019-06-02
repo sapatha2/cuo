@@ -363,16 +363,17 @@ def analyze(df=None,save=False):
   #exit(0)
 
   #ED for models
+  #for model in [9,20,21,12,24,5]:
   '''
-  for model in [9,20,21,12,24,5]:
-    for lam in [4,10,20]:
+  for model in [5,12]:
+    for lam in [0]: #[4,10,20]:
       ed_df = exact_diag_prior(df, cutoff, model, lam, nbs=20)
       ed_df = sort_ed(ed_df)
       ed_df = desc_ed(ed_df).drop(columns=['ci'])
       avg_df = avg_ed(ed_df)
-      avg_df.to_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
+  
+  avg_df.to_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
   '''
-
   #Lowest noise model
   '''
   for model in [9,20,21,12,24,5]:
@@ -386,16 +387,16 @@ def analyze(df=None,save=False):
   '''
  
   #ED plot
-  model = 5
-  lam = 20
-  #titles={5:r'Min',9:r'Min$ + \bar{t}_\pi$',
-  #12:r'Min$ + \bar{t}_{dz}$',20:r'Min$ + \bar{t}_\pi, \bar{t}_{sz}$',
-  #21:r'Min$ + \bar{t}_\pi, \bar{t}_{ds}$',24:r'Min$ + \bar{t}_{ds}, \bar{t}_{dz}$'}
-  #avg_df = pd.read_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
-  #plot_ed_small(df,avg_df,model,fname='analysis/figs/ed_m'+str(model)+'_l'+str(lam)+'.pdf',title=titles[model]+r' model, $\lambda$='+str(lam))
+  model = 12
+  lam = 0
+  titles={5:r'Min',9:r'Min$ + \bar{t}_\pi$',
+  12:r'Min$ + \bar{t}_{dz}$',20:r'Min$ + \bar{t}_\pi, \bar{t}_{sz}$',
+  21:r'Min$ + \bar{t}_\pi, \bar{t}_{ds}$',24:r'Min$ + \bar{t}_{ds}, \bar{t}_{dz}$'}
+  avg_df = pd.read_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
+  plot_ed_small(df,avg_df,model,fname='analysis/figs/ed_m'+str(model)+'_l'+str(lam)+'.pdf',title=titles[model]+r' model, $\lambda$='+str(lam))
   
   #Linear regression plot of selected model 
-  regr_prior(df,model,lam)
+  #regr_prior(df,model,lam)
 
   #Model parameters
   #params_df = iao_analysis(df)
