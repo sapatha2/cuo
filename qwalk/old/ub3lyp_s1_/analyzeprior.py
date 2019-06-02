@@ -282,23 +282,20 @@ def regr_prior(df,model_ind,lam,cutoff=2,nbs=20):
     y_u = np.percentile(sub[1]['y'],97.5) - y_mu
     z = pd.DataFrame({'y_mu':y_mu,'y_l':y_l,'y_u':y_u,'ind':sub[0],
       'y':df.iloc[sub[0]]['energy'],'y_err':df.iloc[sub[0]]['energy_err'],
-      'basestate':df.iloc[sub[0]]['basestate']},index=[0])
+      'basestate':df.iloc[sub[0]]['basestate'],'Sz':df.iloc[sub[0]]['Sz']},index=[0])
     if(av_df is None): av_df = z
     else: av_df = pd.concat((av_df,z),axis=0)
  
   fig = plt.figure(figsize=(3,3))
-  plt.errorbar(av_df['y_mu'].values,av_df['y'].values,yerr=av_df['y_err'].values,
-    xerr=[av_df['y_l'].values,av_df['y_u'].values],fmt='o',alpha=0.3,label='Sample')
-  plt.errorbar(av_df['y_mu'].values,av_df['y'].values,yerr=av_df['y_err'].values,
-    xerr=[av_df['y_l'].values,av_df['y_u'].values],fmt='o',alpha=0.0)
-  plt.errorbar(av_df['y_mu'].values,av_df['y'].values,yerr=av_df['y_err'].values,
-    xerr=[av_df['y_l'].values,av_df['y_u'].values],fmt='o',alpha=0.0)
-  ind = av_df['basestate']<0
+  ind = av_df['Sz']==0.5
   plt.errorbar(av_df[ind]['y_mu'].values,av_df[ind]['y'].values,yerr=av_df[ind]['y_err'].values,
-    xerr=[av_df[ind]['y_l'].values,av_df[ind]['y_u'].values],fmt='o',markeredgecolor='k',label='Basestate')
+    xerr=[av_df[ind]['y_l'].values,av_df[ind]['y_u'].values],fmt='s',markeredgecolor='k',label=r'DMC S$_z$ = $\frac{1}{2}$')
+  ind = av_df['Sz']==1.5
+  plt.errorbar(av_df[ind]['y_mu'].values,av_df[ind]['y'].values,yerr=av_df[ind]['y_err'].values,
+    xerr=[av_df[ind]['y_l'].values,av_df[ind]['y_u'].values],fmt='s',markeredgecolor='k',label=r'DMC S$_z$ = $\frac{3}{2}$')
   plt.plot([-5809.5,-5803.5],[-5809.5,-5803.5],c='k',ls='--')
   plt.legend(loc='best')
-  plt.ylabel(r'Minimal model')
+  plt.ylabel(r'Min model, $\lambda$=20')
   plt.xlabel(r'E$_{eff}$, eV')
   plt.ylabel(r'E$_{DMC}$, eV')
   plt.ylim((-5809.5,-5803.5))
@@ -389,16 +386,16 @@ def analyze(df=None,save=False):
   '''
  
   #ED plot
-  model = 12
+  model = 5
   lam = 20
-  titles={5:r'Min',9:r'Min$ + \bar{t}_\pi$',
-  12:r'Min$ + \bar{t}_{dz}$',20:r'Min$ + \bar{t}_\pi, \bar{t}_{sz}$',
-  21:r'Min$ + \bar{t}_\pi, \bar{t}_{ds}$',24:r'Min$ + \bar{t}_{ds}, \bar{t}_{dz}$'}
-  avg_df = pd.read_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
-  plot_ed_small(df,avg_df,model,fname='analysis/figs/ed_m'+str(model)+'_l'+str(lam)+'.pdf',title=titles[model]+r' model, $\lambda$='+str(lam))
+  #titles={5:r'Min',9:r'Min$ + \bar{t}_\pi$',
+  #12:r'Min$ + \bar{t}_{dz}$',20:r'Min$ + \bar{t}_\pi, \bar{t}_{sz}$',
+  #21:r'Min$ + \bar{t}_\pi, \bar{t}_{ds}$',24:r'Min$ + \bar{t}_{ds}, \bar{t}_{dz}$'}
+  #avg_df = pd.read_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
+  #plot_ed_small(df,avg_df,model,fname='analysis/figs/ed_m'+str(model)+'_l'+str(lam)+'.pdf',title=titles[model]+r' model, $\lambda$='+str(lam))
   
   #Linear regression plot of selected model 
-  #regr_prior(df,model,lam)
+  regr_prior(df,model,lam)
 
   #Model parameters
   #params_df = iao_analysis(df)
