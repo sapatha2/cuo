@@ -289,10 +289,10 @@ def regr_prior(df,model_ind,lam,cutoff=2,nbs=20):
   fig = plt.figure(figsize=(3,3))
   ind = av_df['Sz']==0.5
   plt.errorbar(av_df[ind]['y_mu'].values,av_df[ind]['y'].values,yerr=av_df[ind]['y_err'].values,
-    xerr=[av_df[ind]['y_l'].values,av_df[ind]['y_u'].values],fmt='s',markeredgecolor='k',label=r'DMC S$_z$ = $\frac{1}{2}$')
+    xerr=[av_df[ind]['y_l'].values,av_df[ind]['y_u'].values],fmt='.',label=r'DMC S$_z$ = $\frac{1}{2}$')
   ind = av_df['Sz']==1.5
   plt.errorbar(av_df[ind]['y_mu'].values,av_df[ind]['y'].values,yerr=av_df[ind]['y_err'].values,
-    xerr=[av_df[ind]['y_l'].values,av_df[ind]['y_u'].values],fmt='s',markeredgecolor='k',label=r'DMC S$_z$ = $\frac{3}{2}$')
+    xerr=[av_df[ind]['y_l'].values,av_df[ind]['y_u'].values],fmt='.',label=r'DMC S$_z$ = $\frac{3}{2}$')
   plt.plot([-5809.5,-5803.5],[-5809.5,-5803.5],c='k',ls='--')
   plt.legend(loc='best')
   plt.ylabel(r'Min model, $\lambda$=20')
