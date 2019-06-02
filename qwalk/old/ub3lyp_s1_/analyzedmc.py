@@ -560,17 +560,22 @@ def plot_ed(full_df,av_df,model,save=True):
   plt.show()
   return -1
 
-def plot_ed_small(full_df,av_df,model,save=True):
+def plot_ed_small(full_df,av_df,model,fname=None,title=None):
   norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
-  limits = [(0.5,2.5),(2.5,4.5),(1.5,4.5),(0.5,2.5),(1.5,4.5),(0,1.5)]
+  limits = [(0.5,2.5),(2.5,4.5),(2.5,4.5),(0.5,2.5),(1.5,4.5),(-0.75,1.5)]
     
   rgba_color = plt.cm.Blues(norm(1.75))
   rgba_color2 = plt.cm.Oranges(norm(1.75))
   z=-1 
   fig, axes = plt.subplots(nrows=2,ncols=3,sharey=True,figsize=(6,6))
+  xlabels = [r'n$_{d_{z^2}}$',r'n$_{d_{\pi}}$',r'n$_{d_{\delta}}$',
+  r'n$_{z}$',r'n$_{\pi}$',r'n$_{s}$']
   for parm in ['iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2pz','iao_n_2ppi','iao_n_4s']:
     z+=1 
     ax = axes[z//3,z%3]
+
+    l1 = None
+    l2 = None
 
     #DMC Data
     full_df['energy'] -= min(full_df['energy'])
@@ -579,8 +584,7 @@ def plot_ed_small(full_df,av_df,model,save=True):
     x = f_df[parm].values
     y = f_df['energy'].values
     yerr = f_df['energy_err'].values
-    if(parm=='iao_n_3dd'): ax.errorbar(x,y,yerr,fmt='s',c=rgba_color,alpha=0.5,label='DMC')
-    else: ax.errorbar(x,y,yerr,fmt='s',c=rgba_color,alpha=0.5)
+    ax.errorbar(x,y,yerr,fmt='s',c=rgba_color,alpha=0.5)
 
     f_df = full_df[full_df['Sz']==1.5]
     x = f_df[parm].values
@@ -599,7 +603,6 @@ def plot_ed_small(full_df,av_df,model,save=True):
     y=sub_df['energy'].values
     yerr_u=sub_df['energy_u'].values
     yerr_d=sub_df['energy_l'].values
-    if(parm=='iao_n_3dd'): ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color,label='ED')
     ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color)
 
     sub_df = av_df[(av_df['model']==model)&(av_df['Sz']==1.5)]
@@ -614,14 +617,39 @@ def plot_ed_small(full_df,av_df,model,save=True):
     ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt='o',c=rgba_color2)
 
     ax.axhline(min(full_df['energy'])+2,ls='--',c='k')
-    ax.set_xlabel(parm)
-    ax.set_ylabel('energy (eV)')
+    ax.set_xlabel(xlabels[z])
+    if((z%3) == 0): ax.set_ylabel('E (eV)')
     ax.set_xlim(limits[z])
     ax.set_ylim((-0.2,4.5))
+ 
+    ratio = 1.5
+    ax.set_aspect(1.0/ax.get_data_ratio()*ratio)
+
+    def get_handle_lists(l):
+      """returns a list of lists of handles.
+      """
+      tree = l._legend_box.get_children()[1]
+
+      for column in tree.get_children():
+          for row in column.get_children():
+              yield row.get_children()[0].get_children()
     
-    if(parm=='iao_n_3dd'): ax.legend(loc='best')
-  plt.suptitle('Ed model '+str(model))
-  plt.show()
+    if(parm=='iao_n_4s'): 
+      l1 = ax.scatter([-1e6],[-1e6],marker='s',c='k')
+      l2 = ax.scatter([-1e6],[-1e6],marker='o',c='k')
+      l3 = ax.scatter([-1e6],[-1e6],marker='.',c=rgba_color,label=r'S$_z$=$\frac{1}{2},\frac{3}{2}$')
+      l4 = ax.scatter([-1e6],[-1e6],marker='.',c=rgba_color2)
+      l = ax.legend([l1,l2,(l3,l4)],['DMC','ED',r'S$_z$=$\frac{1}{2},\frac{3}{2}$'],
+        scatterpoints=2,loc='best',handletextpad=0.1,handlelength=1.3)
+      
+      handles_list = list(get_handle_lists(l))
+      handles_list[0][0].set_facecolors(["k","none"])
+      handles_list[1][0].set_facecolors(["k","none"])
+      handles = handles_list[2] 
+      handles[0].set_facecolors([rgba_color, "none"]) # for the fist
+      handles[1].set_facecolors(["none",rgba_color2])
+  plt.suptitle(title) 
+  plt.savefig(fname,bbox_inches='tight')
   return -1
 
 #Consider the "bad" states in our models

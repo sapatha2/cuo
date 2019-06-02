@@ -183,7 +183,7 @@ def plot_prior():
     z+=1
   plt.legend(loc='best')
   plt.xticks(np.arange(0,24,4))
-  plt.ylabel('QHL')
+  plt.ylabel(r'QHL (eV$^2$)')
   plt.xlabel(r'$\lambda$')
   plt.savefig('analysis/figs/prior.pdf',bbox_inches='tight')
   return -1
@@ -375,7 +375,7 @@ def analyze(df=None,save=False):
       avg_df = avg_ed(ed_df)
       avg_df.to_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
   '''
- 
+
   #Lowest noise model
   '''
   for model in [9,20,21,12,24,5]:
@@ -389,13 +389,16 @@ def analyze(df=None,save=False):
   '''
  
   #ED plot
-  model = 5
+  model = 12
   lam = 20
-  #avg_df = pd.read_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
-  #plot_ed_small(df,avg_df,model)
+  titles={5:r'Min',9:r'Min$ + \bar{t}_\pi$',
+  12:r'Min$ + \bar{t}_{dz}$',20:r'Min$ + \bar{t}_\pi, \bar{t}_{sz}$',
+  21:r'Min$ + \bar{t}_\pi, \bar{t}_{ds}$',24:r'Min$ + \bar{t}_{ds}, \bar{t}_{dz}$'}
+  avg_df = pd.read_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
+  plot_ed_small(df,avg_df,model,fname='analysis/figs/ed_m'+str(model)+'_l'+str(lam)+'.pdf',title=titles[model]+r' model, $\lambda$='+str(lam))
   
   #Linear regression plot of selected model 
-  regr_prior(df,model,lam)
+  #regr_prior(df,model,lam)
 
   #Model parameters
   #params_df = iao_analysis(df)
