@@ -286,12 +286,8 @@ def regr_prior(df,model_ind,lam,cutoff=2,nbs=20):
     else: av_df = pd.concat((av_df,z),axis=0)
  
   fig = plt.figure(figsize=(3,3))
-  ind = av_df['Sz']==0.5
-  plt.errorbar(av_df[ind]['y_mu'].values,av_df[ind]['y'].values,yerr=av_df[ind]['y_err'].values,
-    xerr=[av_df[ind]['y_l'].values,av_df[ind]['y_u'].values],fmt='.',label=r'DMC S$_z$ = $\frac{1}{2}$')
-  ind = av_df['Sz']==1.5
-  plt.errorbar(av_df[ind]['y_mu'].values,av_df[ind]['y'].values,yerr=av_df[ind]['y_err'].values,
-    xerr=[av_df[ind]['y_l'].values,av_df[ind]['y_u'].values],fmt='.',label=r'DMC S$_z$ = $\frac{3}{2}$')
+  plt.errorbar(av_df['y_mu'].values,av_df['y'].values,yerr=av_df['y_err'].values,
+    xerr=[av_df['y_l'].values,av_df['y_u'].values],fmt='.',label=r'DMC')
   plt.plot([-5809.5,-5803.5],[-5809.5,-5803.5],c='k',ls='--')
   plt.legend(loc='best')
   plt.ylabel(r'Min model, $\lambda$=20')
@@ -356,44 +352,38 @@ def analyze(df=None,save=False):
   cutoff = 2
 
   #Generate models and plot cost 
-  prior_df = prior_analysis(df,cutoff=cutoff)
-  prior_df.to_pickle('analysis/prior.pickle')
-  plot_prior()
-  exit(0)
+  #prior_df = prior_analysis(df,cutoff=cutoff)
+  #prior_df.to_pickle('analysis/prior.pickle')
+  #plot_prior()
+  #exit(0)
 
   #ED for models
-  #for model in [9,20,21,12,24,5]:
   '''
-  for model in [5,9,12]:
-    for lam in [30]: #[4,10,20]:
+  for model in [5,9,12,20,21,24]:
+    for lam in [20]: #[4,10,20]:
       ed_df = exact_diag_prior(df, cutoff, model, lam, nbs=20)
       ed_df = sort_ed(ed_df)
       ed_df = desc_ed(ed_df).drop(columns=['ci'])
       avg_df = avg_ed(ed_df)
-  avg_df.to_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
+    avg_df.to_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
   exit(0)
   '''
 
+  '''
   avg_eig_df = None
-  for model in [5,9,12]:
+  for model in [5,9,12]:#,20,21,24]:
     lam = 20
     a = pd.read_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
     if(avg_eig_df is None): avg_eig_df = a
     else: avg_eig_df = pd.concat((avg_eig_df,a),axis=0)
   comb_plot_ed_small(df,avg_eig_df,[5,9,12],fname='analysis/figs/final_ed.pdf',cutoff=8)
   exit(0)
+  '''
 
-  #ED plot
-  model = 12
-  lam = 0
-  titles={5:r'Min',9:r'Min$ + \bar{t}_\pi$',
-  12:r'Min$ + \bar{t}_{dz}$',20:r'Min$ + \bar{t}_\pi, \bar{t}_{sz}$',
-  21:r'Min$ + \bar{t}_\pi, \bar{t}_{ds}$',24:r'Min$ + \bar{t}_{ds}, \bar{t}_{dz}$'}
-  avg_df = pd.read_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
-  plot_ed_small(df,avg_df,model,fname='analysis/figs/ed_m'+str(model)+'_l'+str(lam)+'.pdf',title=titles[model]+r' model, $\lambda$='+str(lam))
-  
   #Linear regression plot of selected model 
-  #regr_prior(df,model,lam)
+  model = 5
+  lam = 20
+  regr_prior(df,model,lam)
 
   #Model parameters
   #params_df = iao_analysis(df)
