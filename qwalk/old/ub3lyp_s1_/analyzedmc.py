@@ -17,6 +17,7 @@ from find_connect import  *
 import matplotlib as mpl 
 from statsmodels.sandbox.regression.predstd import wls_prediction_std
 import itertools
+from mpl_toolkits.mplot3d import Axes3D
 
 ######################################################################################
 #FROZEN METHODS
@@ -649,6 +650,83 @@ def plot_ed_small(full_df,av_df,model,fname=None,title=None):
       handles[0].set_facecolors([rgba_color, "none"]) # for the fist
       handles[1].set_facecolors(["none",rgba_color2])
   plt.suptitle(title) 
+  #plt.savefig(fname,bbox_inches='tight')
+  plt.show()
+  return -1
+
+def comb_plot_ed_small(full_df,av_df,models,fname=None,title=None,cutoff=0):
+  norm = mpl.colors.Normalize(vmin=0, vmax=3.75)
+  limits = [(0.5,2.5),(2.5,4.5),(2.5,4.5),(0.5,2.5),(1.5,4.5),(-0.5,1.5)]
+    
+  rgba_color = plt.cm.Blues(norm(1.75))
+  rgba_color2 = plt.cm.Oranges(norm(1.75))
+  fig, axes = plt.subplots(nrows=2,ncols=3,sharey=True,figsize=(6,6))
+  xlabels = [r'n$_{d_{z^2}}$',r'n$_{d_{\pi}}$',r'n$_{d_{\delta}}$',
+  r'n$_{z}$',r'n$_{\pi}$',r'n$_{s}$']
+  
+  labels={5:r'Min',9:r'Min$ + \bar{t}_\pi$',
+  12:r'Min$ + \bar{t}_{dz}$',20:r'Min$ + \bar{t}_\pi, \bar{t}_{sz}$',
+  21:r'Min$ + \bar{t}_\pi, \bar{t}_{ds}$',24:r'Min$ + \bar{t}_{ds}, \bar{t}_{dz}$'}
+
+  markers = ['s','o','^']
+
+  z=-1
+  for parm in ['iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2pz','iao_n_2ppi','iao_n_4s']:
+    z+=1 
+    ax = axes[z//3,z%3]
+    
+    #DMC Data
+    full_df['energy'] -= min(full_df['energy'])
+    f_df = full_df
+    x = f_df[parm].values
+    y = f_df['energy'].values
+    yerr = f_df['energy_err'].values
+    ax.errorbar(x,y,yerr,fmt='.',c=rgba_color,alpha=0.2,label='DMC')
+    
+    p = -1
+    for model in models:
+      p+=1
+      #Eigenstates
+      minE = min(av_df[av_df['model']==model]['energy'])
+      sub_df = av_df[(av_df['model']==model)]
+      sub_df = sub_df.sort_values(by=['energy'])
+      sub_df['energy'] -= minE
+      #sub_df = sub_df[sub_df['energy']<=4.0]
+      sub_df = sub_df.iloc[:20]
+      x=sub_df[parm].values
+      xerr_u=sub_df[parm+'_u'].values
+      xerr_d=sub_df[parm+'_l'].values
+      y=sub_df['energy'].values
+      yerr_u=sub_df['energy_u'].values
+      yerr_d=sub_df['energy_l'].values
+      ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt=markers[p],c='k',markersize=4)
+
+      sub_df = av_df[(av_df['model']==model)]
+      sub_df['energy'] -= minE
+      #sub_df = sub_df[sub_df['energy']<=cutoff]
+      sub_df = sub_df.iloc[:cutoff]
+      if(cutoff > 3): sub_df = sub_df[sub_df['iao_n_4s']<0.7]
+      x=sub_df[parm].values
+      xerr_u=sub_df[parm+'_u'].values
+      xerr_d=sub_df[parm+'_l'].values
+      y=sub_df['energy'].values
+      yerr_u=sub_df['energy_u'].values
+      yerr_d=sub_df['energy_l'].values
+      ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],markeredgecolor='k',fmt=markers[p],markersize=8,label=labels[model])
+
+      ax.axhline(min(full_df['energy'])+2,ls='--',c='k')
+      ax.set_xlabel(xlabels[z])
+      if((z%3) == 0): ax.set_ylabel('E (eV)')
+      ax.set_xlim(limits[z])
+      ax.set_ylim((-0.2,4.5))
+   
+      ratio = 1.5
+      ax.set_aspect(1.0/ax.get_data_ratio()*ratio)
+
+      if(parm=='iao_n_3dd'): 
+        ax.legend(bbox_to_anchor=(2.0, 0.15))
+  
+  plt.suptitle(title) 
   plt.savefig(fname,bbox_inches='tight')
   return -1
 
@@ -669,18 +747,11 @@ def plot_ed_outliers(full_df,out_df,av_df,fname=None):
 
     #DMC Data
     full_df['energy'] -= min(full_df['energy'])
-
-    f_df = full_df[full_df['Sz']==0.5]
+    f_df = full_df
     x = f_df[parm].values
     y = f_df['energy'].values
     yerr = f_df['energy_err'].values
-    ax.errorbar(x,y,yerr,fmt='s',c=rgba_color,alpha=0.5)
-
-    f_df = full_df[full_df['Sz']==1.5]
-    x = f_df[parm].values
-    y = f_df['energy'].values
-    yerr = f_df['energy_err'].values
-    ax.errorbar(x,y,yerr,fmt='s',c=rgba_color2,alpha=0.5)
+    ax.errorbar(x,y,yerr,fmt='.',c=rgba_color,alpha=0.2,label='DMC')
 
     #Eigenstates
     for model in [5,9,12,20,21,24]:
@@ -688,8 +759,9 @@ def plot_ed_outliers(full_df,out_df,av_df,fname=None):
       x=sub_df[parm].values
       y=sub_df['energy'].values
       xerr_u = xerr_d = yerr_u = yerr_d = np.zeros(len(y))
-      ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],fmt='^',c='r',markersize=10,markeredgecolor='k')
-    
+      ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],fmt='*',c='r',markersize=10,markeredgecolor='k')
+      if(model==5): ax.errorbar(x,y,xerr=[xerr_d,xerr_u],yerr=[yerr_d,yerr_u],fmt='*',c='r',markersize=10,markeredgecolor='k',label='Intruder')
+
     ax.axhline(min(full_df['energy'])+2,ls='--',c='k')
     ax.set_xlabel(xlabels[z])
     ax.set_ylabel('E (eV)')
@@ -698,32 +770,10 @@ def plot_ed_outliers(full_df,out_df,av_df,fname=None):
 
     ratio = 1.5
     ax.set_aspect(1.0/ax.get_data_ratio()*ratio)
-
-    def get_handle_lists(l):
-      """returns a list of lists of handles.
-      """
-      tree = l._legend_box.get_children()[1]
-
-      for column in tree.get_children():
-          for row in column.get_children():
-              yield row.get_children()[0].get_children()
-    
-    if(parm=='iao_n_4s'): 
-      l1 = ax.scatter([-1e6],[-1e6],marker='s',c='k')
-      l2 = ax.scatter([-1e6],[-1e6],marker='^',c='r',label='Intruder') 
-      l3 = ax.scatter([-1e6],[-1e6],marker='.',c=rgba_color,label=r'S$_z$=$\frac{1}{2},\frac{3}{2}$')
-      l4 = ax.scatter([-1e6],[-1e6],marker='.',c=rgba_color2)
-      l = ax.legend([l1,l2,(l3,l4)],['DMC','Intruder',r'S$_z$=$\frac{1}{2},\frac{3}{2}$'],
-        scatterpoints=2,loc='best',handletextpad=0.1,handlelength=1.3)
       
-      handles_list = list(get_handle_lists(l))
-      handles_list[0][0].set_facecolors(["k","none"])
-      handles_list[1][0].set_facecolors(["k","none"])
-      handles = handles_list[2] 
-      handles[0].set_facecolors([rgba_color, "none"]) # for the fist
-      handles[1].set_facecolors(["none",rgba_color2])
+    if(parm=='iao_n_3dd'): 
+      ax.legend(bbox_to_anchor=(2.0, 0.15))
 
-  plt.suptitle('Intruder eigenstates')
   plt.savefig(fname,bbox_inches='tight')
   return -1
 
@@ -798,11 +848,10 @@ def analyze(df=None,save=False):
 
   #Plot ed
   avg_eig_df = pd.read_pickle('analysis/avg_eig.pickle')
-  '''
-  for model in [5,9,12]: #[5,9,12,21,20,24]:
-    plot_ed_small(df,avg_eig_df,model=model)
-  exit(0)
-  '''
+  #for model in [5,9,12]: #[5,9,12,21,20,24]:
+    #plot_ed_small(df,avg_eig_df,model=model)
+  #comb_plot_ed_small(df,avg_eig_df,[5,9,12],fname='analysis/figs/init_ed.pdf',cutoff =3)
+  #exit(0)
 
   #Identify outliers for priors
   '''

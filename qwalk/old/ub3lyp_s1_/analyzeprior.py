@@ -16,7 +16,7 @@ from find_connect import  *
 import matplotlib as mpl 
 from prior import prior_fit, prior_score #, sigmoid
 import itertools 
-from analyzedmc import sort_ed, desc_ed, avg_ed, plot_ed_small
+from analyzedmc import sort_ed, desc_ed, avg_ed, plot_ed_small, comb_plot_ed_small
 ######################################################################################
 #FROZEN METHODS
 #Collect df
@@ -83,8 +83,8 @@ def prior_analysis(df,cutoff=2):
     fit_df = df[['energy','prior']+model]
     fit_df['const'] = 1
 
-    #lams = np.arange(0,55,5)
-    lams = np.arange(0,22,2)
+    lams = np.arange(0,55,5)
+    #lams = np.arange(0,22,2)
     s_mu = []
     s_err = []
     r2_mu = []
@@ -166,7 +166,7 @@ def plot_prior():
     error_r2[1] = -group_model[1]['r2_mu'] + error_r2[1,:]
     plt.errorbar(group_model[1]['lam'],group_model[1]['r2_mu'],
     yerr=error_r2,fmt='o-')
-  plt.xticks(np.arange(0,24,4),['']*len(np.arange(0,24,4)))
+  plt.xticks(np.arange(0,60,10),['']*len(np.arange(0,60,10)))
   plt.ylabel(r'R$^2$')
 
   #Lambda vs score
@@ -182,7 +182,7 @@ def plot_prior():
     yerr=[score_d,score_u],marker='o',ls='None',label=labels[z])
     z+=1
   plt.legend(loc='best')
-  plt.xticks(np.arange(0,24,4))
+  plt.xticks(np.arange(0,60,10))
   plt.ylabel(r'QHL (eV$^2$)')
   plt.xlabel(r'$\lambda$')
   plt.savefig('analysis/figs/prior.pdf',bbox_inches='tight')
@@ -365,27 +365,25 @@ def analyze(df=None,save=False):
   #ED for models
   #for model in [9,20,21,12,24,5]:
   '''
-  for model in [5,12]:
-    for lam in [0]: #[4,10,20]:
+  for model in [5,9,12]:
+    for lam in [30]: #[4,10,20]:
       ed_df = exact_diag_prior(df, cutoff, model, lam, nbs=20)
       ed_df = sort_ed(ed_df)
       ed_df = desc_ed(ed_df).drop(columns=['ci'])
       avg_df = avg_ed(ed_df)
-  
   avg_df.to_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
+  exit(0)
   '''
-  #Lowest noise model
-  '''
-  for model in [9,20,21,12,24,5]:
-    for lam in [20]:
-      avg_df = pd.read_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
-      e_err = avg_df['energy_u'].mean() + avg_df['energy_l'].mean()
-      p_err = 0
-      for z in list(avg_df):
-        if(('l' or 'u') in z): p_err+=avg_df[z].mean()
-      print(e_err,p_err)
-  '''
- 
+
+  avg_eig_df = None
+  for model in [5,9,12]:
+    lam = 20
+    a = pd.read_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
+    if(avg_eig_df is None): avg_eig_df = a
+    else: avg_eig_df = pd.concat((avg_eig_df,a),axis=0)
+  comb_plot_ed_small(df,avg_eig_df,[5,9,12],fname='analysis/figs/final_ed.pdf',cutoff=8)
+  exit(0)
+
   #ED plot
   model = 12
   lam = 0
