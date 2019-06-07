@@ -847,6 +847,7 @@ def analyze(df=None,save=False):
   '''
 
   #Plot ed
+  from sklearn.neighbors import KDTree, BallTree
   avg_eig_df = pd.read_pickle('analysis/avg_eig.pickle')
   #for model in [5,9,12]: #[5,9,12,21,20,24]:
     #plot_ed_small(df,avg_eig_df,model=model)
@@ -856,9 +857,10 @@ def analyze(df=None,save=False):
   #Identify outliers for priors
   '''
   outlier_df = None
-  unique_models = [5,9,12,21,20,24]
+  unique_models = [5,9,12,20,21,24]
   var = ['energy','iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2pz',
-        'iao_n_2ppi','iao_n_4s','iao_t_pi','iao_t_dz','iao_t_ds','iao_t_sz']
+        'iao_n_2ppi','iao_n_4s','iao_t_pi','iao_t_dz','iao_t_ds','iao_t_sz',
+        'Jsd','Us']
   variances = df[var].var()
   
   labels={5:r'Min',9:r'Min$ + \bar{t}_\pi$',
@@ -868,34 +870,30 @@ def analyze(df=None,save=False):
   df['energy'] -= min(df['energy'])
   VI = np.linalg.inv(df[var].cov())
   fig = plt.figure(figsize=(3,3))
+  kdt = BallTree(df[var])#metric='mahalanobis',VI=VI)
+ 
   for model in unique_models:
 
     data = avg_eig_df[avg_eig_df['model']==model]
-    data = data[var+['Sz']]
     data['energy'] -= min(data['energy'])
-    data = data[data['energy']<=(2.0)]# + min(data['energy']))]
+    data = data[data['energy']<=(2.0)]
 
-    dists = []
-    to_add = []
-    for i in range(data.shape[0]):
-      diff = df[var].mean() - data.drop(columns=['Sz']).iloc[i]
-      dist = np.dot(diff,np.dot(VI,diff))
-      dist = np.sqrt(dist)
+    dist,ind = kdt.query(data[var],k=10,return_distance=True)
+    dists=list(np.mean(dist,axis=1))
 
-      if((dist > 80) & (i > 1)): to_add.append(i)
-      dists.append(dist)
-    
     d = avg_eig_df[avg_eig_df['model']==model]
     d['energy'] -= min(avg_eig_df[avg_eig_df['model']==model]['energy'])
-    #d = d[d['energy']<=2.0]
+    d = d[d['energy']<=2.0]
+    to_add = np.array(dists) > 0.9
     d = d.iloc[to_add]
+    d = d[d['energy'] > 0.1]
     if(outlier_df is None): 
       outlier_df = d
     else: 
       outlier_df = pd.concat((outlier_df,d),axis=0)
 
     plt.plot(data['energy'].iloc[2:],dists[2:],marker='o',ls='None',label=labels[model])
-  plt.axhline(80,ls='--',c='k')
+  plt.axhline(0.9,ls='--',c='k')
   plt.ylabel('MD')
   plt.xlabel('E (eV)')
   plt.legend(loc='best')
