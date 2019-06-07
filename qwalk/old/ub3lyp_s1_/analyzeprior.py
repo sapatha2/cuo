@@ -40,7 +40,7 @@ def add_priors(df,cutoff):
   '''
   
   prior_df = pd.read_pickle('analysis/outlier.pickle')
-  prior_df = prior_df.iloc[[0,11,19,20,22]] #Remove any degenerate/near degenerate stuff
+  prior_df = prior_df.iloc[[-5,-3,11,29,5]] #Remove any degenerate/near degenerate stuff
   prior_df['prior'] = True 
   prior_df['energy'] = min(df['energy']) + cutoff
 
@@ -83,8 +83,7 @@ def prior_analysis(df,cutoff=2):
     fit_df = df[['energy','prior']+model]
     fit_df['const'] = 1
 
-    lams = np.arange(0,55,5)
-    #lams = np.arange(0,22,2)
+    lams = np.arange(0,22,2)
     s_mu = []
     s_err = []
     r2_mu = []
@@ -166,7 +165,7 @@ def plot_prior():
     error_r2[1] = -group_model[1]['r2_mu'] + error_r2[1,:]
     plt.errorbar(group_model[1]['lam'],group_model[1]['r2_mu'],
     yerr=error_r2,fmt='o-')
-  plt.xticks(np.arange(0,60,10),['']*len(np.arange(0,60,10)))
+  plt.xticks(np.arange(0,24,4),['']*len(np.arange(0,24,4)))
   plt.ylabel(r'R$^2$')
 
   #Lambda vs score
@@ -182,7 +181,7 @@ def plot_prior():
     yerr=[score_d,score_u],marker='o',ls='None',label=labels[z])
     z+=1
   plt.legend(loc='best')
-  plt.xticks(np.arange(0,60,10))
+  plt.xticks(np.arange(0,24,4))
   plt.ylabel(r'QHL (eV$^2$)')
   plt.xlabel(r'$\lambda$')
   plt.savefig('analysis/figs/prior.pdf',bbox_inches='tight')
@@ -357,10 +356,10 @@ def analyze(df=None,save=False):
   cutoff = 2
 
   #Generate models and plot cost 
-  #prior_df = prior_analysis(df,cutoff=cutoff)
-  #prior_df.to_pickle('analysis/prior.pickle')
-  #plot_prior()
-  #exit(0)
+  prior_df = prior_analysis(df,cutoff=cutoff)
+  prior_df.to_pickle('analysis/prior.pickle')
+  plot_prior()
+  exit(0)
 
   #ED for models
   #for model in [9,20,21,12,24,5]:

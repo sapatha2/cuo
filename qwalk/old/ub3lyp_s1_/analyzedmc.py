@@ -902,6 +902,7 @@ def analyze(df=None,save=False):
   '''
 
   outlier_df = pd.read_pickle('analysis/outlier.pickle')
+  outlier_df = outlier_df.iloc[[-5,-3,11,29,5]]
   av_df = pd.read_pickle('analysis/avg_eig.pickle')
   plot_ed_outliers(df,outlier_df,av_df,fname='analysis/figs/intruder.pdf')
 
