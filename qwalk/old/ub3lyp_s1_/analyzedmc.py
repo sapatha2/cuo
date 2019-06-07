@@ -661,12 +661,15 @@ def comb_plot_ed_small(full_df,av_df,models,fname=None,title=None,cutoff=0):
   rgba_color = plt.cm.Blues(norm(1.75))
   rgba_color2 = plt.cm.Oranges(norm(1.75))
   fig, axes = plt.subplots(nrows=2,ncols=3,sharey=True,figsize=(6,6))
-  xlabels = [r'n$_{d_{z^2}}$',r'n$_{d_{\pi}}$',r'n$_{d_{\delta}}$',
-  r'n$_{z}$',r'n$_{\pi}$',r'n$_{s}$']
+  xlabels = [r'$\langle n_{d_{z^2}} \rangle$',r'$\langle n_{d_{\pi}}\rangle$',
+  r'$\langle n_{d_{\delta}}\rangle$',r'$\langle n_{z}\rangle$',r'$\langle n_{\pi}\rangle$'
+  ,r'$\langle n_{s} \rangle$']
   
-  labels={5:r'Min',9:r'Min$ + \bar{t}_\pi$',
-  12:r'Min$ + \bar{t}_{dz}$',20:r'Min$ + \bar{t}_\pi, \bar{t}_{sz}$',
-  21:r'Min$ + \bar{t}_\pi, \bar{t}_{ds}$',24:r'Min$ + \bar{t}_{ds}, \bar{t}_{dz}$'}
+  labels={5:r'Min',9:r'Min$ + \bar{c}_{d_\pi}^\dagger \bar{c}_{p_\pi}$',
+  12:r'Min$ + \bar{c}_{d_{z^2}}^\dagger \bar{c}_{p_z}$',
+  20:r'Min$ + \bar{c}_{d_\pi}^\dagger \bar{c}_{p_\pi}, \bar{c}_{4s}^\dagger \bar{c}_{p_z}$',
+  21:r'Min$ + \bar{c}_{d_\pi}^\dagger \bar{c}_{p_\pi}, \bar{c}_{d_z^2}^\dagger \bar{c}_{4s}$',
+  24:r'Min$ + \bar{c}_{d_z^2}^\dagger \bar{c}_{p_z}, \bar{c}_{d_z^2}^\dagger \bar{c}_{4s}$'}
 
   markers = ['s','o','^']
 
@@ -739,8 +742,9 @@ def plot_ed_outliers(full_df,out_df,av_df,fname=None):
   rgba_color2 = plt.cm.Oranges(norm(1.75))
   z=-1 
   fig, axes = plt.subplots(nrows=2,ncols=3,sharey=True,figsize=(6,6))
-  xlabels = [r'n$_{d_{z^2}}$',r'n$_{d_{\pi}}$',r'n$_{d_{\delta}}$',
-  r'n$_{z}$',r'n$_{\pi}$',r'n$_{s}$']
+  xlabels = [r'$\langle n_{d_{z^2}} \rangle$',r'$\langle n_{d_{\pi}}\rangle$',
+  r'$\langle n_{d_{\delta}}\rangle$',r'$\langle n_{z}\rangle$',r'$\langle n_{\pi}\rangle$'
+  ,r'$\langle n_{s} \rangle$']
   for parm in ['iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2pz','iao_n_2ppi','iao_n_4s']:
     z+=1 
     ax = axes[z//3,z%3]

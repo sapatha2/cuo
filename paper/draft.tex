@@ -7,6 +7,7 @@
 \usepackage{ulem}
 \usepackage{amsmath}
 \usepackage{mathtools}
+\usepackage{wrapfig}
 
 \begin{document}
 \section{Introduction}
@@ -15,7 +16,7 @@
 \subsection{Density Matrix Downfolding (DMD)}
 The DMD procedure allows us to develop low-energy effective theories for physical systems in a systematic manner beginning with the \textit{ab-initio} Hamiltonian:
 \begin{equation}
-H_\text{ab} = -\frac{1}{2} \sum_{i} \nabla_i^2 - \sum_{i,I}\frac{Z}{|r_i - R_I|} + \sum_{i<j}\frac{1}{|r_i - r_j|}
+\hat{H}_\text{ab} = -\frac{1}{2} \sum_{i} \nabla_i^2 - \sum_{i,I}\frac{Z}{|r_i - R_I|} + \sum_{i<j}\frac{1}{|r_i - r_j|}
 \label{eq:Hab}
 \end{equation}
 where $i$ indicates electrons and $I$ nuclei, and the unit of energy is Hartree (Ha).
@@ -26,75 +27,127 @@ The procedure defines a method for downfolding the \textit{ab-initio} energy fun
 \forall |\Psi\rangle \in \mathcal{LE}, \ E_\text{eff}[\Psi] - E_\text{ab}[\Psi] = \epsilon[\Psi] + E_0.
 \label{eq:DMD}
 \end{equation} 
-The energy functionals can be written as expectations over Hamiltonian operators $E_\text{ab} = \langle \Psi | H_\text{ab} |\Psi \rangle$, $E_\text{eff} = \langle \Psi | H_\text{eff} |\Psi \rangle$, $\epsilon$ represents the error in our effective theory, and $E_0$ is a constant energy shift.
+The energy functionals can be written as expectations over Hamiltonian operators $E_\text{ab} = \langle \Psi | \hat{H}_\text{ab} |\Psi \rangle$, $E_\text{eff} = \langle \Psi | \hat{H}_\text{eff} |\Psi \rangle$, $\epsilon$ represents the error in our effective theory, and $E_0$ is a constant energy shift.
 Broadly the DMD method consists of four steps which will be discussed in detail later: 
 A) Defining the space of low-energy excitations which $E_\text{eff}$ should be able to describe accurately.
 B) Sampling, at minimum, a set of states in $\mathcal{H}$ which probe the chosen low-energy excitations in a statistically independent manner. The selected states need not be eigenstates. 
 C) Constructing a set of candidate models which are linear in reduced density matrix (RDM) descriptors with variable coefficients $\{c\}$
 \begin{equation}
-E_\text{eff} = \sum_k c_k d_k[\Psi]\ + E_0,\ d_k[\Psi] = \langle \Psi | \hat{d}_k |\Psi \rangle.
+E_\text{eff} = \sum_k c_k \langle \Psi | \hat{d}_k |\Psi \rangle + E_0.
 \label{eq:Eeff}
 \end{equation}
 Here $\hat{d}_k$ are Hermitian operators typically composed of 1- or 2-RDM elements. 
-Examples of possible $\hat{d}_k$ are number operators $\hat{n}$ and exchange operators $\vec{S}_i \cdot \vec{S}_j$.
+Examples of possible $\hat{d}_k$ are number operators $\hat{n}_i$ and exchange operators $\vec{S}_i \cdot \vec{S}_j$.
 Additionally, a single particle basis must be built to express RDM elements on and should be chosen such that variations among states in $\mathcal{LE}$ are mostly described by variations in the projection of these states onto the basis.
 D) Using the samples to fit the coefficients $\{c\}$ by linear regression such that $E_\text{eff}$ satisfies the conditions in \eqref{eq:DMD} with the smallest error $\epsilon$ possible. 
 The fitting procedure is typically an ordinary linear regression, however, one may use a custom cost function in the regression as well. 
-In order to conduct the linear regression for a functional like \eqref{eq:Eeff}, one needs to calculate for each state sampled from $\mathcal{LE}$ the expectation values of $H_\text{ab}$ and every descriptor $\{\hat{d}_k\}$ used in the regression.
+In order to conduct the linear regression for a functional like \eqref{eq:Eeff}, one needs to calculate for each state sampled from $\mathcal{LE}$ the expectation values of $\hat{H}_\text{ab}$ and every descriptor $\{\hat{d}_k\}$ used in the regression.
 In principle, if conducted with no approximations, the DMD method is rigorously guaranteed to obtain exact results, namely $\epsilon[\Psi] = 0$.
 
 \subsection{Fixed-node diffusion Monte Carlo (FN-DMC)}
-When downfolding $H_\text{ab}$ we will use FN-DMC to access states in $\mathcal{LE}$ and accurately calculate their \textit{ab-initio} energies and RDM elements.
+When downfolding $\hat{H}_\text{ab}$ we will use FN-DMC to access states in $\mathcal{LE}$ and accurately calculate their \textit{ab-initio} energies and RDM elements.
 Diffusion Monte Carlo (DMC) is a quantum Monte Carlo method which projects out the ground state of a Hamiltonian given some initial trial wave function.
-Consider a trial wave function $|\psi_T\rangle$ and the Hamiltonian $H_\text{ab}$ with ground state $|\phi_0\rangle$. We apply the projector $e^{-\tau H_\text{ab}}$ as $\tau \rightarrow \infty$ to $|\psi_T \rangle$
+Consider a trial wave function $|\Psi_T\rangle$ and the Hamiltonian $\hat{H}_\text{ab}$ with ground state $|\Phi_0\rangle$. We apply the projector $e^{-\tau \hat{H}_\text{ab}}$ as $\tau \rightarrow \infty$ to $|\Psi_T \rangle$
 \begin{equation}
-\lim_{\tau \rightarrow \infty} e^{-\tau H_\text{ab}} |\psi_T\rangle 
-\equiv \lim_{\tau \rightarrow \infty} |\psi_\text{DMC}(\tau)\rangle \propto \langle \phi_0|\psi_T\rangle |\phi_0\rangle,
+\lim_{\tau \rightarrow \infty} e^{-\tau \hat{H}_\text{ab}} |\Psi_T\rangle 
+\equiv \lim_{\tau \rightarrow \infty} |\Psi_\text{DMC}(\tau)\rangle \propto \langle \Phi_0|\Psi_T\rangle |\Phi_0\rangle,
 \end{equation}
 projecting out the ground state as long as the trial wave function we choose is not orthogonal to the ground state. 
-The stochastic implementation involves moving samples from the trial function $\psi_T(R)$ using the Green function $G(R, R^\prime, \tau) = \langle R | e^{-\tau(H_\text{ab} - E_T)} | R^\prime \rangle$. Since $H_\text{ab} = T + V$, kinetic and potential energy terms, the Green function is approximated by a Trotter expansion $G(R, R^\prime, \tau) = \langle R | e^{-\tau(H - E_T)} | R^\prime \rangle \sim \Big[e^{-d\tau(V(R) + V(R^\prime))/2} \langle R| e^{-d\tau(T - E_T)}|R^\prime \rangle + O(d\tau^2) \Big]^N $ where $d\tau = \tau/N$.
+The stochastic implementation involves moving samples from the trial function $\Psi_T(R)$ using the Green function $G(R, R^\prime, \tau) = \langle R | e^{-\tau(\hat{H}_\text{ab} - E_T)} | R^\prime \rangle$. Since $H_\text{ab} = T + V$, kinetic and potential energy terms, the Green function is approximated by a Trotter expansion $G(R, R^\prime, \tau) = \langle R | e^{-\tau(\hat{H} - E_T)} | R^\prime \rangle \sim \Big[e^{-d\tau(V(R) + V(R^\prime))/2} \langle R| e^{-d\tau(\hat{T} - E_T)}|R^\prime \rangle + O(d\tau^2) \Big]^N $ where $d\tau = \tau/N$.
 This expansion can be interpreted as an interative procedure where samples are moved N times with a small timestep $d\tau$ until convergence.
-The constant $E_T$ is a trial energy used to control the normalization of $\psi_\text{DMC}(\tau, R)$ and is updated at each move.
+The constant $E_T$ is a trial energy used to control the normalization of $\Psi_\text{DMC}(\tau, R)$ and is updated at each move.
 This implementation, however, suffers from a fermion sign problem. 
-We deal with this sign problem through a fixed-node approximation, where the nodal surface of $\psi_\text{DMC}(\tau, R)$ is forced to match that of the initial trial wave function for all $\tau$.
-This approximation makes FN-DMC variational, and will only return the exact ground state of $H_\text{ab}$ if the nodal surfaces of $|\psi_T\rangle$ and $|\phi_0\rangle$ are identical.
-We make use of this variational principle to access low-energy states within $\mathcal{H}$ by choosing trial wave functions with nodes that differ from the nodes of $|\phi_0 \rangle$.
-To calculate the expectation value of an operator $\hat{O}$ in FN-DMC we will use a mixed estimator $\langle \psi_{DMC}(\tau) |\hat{O} | \psi_T \rangle/\langle \psi_\text{DMC}(\tau) | \psi_T \rangle$ which allows us to use the importance sampled distribution $f = \psi_\text{DMC}(\tau)\psi_T$ for our Monte Carlo estimates.
+We deal with this sign problem through a fixed-node approximation, where the nodal surface of $\Psi_\text{DMC}(\tau, R)$ is forced to match that of the initial trial wave function for all $\tau$.
+This approximation makes FN-DMC variational, and will only return the exact ground state of $H_\text{ab}$ if the nodal surfaces of $|\Psi_T\rangle$ and $|\Phi_0\rangle$ are identical.
+We make use of this variational principle to access low-energy states within $\mathcal{H}$ by choosing trial wave functions with nodes that differ from the nodes of $|\Phi_0 \rangle$.
+To calculate the expectation value of an operator $\hat{A}$ in FN-DMC we will use a mixed estimator $\langle \Psi_{DMC}(\tau) |\hat{A} | \Psi_T \rangle/\langle \Psi_\text{DMC}(\tau) | \Psi_T \rangle$ which allows us to use the importance sampled distribution $f = \Psi_\text{DMC}(\tau)\Psi_T$ for our Monte Carlo estimates.
 Details for calculating reduced density matrix elements in FN-DMC can be found in Wagner.
 
-\pagebreak
 \subsection{Defining $\mathcal{LE}$ for CuO molecule}
-Based on anion photoelectron spectroscopy (APES) experiments\textbf{[ref]} on the CuO molecule we define our low-energy space $\mathcal{LE}$ as the space of states with 9 to 10 electrons in the Cu 3d orbitals. 
-Mathematically we can express this space as the span of some eigenstates within our Hilbert space
+We construct our $\mathcal{LE}$ based on recent anion photoelectron spectroscopy (APES) measurements of the low-lying excited states of the nuetral CuO molecule. 
+The lowest energy excitations measured, which lie below 2eV, involve primarily the O 2p$_z$, 2p$_\pi$ and Cu 4s orbitals, which are fully-filled, half-filled and empty in the ground state respectively.
+Beginning at 2.2 eV are excitations which remove a single electron from the fully filled Cu 3d shell and add them to either the O 2p$_\pi$ or Cu 4s orbitals.
+Seeing that the lowest energy excitations of the CuO molecule involve removing at most one electron from the Cu 3d shell, we define our low-energy space as
 \begin{equation}
-\mathcal{LE} = \text{Span(}\{ |\Psi \rangle | \langle \Psi | n_{3d} | \Psi \rangle \ge 9,\ H|\Psi\rangle = E |\Psi\rangle \}\text{)}.
+\mathcal{LE} = \text{Span(}\{ |\Psi \rangle | \langle \Psi | \hat{n}_{3d} | \Psi \rangle \ge 9,\ \hat{H}_\text{ab}|\Psi\rangle = E |\Psi\rangle \}\text{)}.
+\label{eq:LE}
 \end{equation}
-The APES measurements indicate that the lowest energy excitations in the CuO molecule are between the O p-orbitals and Cu 4s orbitals, leaving around 10 electrons in the Cu 3d orbitals. 
-Bonding between the O p and Cu 3d orbitals lead to significant variations in the Cu 3d occupation, indicating the importance of including excitations out of the Cu 3d orbitals. 
-This is corroborated by APES measurements indicating that the lowest energy eigenstates with 9 electrons in the Cu 3d orbitals are only $\sim$ 0.2 eV higher in energy than the second excited state of the system with 10 electrons in the Cu 3d orbitals. 
-Our particular focus will be on describing most accurately the properties and energies of eigenstates up to 2eV, as higher energy states form a nearly continuous block of states which include vibrational modes.
+Our particular focus will be on describing most accurately the properties and energies of eigenstates up to $\sim$2eV, as measurements on higher energy states observe a nearly continuous block of states which include vibrational modes.
+
+\subsection{Sampling $\mathcal{LE}$}
+Our sample space was generated by using multi-Slater-Jastrow trial wavefunctions in FN-DMC. 
+In principle we could probe every low-energy excitation in $\mathcal{LE}$ in a statistically independent manner by just sampling the eigenstates within $\mathcal{LE}$ and including various non-eigenstates within $\mathcal{LE}$ as well to ensure robust statistics.
+In practice we do not have access to these eigenstates and approximate methods are required to sample the low-energy space. 
+Consider a trial wavefunction of the form $e^{J_i} |\text{D}_i\rangle$, where $e^{J_i}$ is a three-body Jastrow factor and $|\text{D}_i\rangle$ is a determinant of some single particle orbitals.
+If the nodes of $|\text{D}_i\rangle$ are similar to the nodes of an eigenstate $|\Phi_i\rangle \in \mathcal{LE}$, then the properties and energy calculated from FN-DMC using this trial wavefunction will approximate those of the eigenstate, with the degree of approximation depending on the quality of the trial function nodal structure.
+If we were able to find for each $|\Phi_i \rangle \in \mathcal{LE}$ such a $|\text{D}_i\rangle$ then we can approximate any state in $\mathcal{LE}$ as
+\begin{equation}
+|\Psi\rangle = \sum_i c_i |\Phi_i\rangle \sim \sum_i c_i \lim_{\tau \rightarrow \infty} e^{-\tau \hat{H}_\text{ab}} (e^{J_i} |D_i\rangle) \xrightarrow{J_i = J} \lim_{\tau \rightarrow \infty} e^{-\tau \hat{H}_\text{ab}} (e^{J}\sum_{i} c_i|\text{D}_i\rangle).
+\label{eq:sampling}
+\end{equation}
+The last equality is valid if $\forall i\  J_i = J$, allowing us to map $|\Psi \rangle \in \mathcal{LE}$ to the end result of an FN-DMC calculation using a multi-Slater-Jastrow trial wavefunction. We use symmetry-targeted unrestricted Kohn-Sham (UKS) to generate our determinants $|\text{D}_i\rangle$ using a B3LYP functional, which has been shown to accurately reproduce ground state nodal properties of transition-metal oxide molecules, a Trail-Needs pseudopotential, and the VTZ Trail-Needs basis using the package PySCF.
+The symmetry-targeted UKS method allows us to fix the total spin projection S$_z$ and the total number of electrons in a particular irreducible representation (irrep) of the symmetry group under use, $\text{A},\ \text{E}_\text{1x},\ \text{E}_\text{2y}$ etc.
+This method allows us to access almost every excitation in $\mathcal{LE}$, however, there are some cases of two or more low-energy states within $\mathcal{LE}$ which have identical S$_z$ and number of electrons per irrep.
+An example of this dilemma would be the ground state and the state with an excitation from Cu 3d$_{xz} \rightarrow $  O 2p$_x$.
+In these few cases the higher energy excited $|\text{D}_i\rangle$ is inaccessible and the corresponding $|\Phi_i\rangle$ is excluded from the sum in \eqref{eq:sampling}, restricting our sample space to a subspace of $\mathcal{LE}$.
+Methods like constrained DFT also failed to converge the inaccessible $|\text{D}_i\rangle$.
+We will discuss the consequences of this restriction later on.
+A single three-body Jastrow factor $J$ was used for every $|\text{D}_i\rangle$ and was optimized on the lowest energy UKS state using a linear energy optimization method.
+The FN-DMC calculations were conducted with T-moves, to make the calculation variational while using pseudopotentials, with a timestep of $\tau = 0.01$.
+The coefficients $\{c_j\}$ for our sample states were chosen via a shell-sampling method. 
+We begin by fixing the coefficient $c_0 = \sqrt{w}$ where $w \in \{1.0, 0.8, ..., 0.2\}$. 
+For each choice of $w$ we sample n = 5 states by randomly selecting the unassigned coefficients from a uniform distribution such that $\sum_i c_i^2 = 1$. 
+This procedure generates shells of samples at decreasing distance from the eigenstate $|\Phi_0\rangle$. 
+We can then loop over all $i$ to generate shells near each eigenstate.
+This sampling scheme tends to be sparse where the density of states of $\hat{H}_\text{ab}$ is low and therefore extra samples are generated in regions of sparse sample density \textit{post-hoc}. 
+
+\subsection{Constructing candidate models}
+Parameterizing our effective model requires constructing a basis on which to calculate our \textit{ab-initio} 1-/2-RDM elements and selecting a set of descriptors from which we would like to build our model.
+As discussed, the lowest energy excitations in the CuO molecule are between the Cu 3d, 4s and O 2p orbitals, meaning that our basis needs to span these orbitals. 
+We constructed two such bases: a localized intrinsic atomic orbital (IAO) basis and a molecular orbital (MO) basis.
+The IAO basis was built on all Cu 3d, 4s and O 2p molecular orbitals from the $|\text{D}_i\rangle$ used to construct our sample states.
+The MO basis consists of the Cu 3d, 4s and O 2p molecular orbitals from the lowest energy restricted open-shell Kohn-Sham (ROKS) solution with $x \leftrightarrow y$ spatial symmetry, a O 2p$_z \rightarrow$ O 2p$_\pi$ excitation.
+As these two bases are used to describe the same space, they are related by an orthogonal transformation which will allow us to map between them if necessary.
+This choice for the MO basis ensures that our basis elements are spin-independent and respect the spatial symmetries of the molecule.
+In order to describe the low-energy degrees of freedom in the CuO molecule our model will require occupation energies and hybridizations between the Cu 3d, 4s and O 2p atomic orbitals.
+A sparser representation can be found using a MO basis, since occupation operators in the MO basis contain information on both occupation and hybridization in an atomic basis. 
+The lack of doubly occupied Cu 4s states in the low-energy spectrum of CuO indicate the necessity of a Hubbard U term on the Cu 4s.
+This is corroborated by the fact that the FN-DMC energy of the lowest-lying sampled state with a doubly occupied Cu 4s orbital is 7 eV above the lowest energy sampled state.
+Further, we include a Hund's coupling between the Cu 4s and Cu 3d orbitals in our model based on the existence of a similar Hund's coupling 
+for the copper atom.
+These two interaction terms are best represented in the IAO basis as they are intuitively interactions between localized orbitals.
+In addition to these important parameters, we will consider models which contain any number of hybridizations between the MOs to account for orbital relaxation between excited states in the CuO molecule.
+In total our space of canditate models is then 
+\begin{equation}
+\begin{split}
+\{\bar{n}_{4s}, \bar{n}_{p_\pi}, \bar{n}_{p_z}, \hat{n}_{4s\uparrow} \hat{n}_{4s\downarrow},\sum_{i \in \{xy, xz, ...\}}\vec{S}_{4s}\cdot \vec{S}_{d_i}\} \ + \\
+\text{P}(\bar{c}_{d_\pi}^\dagger \bar{c}_{p_\pi} + h.c.,\ \bar{c}_{d_z^2}^\dagger \bar{c}_{p_z} + h.c.,\ \bar{c}_{4s}^\dagger \bar{c}_{p_z} + h.c.,\ \bar{c}_{d_z^2}^\dagger \bar{c}_{4s} + h.c.)
+\end{split}
+\label{eq:models}
+\end{equation}
+where P denotes the power set and operators are defined on the IAO basis unless denoted by a bar, in which case the operator is built on the MO basis. The coefficients for each term above will be denoted $\bar{\epsilon}_{4s},\ \bar{\epsilon}_{p_\pi},\ \bar{\epsilon}_{p_z},\ U_s,\ J_{sd},\ \bar{t}_\pi,\ \bar{t}_{dz},\ \bar{t}_{sz},\ \bar{t}_{ds}$. The operator $\bar{n}_{3d}$ is not included in any models as it is linearly dependent on all other occupation energies through the relationship $\bar{n}_{3d} + \bar{n}_{p_z} + \bar{n}_{p_\pi} + \bar{n}_{4s} = N_\text{elec} = \text{15}$. The symbol $\pi$ denotes a contraction over $x, y$ for p orbitals and $xz,\ yz$ for d orbitals. The symbol $\delta$, introduced later, denotes a contraction over $xy,\ x^2-y^2$ for d orbitals.
 
 \pagebreak
+\subsection{Fitting candidate models}
+After fitting each of the potential models in \eqref{eq:models} using ordinary linear regression (OLS) and solving the resultant models using exact diagonalization, we find a set of models which describe the energy functional on our sample set accurately but whose eigenstates and spectra differ as a consequence of intruder states below an energy of 2eV. 
+The sixteen different models all regress with R$^2 >$ 0.95 on our sample data, however some models are more robust than others. 
+Models which have coefficients that are zero within 95\% confidence intervals, computed through bootstrap estimates, are removed from consideration.
+We then take the left over models, rotate every operator and coefficient into the IAO basis through an appropriate orthogonal transformation, and exactly diagonalize the models.
+Any models which have an average errorbar in eigenvalues, also estimated by bootstrapping, greater than 0.25 eV are ignored.
+Each of the remaining six models describe our sample set accurately, have robust non-zero coefficients, and have small error bars in eigenvalues.
+However, the eigenstates below 2eV differ greatly between these models as illustrated in Figure \ref{fig:Intruder}.
 
-Our sample space $\mathcal{SS}$ was generated by sampling the span of base states - states which approximately describe true eigenstates within the $\mathcal{LE}$ - using multi-Slater-Jastrow trial wave functions in fixed-node Diffusion Monte Carlo (FN-DMC). In principle we could sample $\mathcal{LE}$ by taking linear combinations of the eigenvectors which span it. In practice we do not have access to these eigenvectors and approximate methods are required to sample the low-energy space. We consider wave functions of the following form: 
-\begin{equation}
-\lim_{\tau \rightarrow \infty} e^{-\tau H_\text{ab}} (e^{J}\sum_{i} c_i|\text{D}_i\rangle) = \sum_i c_i \lim_{\tau \rightarrow \infty} e^{-\tau H_\text{ab}} (e^J |D_i\rangle) \equiv \sum_i c_i |\Phi_i\rangle .
-\end{equation}
-where $|D_i\rangle$ is a determinant of single particle orbitals, $e^J$ is a three-body Jastrow function in \textbf{ref}, and $e^{-\tau H_\text{ab}}$ is a projection operator which exponentially suppresses high-energy contributions to the wave function and is realized through an FN-DMC calculation.
-This state is an accurate approximation to a state $|\Psi\rangle \in \mathcal{LE}$ of the form $|\Psi \rangle = \sum_i c_i |\Psi_i\rangle$, where $|\Psi_i\rangle$ is an eigenstate within $\mathcal{LE}$, if $\forall i\ |\Phi_i\rangle \sim |\Psi_i\rangle$. While $|\Psi_i\rangle$ are eigenstates of $H_\text{ab}$, $|\Phi_i\rangle$ generally are not, but do form the basis for our sample space and will be called \textit{base states}. The fixed-node projection can achieve this similarity if the nodes of $|D_i\rangle$ accurately approximate those of $|\Psi_i\rangle $. We use symmetry-targeted unrestricted Kohn-Sham (UKS) to generate our determinants $|D_i\rangle$ using a Trail-Needs pseudopotential, VTZ Trail-Needs basis \textbf{ref}, and a B3LYP functional \textbf{ref}, which has been shown to accurately reproduce nodal properties of transition-metal oxide molecules \textbf{ref}. These calculations were carried out in the package PySCF \textbf{ref}. The symmetry-targeted UKS method allows us to fix the total spin projection S$_z$ and the total number of electrons in a particular irreducible representation (irrep) of the symmetry group under use, $\text{A},\ \text{E}_\text{1x},\ \text{E}_\text{2y}$ etc. There are some cases of two or more base states which have identical S$_z$ and number of electrons per irrep. within  $\mathcal{LE}$, for example the ground state and the excited state with excitation $c^\dagger_{p_\pi} c_{d_\pi} |GS\rangle$. In this scenario the higher energy excitations are inaccessible and excluded from our sample set. We will discuss the consequences of this exclusion later on. The three-body Jastrow factor was optimized on the lowest energy UKS state using a linear energy optimization methods \textbf{ref}. The FN-DMC was conducted with T-moves \textbf{ref} to make the calculation variational while using pseudopotentials with a timestep of $\tau = 0.01$. Necessary 1- and 2-RDM elements were also calculated in FN-DMC using a mixed estimator \textbf{ref}. The coefficients $\{c_j\}$ were chosen via a shell-sampling method. For each base state $|\Phi_i\rangle$ we fix the coefficient $c_i = \sqrt{w},\ w \in \{0.2, 0.4, ..., 1.0\}$ and for each $w$ sample N = 5 states uniformly such that $\sum_j c_j^2 = 1$. Looping over $i$ yields shells of samples centered on each base state. This sampling scheme tends to be sparse where the density of states of $H_\text{ab}$ is low and therefore extra samples are generated in regions of sparse sample density \textit{post-hoc}. This sampling scheme therefore generates a sample set which can be defined as 
-\begin{equation}
-\mathcal{SS} \in \text{Span(}\{ |\Phi \rangle | \langle \Phi | n_{3d} | \Psi \rangle \ge 9,\ H|\Phi\rangle = E |\Phi\rangle \}\text{)} \sim \mathcal{LE}.
-\end{equation}
-where $|\Phi\rangle$ is defined in (5), and which maps exactly onto the true $\mathcal{LE}$ if our base states exactly match the true eigenstates of $H_\text{ab}$.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{../qwalk/old/ub3lyp_s1_/analysis/figs/init_ed.pdf}
+\caption{Results of exact diagonalization showing the energies and properties of the first twenty eigenstates for three candidate models. The ground state and first excited state are colored and have enlarged markers for clarity.}
+\label{fig:Intruder}
+\end{figure}
+\pagebreak
 
-Parameterizing our effective model requires constructing a basis on which to calculate our \textit{ab-initio} 1-/2-RDM elements and selecting a set of descriptors from which we would like to build our model. We constructed two bases for our model Hamiltonian, a localized intrinsic atomic orbital (IAO) basis for evaluating two-body reduced density matrix (2-rdm) elements, and a molecular orbital (MO) basis for one-body reduced density matrix (1-rdm) elements. The two-body interactions we are interested in are typically local interactions, for example a Hubbard-U, Hund's-J or superexchange-J, therefore motivating a local basis for the two-body terms. In the CuO molecule there is heavy hybridization between the Cu d and O p orbitals, and an MO basis can compactly represent this hybridization, leading us to use MO basis elements for our one-body basis elements. Based on experimental measurements and the structure of the data within our $\mathcal{SS}$, the lowest energy excitations of the CuO molecule have excitations between Cu d, O p and Cu 4s orbitals. APES measurements do not see any 4s$^2$ states in the low-energy spectra which is corroborated by our FN-DMC energy for the lowest energy base state with a Cu 4s$^2$ occupation is $\sim$ 7 eV above the lowest energy base state. Including the $\sim$ 0.5eV Hund's coupling on the copper atom, we believe that a minimal model for our downfolding must contain: $\bar{n}_{4s}, \bar{n}_{p_\pi}, \bar{n}_{p_z}, \sum_{i \in \{xy, xz, ...\}}\vec{S}_{4s}\cdot \vec{S}_{d_i}, n_{4s, \uparrow} n_{4s,\downarrow}$. The barred terms are built on the MO basis, and the non-barred ones on the IAO basis. The exclusion of $n_{3d}$ from our minimal model is because of the total number of electrons being constrainted by $\bar{n}_{3d} + \bar{n}_{p_\pi} + \bar{n}_{p_z} + \bar{n}_{4s} = 15$, leaving one of these four occupation numbers linearly dependent on the rest. Excited states in CuO have heavy orbital relaxation, so including extra hoppings may be useful. Therefore we define the following model space $\mathcal{MS}$, from which will we try and select the \textit{best} low-energy model for CuO: 
 
-\begin{equation}
-\mathcal{MS} = \{\bar{n}_{4s}, \bar{n}_{p_\pi}, \bar{n}_{p_z}, \sum_{i \in \{xy, xz, ...\}}\vec{S}_{4s}\cdot \vec{S}_{d_i}, n_{4s, \uparrow} n_{4s,\downarrow}\} + \text{P}(\bar{t}_\pi, \bar{t}_{dz}, \bar{t}_{sz}, \bar{t}_{ds})
-\end{equation}
-where P denotes the power set.
 
-After fitting each potential model using ordinary linear regression (OLS) and solving the resultant models using exact diagonalization, we find a set of models which describe the energy functional on our $\mathcal{SS}$ accurately but whose eigenstates and spectra differ as a consequence of intruder states below an energy of 2eV. The sixteen different models in $\mathcal{MS}$ all regress with R$^2 >$  0.95. We ignore all models which have parameters which are zero within 95\% confidence intervals which we computed through a bootstrap estimate \textbf{ref}. Further, any models which have an average errorbar in eigenvalues $>$ 0.25 eV are ignored. This leaves us with just six models to further consider: the minimal model (Min), Min + $\bar{t}_\pi$, Min + $\bar{t}_{dz}$, Min + $\bar{t}_\pi, \bar{t}_{ds}$, Min + $\bar{t}_\pi, \bar{t}_{sz}$, Min + $\bar{t}_{ds}, \bar{t}_{dz}$. Within the latter five models there are intruder eigenstates, states which lie very far away from our sample set and suffer from large extrapolation errors. Intruder states were defined as any eigenstates with energy $< $ 2 eV with a Mahalanobis distance greater than the 90th percentile of all distances. The Mahalanobis distance is used in data science for outlier detection \textbf{ref} and tells us how far away an eigenstate is from $\mathcal{SS}$. Show in \textbf{Figure ?} are the identified intruder states among the six models above which in aggregate we will call the prior space $\mathcal{PS}$. These energies of these eigenstates are not constrained by $\mathcal{SS}$ because of our inability to target certain base states like $c^\dagger_{p_\pi} c_{d_\pi} |GS\rangle$ as discussed before. This excitation specifically is within our set of intruder states alongside others like $c^\dagger_{p_\pi} c_{d_{z^2}} |GS\rangle$.
+the minimal model (Min), Min + $\bar{t}_\pi$, Min + $\bar{t}_{dz}$, Min + $\bar{t}_\pi, \bar{t}_{ds}$, Min + $\bar{t}_\pi, \bar{t}_{sz}$, Min + $\bar{t}_{ds}, \bar{t}_{dz}$. Within the latter five models there are intruder eigenstates, states which lie very far away from our sample set and suffer from large extrapolation errors. Intruder states were defined as any eigenstates with energy $< $ 2 eV with a Mahalanobis distance greater than the 90th percentile of all distances. The Mahalanobis distance is used in data science for outlier detection \textbf{ref} and tells us how far away an eigenstate is from $\mathcal{SS}$. Show in \textbf{Figure ?} are the identified intruder states among the six models above which in aggregate we will call the prior space $\mathcal{PS}$. These energies of these eigenstates are not constrained by $\mathcal{SS}$ because of our inability to target certain base states like $c^\dagger_{p_\pi} c_{d_\pi} |GS\rangle$ as discussed before. This excitation specifically is within our set of intruder states alongside others like $c^\dagger_{p_\pi} c_{d_{z^2}} |GS\rangle$.
 Other methods like constrained DFT and CASSCF were used to converge these states but we were unsuccessful. 
 
 In order to ensure that intruder states are not present within our final model, we enforce a prior that pushes intruder states above a chosen $E_{cut}$ = 2eV by altering the cost function for our regression. The choice of prior is built on both experimental knowledge and FN-DMC results. From experiment we know that any excitation which de-occupies a d-orbital should be $\sim$ 2 eV in energy. In fact all of our intruder states are excitations out of a d-orbital except for the higher energy intruder which is already nearly at 2eV and would not be affected too strongly by this choice of $E_{cut}$. While we cannot converge these missing base states using UKS, we can consider singles excitations on the UKS ground state which correspond to these excitations in order to get an upper bound for the FN-DMC energies of our missing base states. In FN-DMC the corresponding MO excited states are $> $4eV, and we believe even with orbital relaxation that the converged excited state should be $>$ 2eV in energy. The altered cost function takes the form:

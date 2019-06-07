@@ -169,17 +169,17 @@ def plot_prior():
   plt.ylabel(r'R$^2$')
 
   #Lambda vs score
-  labels=[r'Min',r'Min$ + \bar{t}_\pi$',
-  r'Min$ + \bar{t}_{dz}$',r'Min$ + \bar{t}_\pi, \bar{t}_{sz}$',
-  r'Min$ + \bar{t}_\pi, \bar{t}_{ds}$',r'Min$ + \bar{t}_{ds}, \bar{t}_{dz}$']
+  labels={5:r'Min',9:r'Min$ + \bar{c}_{d_\pi}^\dagger \bar{c}_{p_\pi}$',
+  12:r'Min$ + \bar{c}_{d_{z^2}}^\dagger \bar{c}_{p_z}$',
+  20:r'Min$ + \bar{c}_{d_\pi}^\dagger \bar{c}_{p_\pi}, \bar{c}_{4s}^\dagger \bar{c}_{p_z}$',
+  21:r'Min$ + \bar{c}_{d_\pi}^\dagger \bar{c}_{p_\pi}, \bar{c}_{d_z^2}^\dagger \bar{c}_{4s}$',
+  24:r'Min$ + \bar{c}_{d_z^2}^\dagger \bar{c}_{p_z}, \bar{c}_{d_z^2}^\dagger \bar{c}_{4s}$'}
   plt.subplot(212)
-  z=0
   for group_model in prior_df.groupby(by='model'):        
     score_u = group_model[1]['score_u'] - group_model[1]['score']
     score_d = group_model[1]['score'] - group_model[1]['score_d']
     plt.errorbar(group_model[1]['lam'],group_model[1]['score'],
-    yerr=[score_d,score_u],marker='o',ls='None',label=labels[z])
-    z+=1
+    yerr=[score_d,score_u],marker='o',ls='None',label=labels[group_model[0]])
   plt.legend(loc='best')
   plt.xticks(np.arange(0,24,4))
   plt.ylabel(r'QHL (eV$^2$)')
@@ -354,8 +354,8 @@ def analyze(df=None,save=False):
   #Generate models and plot cost 
   #prior_df = prior_analysis(df,cutoff=cutoff)
   #prior_df.to_pickle('analysis/prior.pickle')
-  #plot_prior()
-  #exit(0)
+  plot_prior()
+  exit(0)
 
   #ED for models
   '''
@@ -369,7 +369,6 @@ def analyze(df=None,save=False):
   exit(0)
   '''
 
-  '''
   avg_eig_df = None
   for model in [5,9,12]:#,20,21,24]:
     lam = 20
@@ -378,7 +377,6 @@ def analyze(df=None,save=False):
     else: avg_eig_df = pd.concat((avg_eig_df,a),axis=0)
   comb_plot_ed_small(df,avg_eig_df,[5,9,12],fname='analysis/figs/final_ed.pdf',cutoff=8)
   exit(0)
-  '''
 
   #Linear regression plot of selected model 
   model = 5
