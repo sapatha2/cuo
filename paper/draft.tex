@@ -12,33 +12,40 @@
 \section{Introduction}
 
 \section{Methods}
-The DMD procedure \textbf{[ref]} allows us to develop low-energy effective theories for physical systems in a systematic manner beginning with the \textit{ab-initio} Hamiltonian under a Born-Oppenheimer approximation:
-
+The DMD procedure allows us to develop low-energy effective theories for physical systems in a systematic manner beginning with the \textit{ab-initio} Hamiltonian:
 \begin{equation}
 H_\text{ab} = -\frac{1}{2} \sum_{i} \nabla_i^2 - \sum_{i,I}\frac{Z}{|r_i - R_I|} + \sum_{i<j}\frac{1}{|r_i - r_j|}
+\label{eq:Hab}
 \end{equation}
-where $i$ indicates electrons and $I$ nuclei. We also treat core electrons using pseudo-potentials. 
-The unit of energy using this Hamiltonian is Hartree (Ha). 
-The goal of DMD is to downfold the \textit{ab-initio} Hamiltonian and Hilbert space onto an effective Hamiltonian acting on a low-energy subspace of the Hilbert space 
-
+where $i$ indicates electrons and $I$ nuclei, and the unit of energy is Hartree (Ha).
+In this paper we will be working under the Born-Oppenheimer approximation and core electrons will be treated using pseudo-potentials.
+The procedure defines a method for downfolding the \textit{ab-initio} energy functional and Hilbert space onto an effective energy functional defined on a low-energy subspace of the Hilbert space 
 \begin{equation}
-(H_\text{ab}, \mathcal{H}) \xrightarrow{\text{DMD}} (H_\text{eff}, \mathcal{LE} \subset \mathcal{H}) \text{ so that }
-\forall |\Psi\rangle \in \mathcal{LE}, \ \langle \Psi | H_\text{ab} | \Psi\rangle = \langle \Psi | H_\text{eff} | \Psi\rangle
+(E_\text{ab}, \mathcal{H}) \xrightarrow{\text{DMD}} (E_\text{eff}, \mathcal{LE} \subset \mathcal{H}), \text{ s.t. }
+\forall |\Psi\rangle \in \mathcal{LE}, \ E_\text{eff}[\Psi] - E_\text{ab}[\Psi] = \epsilon[\Psi] + E_0.
+\label{eq:DMD}
 \end{equation} 
-Broadly the DMD method consists of four steps which will be discussed in detail later: 1) Selecting a low-energy subspace $\mathcal{LE}$ which includes all excitations one wants to describe accurately. 
-In theory $\mathcal{LE}$ would be chosen to be the subspace spanned by the N lowest-energy eigenstates of $H_\text{ab}$, but is constructed more approximately in practice.  
-2) Generate a set of samples within our low-energy space $\mathcal{SS} \in \mathcal{LE}$. 
-The choice of sampling scheme may be system dependent. 
-We will discuss a shell-sampling scheme in this paper. 
-It is important to note that one does not need to have access to the eigenstates of $H_\text{ab}$ in order to sample a chosen $\mathcal{LE}$, nor are the eigenstates required to be in the sample set.
-3) Parameterizing $H_\text{eff}$ as a linear combination of descriptors, 
+The energy functionals can be written as expectations over Hamiltonian operators $E_\text{ab} = \langle \Psi | H_\text{ab} |\Psi \rangle$, $E_\text{eff} = \langle \Psi | H_\text{eff} |\Psi \rangle$, $\epsilon$ represents the error in our effective theory, and $E_0$ is a constant energy shift.
+Broadly the DMD method consists of four steps which will be discussed in detail later: 
+A) Defining the space of low-energy excitations which $E_\text{eff}$ should be able to describe accurately.
+B) Sampling, at minimum, a set of states in $\mathcal{H}$ which probe the chosen low-energy excitations in a statistically independent manner. The selected states need not be eigenstates. 
+C) Constructing a set of candidate models which are linear in reduced density matrix (RDM) descriptors with variable coefficients $\{c\}$
 \begin{equation}
-H_\text{eff} = \sum_k a_k \hat{d}_k
+E_\text{eff} = \sum_k c_k d_k[\Psi]\ + E_0,\ d_k[\Psi] = \langle \Psi | \hat{d}_k |\Psi \rangle.
+\label{eq:Eeff}
 \end{equation}
-where $\hat{d}_k$ are typically 1- or 2-body reduced density matrix (RDM) elements which can represent single- or two-particle terms in an effective theory.
-4) Using the samples to fit the coefficients $\{c_k\}$ such that $H_\text{eff}$ satisfies the conditions in equation (2) as well as possible. 
-The fitting procedure is typically an ordinary linear regression, however one may use a custom cost function in the regression as well. 
-Therefore the DMD procedure allows us to map the problem of downfolding strongly correlated electrons systems onto a linear regression problem which can then be systematically studied using tools developed in data science and statistics.
+Here $\hat{d}_k$ are Hermitian operators typically composed of 1- or 2-RDM elements. 
+Examples of possible $\hat{d}_k$ are number operators $\hat{n}$ and exchange operators $\vec{S}_i \cdot \vec{S}_j$.
+Additionally, a single particle basis must be built to express RDM elements on and should be chosen such that variations among states in $\mathcal{LE}$ are mostly described by variations in the projection of these states onto the basis.
+D) Using the samples to fit the coefficients $\{c\}$ by linear regression such that $E_\text{eff}$ satisfies the conditions in \eqref{eq:DMD} with the smallest error $\epsilon$ possible. 
+The fitting procedure is typically an ordinary linear regression, however, one may use a custom cost function in the regression as well. 
+In order to conduct the linear regression for a functional like \eqref{eq:Eeff}, one needs to calculate for each state sampled from $\mathcal{LE}$ the expectation values of $H_\text{ab}$ and every descriptor $\{\hat{d}_k\}$ used in the regression.
+In principle, if conducted with no approximations, the DMD method is rigorously guaranteed to obtain exact results, namely $\epsilon[\Psi] = 0$.
+
+\pagebreak
+peepoo
+
+\pagebreak
 
 Based on anion photoelectron spectroscopy (APES) experiments\textbf{[ref]} on the CuO molecule we define our low-energy space $\mathcal{LE}$ as the space of states with 9 to 10 electrons in the Cu 3d orbitals. 
 Mathematically we can express this space as the span of some eigenstates within our Hilbert space
