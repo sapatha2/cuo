@@ -58,7 +58,7 @@ This expansion can be interpreted as an interative procedure where samples are m
 The constant $E_T$ is a trial energy used to control the normalization of $\Psi_\text{DMC}(\tau, R)$ and is updated at each move.
 This implementation, however, suffers from a fermion sign problem. 
 We deal with this sign problem through a fixed-node approximation, where the nodal surface of $\Psi_\text{DMC}(\tau, R)$ is forced to match that of the initial trial wave function for all $\tau$.
-This approximation makes FN-DMC variational, and will only return the exact ground state of $H_\text{ab}$ if the nodal surfaces of $|\Psi_T\rangle$ and $|\Phi_0\rangle$ are identical.
+This approximation makes FN-DMC variational, and will only return the exact ground state of $\hat{H}_\text{ab}$ if the nodal surfaces of $|\Psi_T\rangle$ and $|\Phi_0\rangle$ are identical.
 We make use of this variational principle to access low-energy states within $\mathcal{H}$ by choosing trial wave functions with nodes that differ from the nodes of $|\Phi_0 \rangle$.
 To calculate the expectation value of an operator $\hat{A}$ in FN-DMC we will use a mixed estimator $\langle \Psi_{DMC}(\tau) |\hat{A} | \Psi_T \rangle/\langle \Psi_\text{DMC}(\tau) | \Psi_T \rangle$ which allows us to use the importance sampled distribution $f = \Psi_\text{DMC}(\tau)\Psi_T$ for our Monte Carlo estimates.
 Details for calculating reduced density matrix elements in FN-DMC can be found in Wagner.
@@ -135,27 +135,46 @@ Models which have coefficients that are zero within 95\% confidence intervals, c
 We then take the left over models, rotate every operator and coefficient into the IAO basis through an appropriate orthogonal transformation, and exactly diagonalize the models.
 Any models which have an average errorbar in eigenvalues, also estimated by bootstrapping, greater than 0.25 eV are ignored.
 Each of the remaining six models describe our sample set accurately, have robust non-zero coefficients, and have small error bars in eigenvalues.
-However, the eigenstates below 2eV differ greatly between these models as illustrated in Figure \ref{fig:Intruder}.
+However, the eigenstates below 2eV differ greatly between these models as illustrated in Figure \ref{fig:InitED}.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.7\linewidth]{../qwalk/old/ub3lyp_s1_/analysis/figs/init_ed.pdf}
 \caption{Results of exact diagonalization showing the energies and properties of the first twenty eigenstates for three candidate models. The ground state and first excited state are colored and have enlarged markers for clarity.}
+\label{fig:InitED}
+\end{figure}
+
+All three models have a first excited state around 1eV, but only in the minimal model does this state fall near the sample set used for the fitting, and is the only model in which this state corresponds to the correct excitation O 2$p_z \rightarrow $ O 2p$_\pi$ as seen in experiment.
+In contrast, the first excited state for the other two models are visibly distant from our sample set and do not correspond to the experimental first excited state.
+The large distance of these eigenstates from our sample set indicates that their predicted eigenvalues may suffer from large extrapolation errors, and as such we will call them \textit{intruder} states.
+In Figure \ref{fig:Intruder} we present all eigenstates among the six potential models which we classify as intruders.
+While using a Mahalanobis distance is a typical strategy for outlier (intruder) detection, it is only useful for distributions which are approximately normal.
+Our sample space does not resemble a (multivariate) normal distribution in any way, so we instead look at the average distance of the five nearest neighbor samples to an eigenstate.
+If the average distance is larger than 0.9, which in this case happens to divide eigenstates into intruders above and not below cleanly, it is classified as an intruder state.
+In the situation that multiple models share an intruder state, only the intruder state with the farthest average distance is included.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{../qwalk/old/ub3lyp_s1_/analysis/figs/intruder.pdf}
+\caption{Collection of unique intruder states from our six potential models selected using a k-nearest neighbor approach with k = 5.}
 \label{fig:Intruder}
 \end{figure}
-\pagebreak
 
-
-
-the minimal model (Min), Min + $\bar{t}_\pi$, Min + $\bar{t}_{dz}$, Min + $\bar{t}_\pi, \bar{t}_{ds}$, Min + $\bar{t}_\pi, \bar{t}_{sz}$, Min + $\bar{t}_{ds}, \bar{t}_{dz}$. Within the latter five models there are intruder eigenstates, states which lie very far away from our sample set and suffer from large extrapolation errors. Intruder states were defined as any eigenstates with energy $< $ 2 eV with a Mahalanobis distance greater than the 90th percentile of all distances. The Mahalanobis distance is used in data science for outlier detection \textbf{ref} and tells us how far away an eigenstate is from $\mathcal{SS}$. Show in \textbf{Figure ?} are the identified intruder states among the six models above which in aggregate we will call the prior space $\mathcal{PS}$. These energies of these eigenstates are not constrained by $\mathcal{SS}$ because of our inability to target certain base states like $c^\dagger_{p_\pi} c_{d_\pi} |GS\rangle$ as discussed before. This excitation specifically is within our set of intruder states alongside others like $c^\dagger_{p_\pi} c_{d_{z^2}} |GS\rangle$.
-Other methods like constrained DFT and CASSCF were used to converge these states but we were unsuccessful. 
-
-In order to ensure that intruder states are not present within our final model, we enforce a prior that pushes intruder states above a chosen $E_{cut}$ = 2eV by altering the cost function for our regression. The choice of prior is built on both experimental knowledge and FN-DMC results. From experiment we know that any excitation which de-occupies a d-orbital should be $\sim$ 2 eV in energy. In fact all of our intruder states are excitations out of a d-orbital except for the higher energy intruder which is already nearly at 2eV and would not be affected too strongly by this choice of $E_{cut}$. While we cannot converge these missing base states using UKS, we can consider singles excitations on the UKS ground state which correspond to these excitations in order to get an upper bound for the FN-DMC energies of our missing base states. In FN-DMC the corresponding MO excited states are $> $4eV, and we believe even with orbital relaxation that the converged excited state should be $>$ 2eV in energy. The altered cost function takes the form:
-
+Given that our intruder states correspond to states within $\mathcal{LE}$ but outside our sample set, they must live within the span of the eigenstates which were excluded in our sampling scheme as described before.
+This is evidenced by the fact that two of the intruder states correspond explicitly to excitations we could not access: Cu 3d$_{z^2} \rightarrow $ O 2p$_\pi$ and  Cu 3d$_\pi \rightarrow $ O 2p$_\pi$.
+In fact, these are the only two singly excited states which we could not access with our sampling scheme.
+While inaccessible, we can approximate these states by single rigid MO excitations above the UKS ground state, which results in states with a FN-DMC energy above 4eV.
+Including a generous 2eV reduction in FN-DMC energy due to orbital relaxation, we estimate that these two states should lie at least 2eV in energy. 
+Since all the other inaccessible eigenstates are double or higher order excitations, our very approximate exploration of the inaccessible parts of $\mathcal{LE}$ leaves us with a reasonable prior: intruder states should lie above 2eV in energy in our effective theories.
+We can enforce this prior by adding a term to our ordinary linear regression cost function
 \begin{equation}
-\text{Cost} = \sum_{i \in \mathcal{SS}} (E_{eff,i} - E_{ab, i})^2 + \lambda \sum_{p \in \mathcal{PS}} \text{QHL}(2 - E_{eff,p})\ \text{QHL}(x) = \Theta(x)x^2
+\text{Cost} = \sum_{i} (E_\text{eff}[\Psi_i] - E_\text{ab}[\Psi_i])^2 + \lambda \sum_{p}\text{QHL}(2 - E_\text{eff}[\Psi_p]),\ \text{QHL}(x) = \Theta(x)x^2
+\label{eq:cost}
 \end{equation}
-where $E_{eff}$ is the energy of a state on our effective model, $\lambda>0$ is a parameter which can be varied, and QHL is a quadratic hinge loss with $\Theta$ the Heaviside step function. 
+where $\lambda>0$ is a parameter which can be varied, QHL is a quadratic hinge loss, $\Theta$ is the Heaviside step function, the index $i$ is over our sampled states and $p$ over the selected intruder states.
+Increasing the value of $\lambda$ leads to a stronger penalty for models which do not satisfy our prior.
+
+\pagebreak
 \section{Discussion}
 
 
