@@ -67,7 +67,8 @@ Details for calculating reduced density matrix elements in FN-DMC can be found i
 We construct our $\mathcal{LE}$ based on recent anion photoelectron spectroscopy (APES) measurements of the low-lying excited states of the nuetral CuO molecule. 
 The lowest energy excitations measured, which lie below 2eV, involve primarily the O 2p$_z$, 2p$_\pi$ and Cu 4s orbitals, which are fully-filled, half-filled and empty in the ground state respectively.
 Beginning at 2.2 eV are excitations which remove a single electron from the fully filled Cu 3d shell and add them to either the O 2p$_\pi$ or Cu 4s orbitals.
-Seeing that the lowest energy excitations of the CuO molecule involve removing at most one electron from the Cu 3d shell, we define our low-energy space as
+The neutral copper atom also carries a Hund's coupling between the d and s orbitals of about $\sim$ 0.5 eV, the effects of which would be measurable among the states in $\mathcal{LE}$ as long as states of both doublet and quartet states are included.
+In order to probe all of these low-energy excitations we select a low-energy space
 \begin{equation}
 \mathcal{LE} = \text{Span(}\{ |\Psi \rangle | \langle \Psi | \hat{n}_{3d} | \Psi \rangle \ge 9,\ \hat{H}_\text{ab}|\Psi\rangle = E |\Psi\rangle \}\text{)}.
 \label{eq:LE}
@@ -140,7 +141,7 @@ However, the eigenstates below 2eV differ greatly between these models as illust
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.7\linewidth]{../qwalk/old/ub3lyp_s1_/analysis/figs/init_ed.pdf}
-\caption{Results of exact diagonalization showing the energies and properties of the first twenty eigenstates for three candidate models. The ground state and first excited state are colored and have enlarged markers for clarity.}
+\caption{Results of exact diagonalization showing the energies and properties of the first twenty eigenstates for three candidate models fit using ordinary linear regression. The ground state and first excited state are colored and have enlarged markers for clarity. Error bars are 95\% CI calculated by a bootstrap estimate.}
 \label{fig:InitED}
 \end{figure}
 
@@ -174,10 +175,100 @@ We can enforce this prior by adding a term to our ordinary linear regression cos
 where $\lambda>0$ is a parameter which can be varied, QHL is a quadratic hinge loss, $\Theta$ is the Heaviside step function, the index $i$ is over our sampled states and $p$ over the selected intruder states.
 Increasing the value of $\lambda$ leads to a stronger penalty for models which do not satisfy our prior.
 
-\pagebreak
-\section{Discussion}
+\section{Results and Discussion}
+\subsection{Regression with a prior}
+Using our new cost function we find a set of models which accurately describe our sample data, have very similar spectra and eigenvectors, and do not contain intruder states below the 2eV prior. 
+Shown in Figure \ref{fig:Prior} show the R$^2$ score and QHL for different models fit at $\lambda \in [0,20]$. 
+The R$^2$ score stays above 0.95 for all models and $\lambda$, and the QHL converges quickly to nearly zero at $\lambda = 20$ for all six models. 
+We conclude that all six models at $\lambda = 20$ should be considered good models as they satisfy our prior and also explain our sample set accurately. 
+Also shown are $E_\text{eff}, E_\text{ab}$ for our samples using the minimal model at $\lambda = 20$ to illustrate the high fit quality even with a large $\lambda$.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{../qwalk/old/ub3lyp_s1_/analysis/figs/prior_and_regr.pdf}
+\caption{On the left, scores of the six candidate models at various $\lambda$ when fitting our effective theories using the cost function \eqref{eq:cost}. On the right we show predicted versus calculated energies for our low-energy sampled states for the minimal model fit at $\lambda = 20$.}
+\label{fig:Prior}
+\end{figure}
 
-\section{Conclusion}
+Figure \ref{fig:FinalED} presents the properties and eigenvalues of the lowest 30 eigenstates for three of the six fit models at $\lambda = 20$. 
+In comparison one can view Figure \ref{fig:InitED} as the same figure for fits at $\lambda = 0$. 
+At $\lambda = 20$ there are no outliers below 2eV in any of the three fit models. 
+The ground states are similar for the three models, a feature also seen for the models fit at $\lambda = 0$.
+Unlike at $\lambda = 0$, we see that the excited states of the three models are also very similar.
+This pattern is also shared by the three other candidate models which are not shown. 
+The additional constraint from asserting a prior has seemingly caused a single effective theory to emerge from our set of candidate models.
+The values of the fit parameters for our six models can be seen in Table 1.
+All the models share similar parameter values except the fifth model, Min$ + \bar{c}_{d_\pi}^\dagger \bar{c}_{p_\pi}, \bar{c}_{d_z^2}^\dagger \bar{c}_{4s}$, indicating that there are at least two effective theories on $\mathcal{LE}$ which lead to identical low-energy eigenstates and spectra, describe the energies of our sample data accurately and satisfy our prior.
+We believe this arises because our low-energy space has no states which can probe the energy of the excitation Cu 3d $\rightarrow$ O 2p$_z$. 
+No single excitation on the ground state can lead to this excitation and the lowest energy double excitation which can probe this difference would be Cu 3d, O 2p$_z \rightarrow$ O 2p$_\pi$, O 4s which would have fewer than nine electrons in the Cu 3d orbitals since since the O 2p$_z$ molecular orbital is hybridized with the Cu 3d$_{z^2}$ orbital.
+This energy difference can therefore be freely varied without affecting the quality or eigensolutions to the model, meaning there is no unique effective model for this low-energy space.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\linewidth]{../qwalk/old/ub3lyp_s1_/analysis/figs/final_ed.pdf}
+\caption{Results of exact diagonalization showing the energies and properties of the first thirty eigenstates for three candidate models using linear regression with cost function \ref{eq:cost} and $\lambda = 20$. The ground state and first excited state are colored and have enlarged markers for clarity. Error bars are 95\% CI calculated by a bootstrap estimate.}
+\label{fig:FinalED}
+\end{figure}	
+\begin{table}[H]
+\begin{center}
+
+\begin{tabular}{l|llllll}
+&Min & Min & Min & Min & Min & Min \\
+& & $ + \bar{c}_{d_\pi}^\dagger \bar{c}_{p_\pi}$ & $ + \bar{c}_{d_{z^2}}^\dagger \bar{c}_{p_z}$ & $ + \bar{c}_{d_\pi}^\dagger \bar{c}_{p_\pi}, \bar{c}_{4s}^\dagger \bar{c}_{p_z}$ & $ + \bar{c}_{d_\pi}^\dagger \bar{c}_{p_\pi}, \bar{c}_{d_z^2}^\dagger \bar{c}_{4s}$ & $ + \bar{c}_{d_z^2}^\dagger \bar{c}_{p_z}, \bar{c}_{d_z^2}^\dagger \bar{c}_{4s}$ \\ \hline 
+$\epsilon_{d_{z^2}}$& 0.31(2)& 0.33(2)& 0.24(2)& 0.34(2)& 0.58(2)& 0.27(2)\\
+$\epsilon_{d_\pi}$& 0.19(1)& 0.10(1)& 0.19(1)& 0.10(2)& 0.08(2)& 0.19(1)\\
+$\epsilon_{d_\delta}$& 0.0(0)& 0.0(0)& 0.0(0)& 0.0(0)& 0.0(0)& 0.0(0)\\
+$\epsilon_{4s}$& 2.16(4)& 2.24(6)& 2.22(3)& 2.23(6)& 1.2(2)& 2.2(6)\\
+$\epsilon_{p_\pi}$& 1.7(4)& 1.84(4)& 1.72(2)& 1.83(4)& 2.13(4)& 1.71(4)\\
+$\epsilon_{p_z}$& 0.93(5)& 0.98(5)& 1.06(3)& 0.96(6)& 1.73(7)& 0.99(7)\\
+$t_\pi$& -0.57(1)& -0.45(2)& -0.58(1)& -0.46(3)& -0.47(2)& -0.57(1)\\
+$t_{dz}$& 0.53(3)& 0.56(3)& 0.52(2)& 0.57(3)& 1.00(4)& 0.53(2)\\
+$t_{sz}$& 0.88(3)& 0.89(1)& 0.84(2)& 0.87(3)& 1.26(6)& 0.8(3)\\
+$t_{ds}$& 0.45(2)& 0.45(1)& 0.48(3)& 0.47(2)& 0.72(4)& 0.55(4)\\
+$J_{sd}$& -0.6(1)& -0.9(1)& -0.7(1)& -0.9(1)& -0.4(1)& -0.7(1)\\
+$U_s$& 4.0(1)& 3.6(3)& 3.9(1)& 3.6(2)& 4.5(2)& 3.9(1)\\
+\end{tabular}
+\\ $\ $
+\\
+Table 1: Parameters in eV for our six potential models when fit using \eqref{eq:cost} at $\lambda = 20$. 
+\end{center}
+\end{table}
+
+\subsection{Comparisons to experiment and theory}
+Our final regressed models accurately reproduce properties and energies of the lowest lying eigenstates as seen in modern APES experiments on the CuO molecule.
+From Figure \ref{fig:FinalED} we see that the ground state of our effective theory has fully filled Cu 3d shell, nearly two electrons in O 2p$_z$ orbital, three in the O 2p$_\pi$ and around a quarter of an electron in the Cu 4s orbital.
+An approximate electronic configuration for the ground state is therefore
+be assigned 1$\sigma^2$1$\pi^4$1$\delta^4$2$\sigma^2$2$\pi^3$3$\sigma^0$ where the orbitals associated with the assignment are Cu 3d$_{z^2}$, Cu 3d$_\pi$, Cu 3d$_\delta$, O 2p$_z$, O 2p$_\pi$, and Cu 4s.
+This state also has a total spin projection S$_z = \frac{1}{2}$.
+This matches the well studied ground state electron configuration for the molecule $^2\Pi$.
+There are two excited states around 1eV in energy, the first of which is a state with the following single excitation O 2p$_z \rightarrow$ O 2p$_\pi$, has the configuration 1$\sigma^2$1$\pi^4$1$\delta^4$2$\sigma^2$2$\pi^4$4$\sigma^0$, and S$_z = \frac{1}{2}$.
+According to experiment there is also such a state at 1eV and is usually denoted as $^2X$.
+A second excited state at 1.2 eV exists which corresponds to an excitation 
+O 2p$_\pi \rightarrow$ Cu 4s, has configuration 1$\sigma^2$1$\pi^4$1$\delta^4$2$\sigma^2$2$\pi^2$4$\sigma^1$, and can either be S$_z = \frac{1}{2}, \frac{3}{2}$. 
+This is also the lowest energy eigenstate which can be a spin quartet.
+\textbf{ref} agree that this excitation should be the lowest spin quartet excitation, but argue that this state should be at an energy of 1.9 eV. 
+Our model has a different spin quartet state with a full Cu d shell at 1.9 eV, corresponding to an excitation O 2p$_z \rightarrow$ Cu 4s, with configuration 1$\sigma^2$1$\pi^4$1$\delta^4$2$\sigma^1$2$\pi^4$4$\sigma^1$. 
+There are another host of eigenstates for our models at 2 eV corresponding to singles excitations of the form Cu 3d $\rightarrow$ O 2p$_\pi$. 
+This matches measurements which indicate that the lowest energy eigenstates with a single hole in the Cu 3d shell lie at 2.2 eV above the ground state.
+
+Our model is more accurate than a single-particle model constructed using
+density functional theory orbitals and eigenvalues. 
+We consider a single-particle theory for the CuO molecule using restricted open-shell Kohn Sham (ROKS) eigenvalues and orbitals as single particle energies and states in our theory. 
+This model is very inaccurate in describing the energy of any state with an occupied Cu 4s molecular orbital which it assigns to higher than 4 eV in energy above the ground state.
+We believe this is due to this single particle method neglecting the heavy orbital relaxations between excited states, particularly in the $\sigma$ symmetry sector in which the Cu 4s orbital resides.
+
+\section{Conclusions}
+In this paper we systematically fit a many-body model for the neutral CuO molecule which can accurately reproduce the spectrum and properties of low-lying eigenstates seen in experiment using a \textit{ab-initio} QMC DMD method, and discuss the details of and developments in our model fitting procedure.
+In particular, we study the problem of intruder states in our effective theories --- states which suffer from large extrapolations errors under our model ---  by connecting the existence of these states to our inability to access parts of $\mathcal{LE}$ when generating the low-energy wave function samples used to fit our models.
+The intruder state issue is dealt by using our knowledge of $E_\text{ab}$ on the inaccessible parts of $\mathcal{LE}$ to construct a prior for our regression and enforcing it through an augmented ordinary linear regression cost function.
+The resultant models fit using the augmented cost function do not contain any intruder states.
+The fit models can accurately describe the energies and electron configurations of experimentally measured low-lying excitations with a much higher accuracy than effective single-particle theories generated by ROKS, for example.
+We also discuss the non-uniqueness of effective theories by studying two different effective theories we built which produce almost identical spectra and eigenvectors and fit our sample data accurately.
+
+We believe that the fitting procedure illustrated here can be used to generate effective theories for other strongly correlated systems and can be seen as a stepping stone towards developing a more robust downfolding methodology. 
+A particularly interesting avenue may be developing effective theories for all neutral transition-metal oxide molecules (TMO), leading to a sequence of models across the transition metal atoms. 
+From a methodology stand point, the work here indicates the need for a robust sampling method of $\mathcal{LE}$ which allows one to access the full space across different materials.
+The existence of such a method would alleviate the need for the use of a prior to inject information about $E_\text{ab}$ on the inaccessible parts of $\mathcal{LE}$ and lead to a more conceptually and computationally direct model fitting procedure. 
+
 
 \end{document}
