@@ -8,10 +8,16 @@
 \usepackage{amsmath}
 \usepackage{mathtools}
 \usepackage{wrapfig}
-
 \begin{document}
+\begin{abstract}
+Constructing model Hamiltonians which can accurately describe the energies and properties of the lowest lying eigenstates for strongly correlated electron systems is a pressing problem in modern condensed matter physics.
+In this paper we systematically develop a many-body model for the neutral CuO molecule using a generalizable \textit{ab-initio} Quantum Monte Carlo (QMC) density matrix downfolding (DMD) method and discuss details of the fitting procedure.
+Exact solutions to our final regressed model accurately reproduce properties and energies of the lowest lying eigenstates of the CuO molecule.
+Our results indicate that the DMD procedure can serve as a systematic method for developing many-body effective theories for strongly correlated electron systems.
+\end{abstract}
+
 \section{Introduction}
-Systematically developing model Hamiltonians which can accurately describe the energies and properties of the lowest lying eigenstates for strongly correlated electrons systems is a pressing problem in modern condensed matter physics. 
+Systematically developing model Hamiltonians which can accurately describe the energies and properties of the lowest lying eigenstates for strongly correlated electron systems is a pressing problem in modern condensed matter physics. 
 Examples of such materials are high-temperature superconductors and other transition metal oxides.
 Low-energy excitations of these systems typically involve collective spin, lattice, and charge degrees of freedom with intermediate couplings.
 Consequently, many of these systems have competing exotic long range ordering, for example the hypothesized competition between antiferromagnetic order and d-wave superconducting order in the cuprates.
@@ -32,7 +38,7 @@ Aside from this method, Lowdin methods coupled to a stochastic method and canoni
 These methods have the draw back that the constructed effective theory typically does not come with any estimate of the quality of the model, therefore making model validation a phenomenological task which can lead to unclear biases in the model construction.
 
 In this paper we systematically fit a many-body model
-which can accurately describe energies and properties of low-lying eigenstates for the neutral CuO molecule using a generalizable \textit{ab-initio} Quantum Monte Carlo (QMC) density matrix downfolding (DMD) method as a stepping stone towards application to bulk strongly correlated materials.
+which can accurately describe energies and properties of low-lying eigenstates for the neutral CuO molecule using a generalizable \textit{ab-initio} QMC DMD method as a stepping stone towards application to bulk strongly correlated materials.
 The neutral CuO molecule has been a subject of intense theoretical and experimental study due to the complex structure of its low-energy space.
 While the low-energy excitations in the doublet sector of the CuO molecule are well understood, singlet selection rules for spectroscopic measurements and the doublet ground state leave the quartet sector of excitations unexplored.
 The CuO molecule is hence a good playground for testing and developing the DMD method as there are some well understood excitations which our model should describe accurately and a set of poorly understood excitations which our model can give some insight into.
