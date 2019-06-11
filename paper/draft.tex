@@ -23,7 +23,7 @@ Low-energy excitations of these systems typically involve collective spin, latti
 Consequently, many of these systems have competing exotic long range ordering, for example the hypothesized competition between antiferromagnetic order and d-wave superconducting order in the cuprates.
 The main difficulty in describing these materials is that they do not exhibit behavior which can be described by an effective single particle theory nor perturbatively in either weak or strong coupling limits.
 
-The necessity for non-perturbative, many-body models in describing the low-lying excited states of strongly correlated electron systems poses a difficult challenge when developing model Hamiltonians for real world systems.
+The necessity for non-perturbative, many-body models in describing the low-lying excited states of strongly correlated electron systems poses a difficult challenge when developing effective theories for real world systems.
 Fermi liquid theory is the prototypical example of a one-body non-perturbative effective theory for metals.
 The low-energy effective theory has long-lived non-interacting single particle excitations near the Fermi surface and the Coulomb interaction is treated non-perturbatively.
 The anti-ferromagnetic Heisenberg model is a good example of a many-body perturbative effective theory for Mott insulators.
@@ -211,7 +211,7 @@ Increasing the value of $\lambda$ leads to a stronger penalty for models which d
 \section{Results and Discussion}
 \subsection{Regression with a prior}
 Using our new cost function we find a set of models which accurately describe our sample data, have very similar spectra and eigenvectors, and do not contain intruder states below the 2eV prior. 
-Shown in Figure \ref{fig:Prior} show the R$^2$ score and QHL for different models fit at $\lambda \in [0,20]$. 
+Shown in Figure \ref{fig:Prior} are the R$^2$ scores and QHL for the three candidate models fit at $\lambda \in [0,20]$. 
 The R$^2$ score stays above 0.95 for all models and $\lambda$, and the QHL converges quickly to nearly zero at $\lambda = 20$ for all three models. 
 We conclude that all three models at $\lambda = 20$ should be considered good models as they satisfy our prior and also explain our sample set accurately. 
 Also shown are $E_\text{eff}, E_\text{ab}$ for our samples using the minimal model at $\lambda = 20$ to illustrate the high fit quality even with a large $\lambda$.
@@ -223,14 +223,14 @@ Also shown are $E_\text{eff}, E_\text{ab}$ for our samples using the minimal mod
 \label{fig:Prior}
 \end{figure}
 
-Figure \ref{fig:FinalED} presents the properties and eigenvalues of the lowest 30 eigenstates for three of the three fit models at $\lambda = 20$. 
+Figure \ref{fig:FinalED} presents the properties and eigenvalues of the lowest 30 eigenstates for the three fit models at $\lambda = 20$. 
 In comparison one can view Figure \ref{fig:InitED} as the same figure for fits at $\lambda = 0$. 
 At $\lambda = 20$ there are no outliers below 2eV in any of the three fit models. 
-The ground states are similar for the three models, a feature also seen for the models fit at $\lambda = 0$.
-Unlike at $\lambda = 0$, we see that the excited states of the three models are also very similar.
+The ground states are similar for the models, a feature also seen for the models fit at $\lambda = 0$.
+Unlike at $\lambda = 0$, we see that the excited states of the models are also very similar.
 The additional constraint from asserting a prior has seemingly caused a single effective theory to emerge from our set of candidate models.
 This conclusion is verified by looking at the values of the fit parameters for our three models, presented in Table 1.
-The parameter values for the three different models fit at $\lambda = 20$ are nearly identical within error bars and indicate that asserting our prior ensures that all three candidate models regress to a single low-energy effective theory.
+The parameter values for the three different models fit at $\lambda = 20$ are nearly identical within error bars and indicate that asserting our prior ensures that all candidate models regress to a single low-energy effective theory.
 All occupation energies are relative to $\epsilon_{d_\delta}$.
 
 \begin{figure}[H]
@@ -265,7 +265,7 @@ Table 1: Parameters in eV for our three potential models when fit using \eqref{e
 \end{table}
 
 \subsection{Comparisons to experiment and theory}
-Our final regressed models accurately reproduce properties and energies of the lowest lying eigenstates as seen in modern APES experiments on the CuO molecule.
+Our final regressed model accurately reproduces properties and energies of the lowest lying eigenstates as seen in modern APES experiments on the CuO molecule.
 From Figure \ref{fig:FinalED} we see that the ground state of our effective theory has fully filled Cu 3d shell, nearly two electrons in O 2p$_z$ orbital, three in the O 2p$_\pi$ and around a quarter of an electron in the Cu 4s orbital.
 An approximate electronic configuration for the ground state is therefore
 be assigned 1$\sigma^2$1$\pi^4$1$\delta^4$2$\sigma^2$2$\pi^3$3$\sigma^0$ where the orbitals associated with the assignment are Cu 3d$_{z^2}$, Cu 3d$_\pi$, Cu 3d$_\delta$, O 2p$_z$, O 2p$_\pi$, and Cu 4s.
@@ -290,10 +290,9 @@ We believe this is due to this single particle method neglecting the heavy orbit
 \section{Conclusions}
 In this paper we systematically fit a many-body model for the neutral CuO molecule which can accurately reproduce the spectrum and properties of low-lying eigenstates seen in experiment using a \textit{ab-initio} QMC DMD method, and discuss the details of and developments in our model fitting procedure.
 In particular, we study the problem of intruder states in our effective theories --- states which suffer from large extrapolations errors under our model ---  by connecting the existence of these states to our inability to access parts of $\mathcal{LE}$ when generating the low-energy wave function samples used to fit our models.
-The intruder state issue is dealt by using our knowledge of $E_\text{ab}$ on the inaccessible parts of $\mathcal{LE}$ to construct a prior for our regression and enforcing it through an augmented ordinary linear regression cost function.
-The resultant models fit using the augmented cost function do not contain any intruder states.
-The fit models can accurately describe the energies and electron configurations of experimentally measured low-lying excitations with a much higher accuracy than effective single-particle theories generated by ROKS, particularly for quartet states.
-We also discuss the non-uniqueness of effective theories by studying two different effective theories we built which produce almost identical spectra and eigenvectors and fit our sample data accurately.
+The intruder state issue is dealt with by using our knowledge of $E_\text{ab}$ on the inaccessible parts of $\mathcal{LE}$ to construct a prior for our regression and enforcing it through an augmented ordinary linear regression cost function.
+The resultant model fit using the augmented cost function does not contain any intruder states.
+Our model can accurately describe the energies and electron configurations of experimentally measured low-lying excitations with a much higher accuracy than effective single-particle theories generated by ROKS, particularly for quartet states.
 
 We believe that the fitting procedure illustrated here can be used to generate effective theories for other strongly correlated systems and can be seen as a stepping stone towards developing a more robust downfolding methodology. 
 A particularly interesting avenue may be developing effective theories for all neutral transition-metal oxide molecules (TMO), leading to a sequence of models across the transition metal atoms. 
