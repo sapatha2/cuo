@@ -671,7 +671,7 @@ def comb_plot_ed_small(full_df,av_df,models,fname=None,title=None,cutoff=0):
   21:r'Min$ + \bar{c}_{d_\pi}^\dagger \bar{c}_{p_\pi}, \bar{c}_{d_z^2}^\dagger \bar{c}_{4s}$',
   24:r'Min$ + \bar{c}_{d_z^2}^\dagger \bar{c}_{p_z}, \bar{c}_{d_z^2}^\dagger \bar{c}_{4s}$'}
 
-  markers = ['s','o','^']
+  markers = ['s','o','^'] + ['o']*15
 
   z=-1
   for parm in ['iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2pz','iao_n_2ppi','iao_n_4s']:
@@ -695,7 +695,7 @@ def comb_plot_ed_small(full_df,av_df,models,fname=None,title=None,cutoff=0):
       sub_df = sub_df.sort_values(by=['energy'])
       sub_df['energy'] -= minE
       #sub_df = sub_df[sub_df['energy']<=4.0]
-      sub_df = sub_df.iloc[:20]
+      sub_df = sub_df.iloc[:30]
       x=sub_df[parm].values
       xerr_u=sub_df[parm+'_u'].values
       xerr_d=sub_df[parm+'_l'].values
@@ -835,8 +835,8 @@ def analyze(df=None,save=False):
   avg_eig_df = pd.read_pickle('analysis/avg_eig.pickle')
   noises = []
   for model in unique_models:
-    noise = avg_eig_df[avg_eig_df['model']==model].mean()['energy_u'] +\
-    avg_eig_df[avg_eig_df['model']==model].mean()['energy_l']
+    a = avg_eig_df[avg_eig_df['model']==model].sort_values(by='energy').iloc[:20]
+    noise = a.mean()['energy_u'] + a.mean()['energy_l']
     noises.append(noise)
 
   ind = np.argsort(noises)
@@ -845,23 +845,24 @@ def analyze(df=None,save=False):
   plt.ylabel('Avg E_err, eV')
   plt.xlabel('Model')
   plt.xticks(np.arange(len(ind)),np.array(unique_models)[ind])
-  plt.axhline(0.25,ls='--',c='k')
+  plt.axhline(0.20,ls='--',c='k')
   plt.show() 
   exit(0)
   '''
 
   #Plot ed
-  from sklearn.neighbors import KDTree, BallTree
-  avg_eig_df = pd.read_pickle('analysis/avg_eig.pickle')
-  #for model in [5,9,12]: #[5,9,12,21,20,24]:
-    #plot_ed_small(df,avg_eig_df,model=model)
-  #comb_plot_ed_small(df,avg_eig_df,[5,9,12],fname='analysis/figs/init_ed.pdf',cutoff =3)
-  #exit(0)
-
-  #Identify outliers for priors
+  #from sklearn.neighbors import KDTree, BallTree
+  #avg_eig_df = pd.read_pickle('analysis/avg_eig.pickle')
   '''
+  comb_plot_ed_small(df,avg_eig_df,[5,9,12],fname='analysis/figs/init_ed.pdf',cutoff =3)
+  exit(0)
+  '''
+
+  '''
+  #Identify outliers for priors
   outlier_df = None
-  unique_models = [5,9,12,20,21,24]
+  #unique_models = [5,9,12,20,21,24]
+  unique_models = [5,9,12]
   var = ['energy','iao_n_3dz2','iao_n_3dpi','iao_n_3dd','iao_n_2pz',
         'iao_n_2ppi','iao_n_4s','iao_t_pi','iao_t_dz','iao_t_ds','iao_t_sz',
         'Jsd','Us']
@@ -903,10 +904,13 @@ def analyze(df=None,save=False):
   plt.legend(loc='best')
   plt.savefig('analysis/figs/MD.pdf',bbox_inches='tight')
   outlier_df.to_pickle('analysis/outlier.pickle')
+  exit(0)
   '''
 
   outlier_df = pd.read_pickle('analysis/outlier.pickle')
-  outlier_df = outlier_df.iloc[[-5,-3,11,29,5]]
+  #print(outlier_df)
+  #exit(0)
+  outlier_df = outlier_df.iloc[[-5,-3,-1,5]]
   av_df = pd.read_pickle('analysis/avg_eig.pickle')
   plot_ed_outliers(df,outlier_df,av_df,fname='analysis/figs/intruder.pdf')
 

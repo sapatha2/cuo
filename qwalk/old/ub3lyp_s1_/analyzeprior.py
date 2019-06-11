@@ -16,7 +16,7 @@ from find_connect import  *
 import matplotlib as mpl 
 from prior import prior_fit, prior_score #, sigmoid
 import itertools 
-from analyzedmc import sort_ed, desc_ed, avg_ed, plot_ed_small, comb_plot_ed_small
+from analyzedmc import sort_ed, desc_ed, avg_ed, plot_ed_small, comb_plot_ed_small, plot_ed
 ######################################################################################
 #FROZEN METHODS
 #Collect df
@@ -31,30 +31,20 @@ def add_priors(df,cutoff):
   df = df[var]
   df['prior'] = False
   
-  '''
-  prior_df = avg_eig[(avg_eig['model']==12)&(avg_eig['Sz']==0.5)].iloc[2]
-  prior_df = pd.concat((prior_df,avg_eig[(avg_eig['model']==9)&(avg_eig['Sz']==1.5)].iloc[0]),axis=1)
-  prior_df = prior_df.T
-  prior_df = prior_df[var]
-  prior_df['prior'] = True
-  '''
-  
   prior_df = pd.read_pickle('analysis/outlier.pickle')
-  prior_df = prior_df.iloc[[-5,-3,11,29,5]] #Remove any degenerate/near degenerate stuff
+  prior_df = prior_df.iloc[[-5,-3,-1,5]] #Remove any degenerate/near degenerate stuff
   prior_df['prior'] = True 
   prior_df['energy'] = min(df['energy']) + cutoff
 
   return pd.concat((df,prior_df),axis=0)
 
 def get_iao_parms(exp_parms,model):
-  print(exp_parms, model)
   param_names=['mo_n_4s','mo_n_2ppi','mo_n_2pz','mo_t_pi','mo_t_dz',
   'mo_t_sz','mo_t_ds','Jsd','Us']
   params=[]
   for parm in param_names:
     if(parm in model): params.append(exp_parms[model.index(parm)])
     else: params.append(0)
-  print(params)
   
   #params input must be es,epi,epz,tpi,tdz,tsz,tds
   h1_iao = h1_moToIAO(params[:-2])
@@ -74,7 +64,7 @@ def prior_analysis(df,cutoff=2):
   df = add_priors(df,cutoff = 2)
   oneparm_df = pd.read_pickle('analysis/oneparm.pickle').drop(columns=['r2_mu','r2_err'])
   prior_df = None
-  for i in [5, 9, 12, 21, 20, 24]:
+  for i in [5, 9, 12]:#, 21, 20, 24]:
     ind = np.nonzero(oneparm_df.iloc[i])[0]
     model = np.array(list(oneparm_df))[ind]
     model = list(model[:int(len(model)/2)])
@@ -330,7 +320,7 @@ def iao_analysis(df,cutoff=2):
         params = prior_fit(d,lam)
         params_iao = get_iao_parms(params[:-1],model)
         score = prior_score(params,d)
-        print(score[0],score[1].values)
+        print(params_iao)
 
         ps.append(params)
         ps_iao.append(params_iao)
@@ -352,14 +342,16 @@ def analyze(df=None,save=False):
   cutoff = 2
 
   #Generate models and plot cost 
-  #prior_df = prior_analysis(df,cutoff=cutoff)
-  #prior_df.to_pickle('analysis/prior.pickle')
+  '''
+  prior_df = prior_analysis(df,cutoff=cutoff)
+  prior_df.to_pickle('analysis/prior.pickle')
   plot_prior()
   exit(0)
+  '''
 
   #ED for models
   '''
-  for model in [5,9,12,20,21,24]:
+  for model in [5,9,12]:
     for lam in [20]: #[4,10,20]:
       ed_df = exact_diag_prior(df, cutoff, model, lam, nbs=20)
       ed_df = sort_ed(ed_df)
@@ -369,8 +361,9 @@ def analyze(df=None,save=False):
   exit(0)
   '''
 
+  #Combined plot of ED
   avg_eig_df = None
-  for model in [5,9,12]:#,20,21,24]:
+  for model in [5,9,12]:
     lam = 20
     a = pd.read_pickle('analysis/avg_eig_prior_m'+str(model)+'_l'+str(lam)+'.pickle')
     if(avg_eig_df is None): avg_eig_df = a
@@ -384,8 +377,8 @@ def analyze(df=None,save=False):
   regr_prior(df,model,lam)
 
   #Model parameters
-  #params_df = iao_analysis(df)
-  #params_df.to_pickle('analysis/params.pickle')
+  params_df = iao_analysis(df)
+  params_df.to_pickle('analysis/params.pickle')
 
 if __name__=='__main__':
   #DATA COLLECTION

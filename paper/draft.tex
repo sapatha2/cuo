@@ -166,8 +166,9 @@ After fitting each of the potential models in \eqref{eq:models} using ordinary l
 The sixteen different models all regress with R$^2 >$ 0.95 on our sample data, however some models are more robust than others. 
 Models which have coefficients that are zero within 95\% confidence intervals, computed through bootstrap estimates, are removed from consideration.
 We then take the left over models, rotate every operator and coefficient into the IAO basis through an appropriate orthogonal transformation, and exactly diagonalize the models.
-Any models which have an average errorbar in eigenvalues, also estimated by bootstrapping, greater than 0.25 eV are ignored.
-Each of the remaining six models describe our sample set accurately, have robust non-zero coefficients, and have small error bars in eigenvalues.
+Any models which have an average errorbar in the first 20 eigenvalues, also estimated by bootstrapping, greater than 0.20 eV are ignored.
+These eigenvalues correspond to states which lie below $\sim $ 2.5 eV and contain all low-energy Cu 3d$^{10}$ states and the lowest-energy Cu 3d$^{9}$ excitations.
+Each of the remaining three models describe our sample set accurately, have robust non-zero coefficients, and have small error bars in eigenvalues of states which we care about the most.
 However, the eigenstates below 2eV differ greatly between these models as illustrated in Figure \ref{fig:InitED}.
 
 \begin{figure}[H]
@@ -180,7 +181,7 @@ However, the eigenstates below 2eV differ greatly between these models as illust
 All three models have a first excited state around 1eV, but only in the minimal model does this state fall near the sample set used for the fitting, and is the only model in which this state corresponds to the correct excitation O 2$p_z \rightarrow $ O 2p$_\pi$ as seen in experiment.
 In contrast, the first excited state for the other two models are visibly distant from our sample set and do not correspond to the experimental first excited state.
 The large distance of these eigenstates from our sample set indicates that their predicted eigenvalues may suffer from large extrapolation errors, and as such we will call them \textit{intruder} states.
-In Figure \ref{fig:Intruder} we present all eigenstates among the six potential models which we classify as intruders.
+In Figure \ref{fig:Intruder} we present all eigenstates among the three potential models which we classify as intruders.
 While using a Mahalanobis distance is a typical strategy for outlier (intruder) detection, it is only useful for distributions which are approximately normal.
 Our sample space does not resemble a (multivariate) normal distribution in any way, so we instead look at the average distance of the five nearest neighbor samples to an eigenstate.
 If the average distance is larger than 0.9, which in this case happens to divide eigenstates into intruders above and not below cleanly, it is classified as an intruder state.
@@ -189,7 +190,7 @@ In the situation that multiple models share an intruder state, only the intruder
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.7\linewidth]{../qwalk/old/ub3lyp_s1_/analysis/figs/intruder.pdf}
-\caption{Collection of unique intruder states from our six potential models selected using a k-nearest neighbor approach with k = 5.}
+\caption{Collection of unique intruder states from our three potential models selected using a k-nearest neighbor approach with k = 5.}
 \label{fig:Intruder}
 \end{figure}
 
@@ -211,27 +212,26 @@ Increasing the value of $\lambda$ leads to a stronger penalty for models which d
 \subsection{Regression with a prior}
 Using our new cost function we find a set of models which accurately describe our sample data, have very similar spectra and eigenvectors, and do not contain intruder states below the 2eV prior. 
 Shown in Figure \ref{fig:Prior} show the R$^2$ score and QHL for different models fit at $\lambda \in [0,20]$. 
-The R$^2$ score stays above 0.95 for all models and $\lambda$, and the QHL converges quickly to nearly zero at $\lambda = 20$ for all six models. 
-We conclude that all six models at $\lambda = 20$ should be considered good models as they satisfy our prior and also explain our sample set accurately. 
+The R$^2$ score stays above 0.95 for all models and $\lambda$, and the QHL converges quickly to nearly zero at $\lambda = 20$ for all three models. 
+We conclude that all three models at $\lambda = 20$ should be considered good models as they satisfy our prior and also explain our sample set accurately. 
 Also shown are $E_\text{eff}, E_\text{ab}$ for our samples using the minimal model at $\lambda = 20$ to illustrate the high fit quality even with a large $\lambda$.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.7\linewidth]{../qwalk/old/ub3lyp_s1_/analysis/figs/prior_and_regr.pdf}
-\caption{On the left, scores of the six candidate models at various $\lambda$ when fitting our effective theories using the cost function \eqref{eq:cost}. On the right we show predicted versus calculated energies for our low-energy sampled states for the minimal model fit at $\lambda = 20$.}
+\caption{On the left, scores of the three candidate models at various $\lambda$ when fitting our effective theories using the cost function \eqref{eq:cost}. On the right we show predicted versus calculated energies for our low-energy sampled states for the minimal model fit at $\lambda = 20$.}
 \label{fig:Prior}
 \end{figure}
 
-Figure \ref{fig:FinalED} presents the properties and eigenvalues of the lowest 30 eigenstates for three of the six fit models at $\lambda = 20$. 
+Figure \ref{fig:FinalED} presents the properties and eigenvalues of the lowest 30 eigenstates for three of the three fit models at $\lambda = 20$. 
 In comparison one can view Figure \ref{fig:InitED} as the same figure for fits at $\lambda = 0$. 
 At $\lambda = 20$ there are no outliers below 2eV in any of the three fit models. 
 The ground states are similar for the three models, a feature also seen for the models fit at $\lambda = 0$.
 Unlike at $\lambda = 0$, we see that the excited states of the three models are also very similar.
-This pattern is also shared by the three other candidate models which are not shown. 
 The additional constraint from asserting a prior has seemingly caused a single effective theory to emerge from our set of candidate models.
-The values of the fit parameters for our six models can be seen in Table 1.
-All the models share similar parameter values except the fifth model, Min$ + \bar{c}_{d_\pi}^\dagger \bar{c}_{p_\pi}, \bar{c}_{d_z^2}^\dagger \bar{c}_{4s}$, indicating that there are at least two different effective theories on $\mathcal{LE}$ which lead to identical low-energy eigenstates and spectra, describe the energies of our sample data accurately and satisfy our prior.
-\textbf{Why does this happen?}
+This conclusion is verified by looking at the values of the fit parameters for our three models, presented in Table 1.
+The parameter values for the three different models fit at $\lambda = 20$ are nearly identical within error bars and indicate that asserting our prior ensures that all three candidate models regress to a single low-energy effective theory.
+All occupation energies are relative to $\epsilon_{d_\delta}$.
 
 \begin{figure}[H]
 \centering
@@ -243,25 +243,25 @@ All the models share similar parameter values except the fifth model, Min$ + \ba
 \begin{center}
 
 \begin{tabular}{l|llllll}
-&Min & Min & Min & Min & Min & Min \\
-& & $ + \bar{c}_{d_\pi}^\dagger \bar{c}_{p_\pi}$ & $ + \bar{c}_{d_{z^2}}^\dagger \bar{c}_{p_z}$ & $ + \bar{c}_{d_\pi}^\dagger \bar{c}_{p_\pi}, \bar{c}_{4s}^\dagger \bar{c}_{p_z}$ & $ + \bar{c}_{d_\pi}^\dagger \bar{c}_{p_\pi}, \bar{c}_{d_z^2}^\dagger \bar{c}_{4s}$ & $ + \bar{c}_{d_z^2}^\dagger \bar{c}_{p_z}, \bar{c}_{d_z^2}^\dagger \bar{c}_{4s}$ \\ \hline 
-$\epsilon_{d_{z^2}}$& 0.31(2)& 0.33(2)& 0.24(2)& 0.34(2)& 0.58(2)& 0.27(2)\\
-$\epsilon_{d_\pi}$& 0.19(1)& 0.10(1)& 0.19(1)& 0.10(2)& 0.08(2)& 0.19(1)\\
-$\epsilon_{d_\delta}$& 0.0(0)& 0.0(0)& 0.0(0)& 0.0(0)& 0.0(0)& 0.0(0)\\
-$\epsilon_{4s}$& 2.16(4)& 2.24(6)& 2.22(3)& 2.23(6)& 1.2(2)& 2.2(6)\\
-$\epsilon_{p_\pi}$& 1.7(4)& 1.84(4)& 1.72(2)& 1.83(4)& 2.13(4)& 1.71(4)\\
-$\epsilon_{p_z}$& 0.93(5)& 0.98(5)& 1.06(3)& 0.96(6)& 1.73(7)& 0.99(7)\\
-$t_\pi$& -0.57(1)& -0.45(2)& -0.58(1)& -0.46(3)& -0.47(2)& -0.57(1)\\
-$t_{dz}$& 0.53(3)& 0.56(3)& 0.52(2)& 0.57(3)& 1.00(4)& 0.53(2)\\
-$t_{sz}$& 0.88(3)& 0.89(1)& 0.84(2)& 0.87(3)& 1.26(6)& 0.8(3)\\
-$t_{ds}$& 0.45(2)& 0.45(1)& 0.48(3)& 0.47(2)& 0.72(4)& 0.55(4)\\
-$J_{sd}$& -0.6(1)& -0.9(1)& -0.7(1)& -0.9(1)& -0.4(1)& -0.7(1)\\
-$U_s$& 4.0(1)& 3.6(3)& 3.9(1)& 3.6(2)& 4.5(2)& 3.9(1)\\
+&Min & Min & Min \\
+& & $ + \bar{c}_{d_\pi}^\dagger \bar{c}_{p_\pi}$ & $ + \bar{c}_{d_{z^2}}^\dagger \bar{c}_{p_z}$ \\ $\ $ \\ \hline 
+$\epsilon_{d_{z^2}}$& 0.32(2)& 0.32(1)& 0.29(2)\\
+$\epsilon_{d_\pi}$& 0.19(1)& 0.10(2)& 0.19(1)\\
+$\epsilon_{d_\delta}$& 0.0 & 0.0 & 0.0\\
+$\epsilon_{4s}$& 2.2(4)& 2.23(3)& 2.19(5)\\
+$\epsilon_{p_\pi}$& 1.7(3)& 1.8(2)& 1.7(3)\\
+$\epsilon_{p_z}$& 0.96(4)& 0.97(3)& 0.99(5)\\
+$t_\pi$& -0.57(1)& -0.45(2)& -0.57(1)\\
+$t_{dz}$& 0.55(3)& 0.56(2)& 0.54(2)\\
+$t_{sz}$& 0.87(2)& 0.89(2)& 0.85(2)\\
+$t_{ds}$& 0.44(1)& 0.45(1)& 0.45(2)\\
+$J_{sd}$& -0.6(1)& -0.8(1)& -0.6(1)\\
+$U_s$& 3.8(2)& 3.7(2)& 3.9(2))\\
 \end{tabular}
 \\ $\ $
 \\
-Table 1: Parameters in eV for our six potential models when fit using \eqref{eq:cost} at $\lambda = 20$. 
 \end{center}
+Table 1: Parameters in eV for our three potential models when fit using \eqref{eq:cost} at $\lambda = 20$. Error bars are 95\% CI calculated using a bootstrap estimate.
 \end{table}
 
 \subsection{Comparisons to experiment and theory}

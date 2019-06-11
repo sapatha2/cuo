@@ -91,23 +91,39 @@ def ED(parms, nroots, norb, nelec):
   e, ci = fci.direct_uhf.kernel(h1, eri, norb, nelec, nroots=nroots)
   return e, ci
 
-  '''
-  #Generate vector of number occupations 
-  #['del','del','yz','xz','x','y','z2','z','s']
-  dm_u = []
-  dm_d = []
-  sigU = []
-  sigJ = []
-  for i in range(nroots):
-    dm2=cis.make_rdm12s(ci[i],norb,nelec)
-    dm_u.append(dm2[0][0])
-    dm_d.append(dm2[0][1])
-    sigU.append(dm2[1][1][8,8,8,8]) #U4s parameter sum
-    
-    Jsd = 0
-    for i in [0,1,2,3,6]:
-      Jsd += 0.25*(dm2[1][0][8,8,i,i] + dm2[1][2][8,8,i,i] - dm2[1][1][8,8,i,i] - dm2[1][1][i,i,8,8])-\
-             0.5*(dm2[1][1][i,8,8,i] + dm2[1][1][8,i,i,8])
-    sigJ.append(Jsd) #Jsd parameter sum
-  return e, ci, np.array(dm_u), np.array(dm_d), sigU, sigJ
-  '''
+if __name__=='__main__':
+  norb = 9
+  nelec = (8,7)
+  nroots = 30
+  
+  #MINIMAL MODEL
+  #v = [0.31,0.19,0,2.16,1.7,0.93,-0.57,0.53,0.88,0.45,-0.6,4.0]
+  #EXTENDED MODEL
+  v = [0.58,0.08,0,1.2,2.13,1.73,-0.47,1.00,1.26,0.72,-0.4,4.5]
+  edz2, edpi, edd, es, eppi, epz, tpi, tdz, tsz, tds, Jsd, Us = v
+
+  h1 = np.zeros((norb,norb))
+  h1[2,5] = h1[3,4] = tpi
+  h1[6,7] = tdz
+  h1[7,8] = tsz 
+  h1[6,8] = tds
+  h1 += h1.T
+  h1[6,6] = edz2
+  h1[2,2] = h1[3,3] = edpi
+  h1[0,0] = h1[1,1] = edd
+  h1[4,4] = h1[5,5] = eppi
+  h1[7,7] = epz
+  h1[8,8] = es
+
+  h1 = np.array([h1,h1])
+  h2 = h2_IAO(v[-2],v[-1])
+
+  mol = gto.Mole()
+  cis = fci.direct_uhf.FCISolver(mol)
+  eri_aa = ao2mo.restore(1, h2[0], norb)
+  eri_ab = ao2mo.restore(1, h2[1], norb)
+  eri_bb = ao2mo.restore(1, h2[2], norb) #4 and 8 fold identical since we have no complex entries
+  eri = (eri_aa, eri_ab, eri_bb)
+
+  e, ci = fci.direct_uhf.kernel(h1, eri, norb, nelec, nroots=nroots)
+  print(np.around(e-min(e),2))
