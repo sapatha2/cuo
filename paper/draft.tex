@@ -140,7 +140,9 @@ As discussed, the lowest energy excitations in the CuO molecule are between the 
 We constructed two such bases: a localized intrinsic atomic orbital (IAO) basis and a molecular orbital (MO) basis.
 The IAO basis was built on all Cu 3d, 4s and O 2p molecular orbitals from the $|\text{D}_i\rangle$ used to construct our sample states.
 The MO basis consists of the Cu 3d, 4s and O 2p molecular orbitals from the lowest energy restricted open-shell Kohn-Sham (ROKS) solution with $x \leftrightarrow y$ spatial symmetry, a O 2p$_z \rightarrow$ O 2p$_\pi$ excitation.
-As these two bases are used to describe the same space, they are related by an orthogonal transformation which will allow us to map between them if necessary.
+We determine whether each basis is valid by looking at how much the trace of 1-RDM in FN-DMC on that basis differs from the expected value of 15 electrons.
+We find that within 95\% confidence the trace is 14.7-14.8 (MO) and 14.6 - 14.7 (IAO), indicating that the major variation between states in $\mathcal{LE}$ can be described by either single particle basis.
+As these two bases are used to describe the same space, they are related by a  transformation which will allow us to map between them if necessary.
 This choice for the MO basis ensures that our basis elements are spin-independent and respect the spatial symmetries of the molecule.
 In order to describe the low-energy degrees of freedom in the CuO molecule our model will require occupation energies and hybridizations between the Cu 3d, 4s and O 2p atomic orbitals.
 A sparser representation can be found using a MO basis, since occupation operators in the MO basis contain information on both occupation and hybridization in an atomic basis. 

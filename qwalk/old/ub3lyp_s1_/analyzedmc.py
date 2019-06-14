@@ -814,7 +814,6 @@ def analyze(df=None,save=False):
   '''
 
   #Select unique models
-  '''
   unique_models = []
   oneparm_df = pd.read_pickle('analysis/oneparm.pickle').drop(columns=['r2_mu','r2_err'])
   for model in np.arange(32):
@@ -848,7 +847,6 @@ def analyze(df=None,save=False):
   plt.axhline(0.20,ls='--',c='k')
   plt.show() 
   exit(0)
-  '''
 
   #Plot ed
   #from sklearn.neighbors import KDTree, BallTree
@@ -922,4 +920,9 @@ if __name__=='__main__':
   #df.to_pickle('formatted_gosling.pickle')
   
   df = pd.read_pickle('formatted_gosling.pickle')
+  tr_iao = df['iao_n_3d'] + df['iao_n_2pz'] + df['iao_n_2ppi'] + df['iao_n_4s']
+  tr_mo = df['mo_n_3d'] + df['mo_n_2pz'] + df['mo_n_2ppi'] + df['mo_n_4s']
+  print(np.percentile(tr_iao,97.5), np.percentile(tr_iao,2.5))
+  print(np.percentile(tr_mo,97.5), np.percentile(tr_mo,2.5))
+  exit(0)
   analyze(df)
